@@ -91,7 +91,7 @@ export function Map({ pings }: MapProps) {
 
   if (!isClient || isLoading) {
     return (
-      <div className="h-full w-full bg-gray-100 flex items-center justify-center">
+      <div className="h-full w-full relative z-0 bg-gray-100 flex items-center justify-center rounded-lg border border-gray-200 shadow-sm">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
           <p className="text-gray-500">Loading map...</p>
@@ -102,12 +102,17 @@ export function Map({ pings }: MapProps) {
 
   return (
     <MapErrorBoundary>
-      <div className="h-full w-full relative overflow-hidden">
+      <div className="h-full w-full relative z-0 overflow-hidden rounded-lg border border-gray-200 shadow-sm">
         <MapContainer
           center={[-26.2041, 28.0473]} // Johannesburg
           zoom={10}
           className="h-full w-full"
-          style={{ height: '100%', width: '100%' }}
+          style={{ 
+            height: '100%', 
+            width: '100%', 
+            position: 'relative',
+            zIndex: 0
+          }}
           zoomControl={true}
           scrollWheelZoom={true}
           doubleClickZoom={true}
