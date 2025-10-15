@@ -1,0 +1,45 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Pre-commit hook for DMOC Web (PWA)
+# Ensures code quality and changelog maintenance
+
+echo "🔍 Running pre-commit checks..."
+
+# Run linting
+echo "📝 Running ESLint..."
+npm run lint
+
+# Run formatting check
+echo "🎨 Checking code formatting..."
+npx prettier --check .
+
+# Check if CHANGELOG.md has been updated for significant changes
+echo "📋 Checking changelog updates..."
+
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only)
+
+# Check if any significant files have changed
+SIGNIFICANT_CHANGES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|js|jsx)$' | grep -v -E '(test|spec)\.(ts|tsx|js|jsx)$')
+
+if [ -n "$SIGNIFICANT_CHANGES" ]; then
+  # Check if CHANGELOG.md is staged
+  if ! echo "$STAGED_FILES" | grep -q "CHANGELOG.md"; then
+    echo "⚠️  Warning: Significant code changes detected but CHANGELOG.md not updated"
+    echo "   Consider running: npm run changelog:add <type> <description>"
+    echo "   Or: npm run changelog:generate"
+    echo ""
+    echo "   Types: feat, fix, change, security"
+    echo "   Example: npm run changelog:add feat 'Add real-time notifications'"
+    echo ""
+    read -p "Continue without changelog update? (y/N): " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      echo "❌ Commit cancelled. Please update CHANGELOG.md first."
+      exit 1
+    fi
+  fi
+fi
+
+echo "✅ Pre-commit checks passed!"

@@ -1,0 +1,60 @@
+# wrangler.toml
+# Cloudflare Worker configuration for JSON API caching
+# Deploy with: wrangler deploy
+
+name = "json-api-cache"
+main = "src/worker.ts"
+compatibility_date = "2024-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+# Worker configuration
+[env.production]
+name = "json-api-cache-prod"
+
+[env.staging]
+name = "json-api-cache-staging"
+
+# Routes configuration - update these to match your API endpoints
+# Example routes for common API patterns
+routes = [
+  # Uncomment and modify these routes to match your API
+  # "api.yourdomain.com/api/*",
+  # "yourdomain.com/api/v1/*",
+  # "yourdomain.com/api/v2/*"
+]
+
+# Custom domains (optional)
+# [[env.production.routes]]
+# pattern = "api.yourdomain.com/*"
+# custom_domain = true
+
+# Environment variables
+[vars]
+CACHE_TTL = "300"  # 5 minutes in seconds
+CACHE_VERSION = "v1"
+
+# Secrets (set these with: wrangler secret put SECRET_NAME)
+# [secrets]
+# API_KEY = "your-api-key-here"
+
+# Build configuration
+[build]
+command = "npm run build"
+
+# Development configuration
+[dev]
+port = 8787
+local_protocol = "http"
+
+# Cache configuration
+[cache]
+# Enable default cache
+default = true
+
+# Analytics (optional)
+[analytics]
+enabled = true
+
+# Logging
+[log]
+level = "info"

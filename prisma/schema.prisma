@@ -1,0 +1,198 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  settings  String   @default("{}") // JSON as string for SQLite
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizations Organization[]
+  users         User[]
+  devices       Device[]
+
+  @@map("tenants")
+}
+
+model Organization {
+  id       String   @id @default(cuid())
+  tenantId String
+  name     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant   Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  companies Company[]
+
+  @@map("organizations")
+}
+
+model Company {
+  id       String   @id @default(cuid())
+  orgId    String
+  name     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  drivers      Driver[]
+  vehicles     Vehicle[]
+  manifests    Manifest[]
+
+  @@map("companies")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  tenantId     String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("OPERATOR") // ADMIN, MANAGER, OPERATOR
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("users")
+}
+
+model Driver {
+  id        String   @id @default(cuid())
+  companyId String
+  name      String
+  licenseNo String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  offenses Offense[]
+
+  @@map("drivers")
+}
+
+model Vehicle {
+  id             String   @id @default(cuid())
+  companyId      String
+  plate          String
+  make           String
+  model          String
+  color          String
+  trackerDeviceId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  offenses Offense[]
+
+  @@map("vehicles")
+}
+
+model Manifest {
+  id          String   @id @default(cuid())
+  companyId   String
+  title       String
+  status      String   @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+  scheduledAt DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  stops   Stop[]
+
+  @@map("manifests")
+}
+
+model Stop {
+  id         String   @id @default(cuid())
+  manifestId String
+  order      Int
+  location   String   // JSON as string: {lat: number, lng: number}
+  arrivedAt  DateTime?
+  departedAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  manifest Manifest @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+
+  @@map("stops")
+}
+
+model Offense {
+  id        String      @id @default(cuid())
+  driverId  String?
+  vehicleId String?
+  kind      String      // SPEEDING, PARKING_VIOLATION, TRAFFIC_VIOLATION, SAFETY_VIOLATION, OTHER
+  severity  String      @default("MINOR") // MINOR, MODERATE, MAJOR, CRITICAL
+  notes     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  driver  Driver?  @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  vehicle Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+
+  @@map("offenses")
+}
+
+model Attachment {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  url        String
+  mime       String
+  meta       String   @default("{}") // JSON as string
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("attachments")
+}
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  source      String
+  payload     String   // JSON as string
+  processedAt DateTime?
+  status      String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("webhook_events")
+}
+
+model Device {
+  id         String   @id @default(cuid())
+  tenantId   String
+  externalId String   @unique
+  lastPingAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  locationPings LocationPing[]
+
+  @@map("devices")
+}
+
+model LocationPing {
+  id        String   @id @default(cuid())
+  deviceId  String
+  lat       Float
+  lng       Float
+  speed     Float?
+  heading   Float?
+  timestamp DateTime
+  createdAt DateTime @default(now())
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@map("location_pings")
+}

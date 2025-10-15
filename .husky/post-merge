@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Post-merge hook for DMOC Web (PWA)
+# Automatically updates changelog after merging significant changes
+
+echo "🔄 Running post-merge checks..."
+
+# Check if this was a merge commit
+if [ -n "$(git log -1 --pretty=%B | grep -E '^Merge')" ]; then
+  echo "📋 Merge detected, checking for changelog updates..."
+  
+  # Get commits from the merge
+  MERGE_COMMITS=$(git log --oneline --merges -1)
+  
+  if [ -n "$MERGE_COMMITS" ]; then
+    echo "🔍 Found merge commit: $MERGE_COMMITS"
+    echo "💡 Consider running: npm run changelog:generate"
+    echo "   This will automatically generate changelog entries from recent commits"
+  fi
+fi
+
+echo "✅ Post-merge checks completed!"

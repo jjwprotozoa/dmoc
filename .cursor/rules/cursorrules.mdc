@@ -1,0 +1,82 @@
+---
+alwaysApply: true
+---
+
+# .cursorrules
+
+project: "DMOC Web (PWA)"
+owner: "Digiwize"
+description: >
+Multi-tenant logistics operations app converted from Windows to web.
+Each logistics client (Delta, Cobra, etc.) runs under Digiwize.
+Uses MySQL, Prisma, Next.js, NestJS, Socket.IO, BullMQ, and MinIO.
+
+rules:
+
+- Always comment the top of every code file with its relative path and purpose.
+- Use modular folder structure under /apps/web and /apps/api.
+- Enforce tenant isolation via tenant_id on every query.
+- Global offender_registry visible only through backend logic, not client-to-client.
+- Use Prisma ORM for all DB access (MySQL).
+- Use Socket.IO for real-time manifest updates and WhatsApp/GPS feed.
+- Use next-pwa and Dexie for offline PWA support.
+- UI: Tailwind + shadcn + lucide-react; must respect tenant theme.
+- Backend: NestJS + BullMQ + Redis + MinIO for media storage.
+- ANPR uses YOLOv8 + PaddleOCR microservice (FastAPI).
+- Biometrics uses InsightFace or DeepFace for selfie/ID match.
+- Keep functions ≤ 60 lines; document logic and side effects.
+- Digiwize admins can view all tenants; tenants can see only their data.
+- Push updates through real-time sockets, not polling.
+- Never expose raw ID numbers across tenants.
+- When opening a PR, include the Linear issue ID in the branch name and PR title; summarize changes, risks, and test steps.
+
+## Changelog Management
+
+- Maintain CHANGELOG.md using semantic versioning (MAJOR.MINOR.PATCH).
+- Use automated changelog scripts: `npm run changelog:add`, `npm run changelog:version`, `npm run changelog:generate`.
+- Update changelog for significant changes (features, fixes, security updates).
+- Git hooks automatically check for changelog updates on commits.
+- Version bumping: patch (bug fixes), minor (new features), major (breaking changes).
+- Include Linear issue IDs in changelog entries when applicable.
+- Follow Keep a Changelog format with categories: Added, Changed, Fixed, Security, Deprecated, Removed.
+
+## Version Guidelines
+
+- **MAJOR** (X.0.0): Breaking changes, major architectural changes, API changes
+- **MINOR** (0.X.0): New features, significant improvements, new integrations
+- **PATCH** (0.0.X): Bug fixes, minor improvements, documentation updates, dependency updates
+
+## Changelog Entry Format
+
+```markdown
+### Added
+- Feature description with context and impact
+- Integration with external service X
+
+### Changed
+- Modified behavior description with migration notes
+- Updated dependency X to version Y
+
+### Fixed
+- Bug fix description with affected components
+- Performance improvement in component X
+
+### Security
+- Security fix description with CVE if applicable
+- Updated authentication mechanism
+```
+
+## Automated Changelog Commands
+
+- `npm run changelog:add <type> <description> [category]` - Add manual entry
+- `npm run changelog:version [type] [version]` - Create new version section
+- `npm run changelog:generate [since]` - Generate from git commits
+- `npm run changelog:current` - Show current version
+- `npm run version:patch|minor|major` - Quick version bumping
+
+## Git Integration
+
+- Pre-commit hook checks for changelog updates on significant changes
+- Post-merge hook suggests generating changelog from commits
+- Husky manages git hooks automatically
+- Changelog updates are encouraged but not mandatory for small changes
