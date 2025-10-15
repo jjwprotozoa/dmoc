@@ -20,7 +20,13 @@
     "version:patch": "npm version patch",
     "version:minor": "npm version minor",
     "version:major": "npm version major",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:dev": "cp prisma/schema-dev.prisma prisma/schema.prisma && prisma generate",
+    "db:prod": "cp prisma/schema.prisma prisma/schema.prisma && prisma generate",
+    "db:push": "prisma db push",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:seed:prod": "tsx prisma/seed-production.ts",
+    "deploy:prod": "npm run db:prod && npm run db:push && npm run db:seed:prod && npm run build"
   },
   "keywords": [
     "nextjs",
@@ -49,6 +55,7 @@
     "next": "^14.0.0",
     "next-auth": "^4.24.0",
     "next-pwa": "^5.6.0",
+    "node-fetch": "^3.3.2",
     "prisma": "^5.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
