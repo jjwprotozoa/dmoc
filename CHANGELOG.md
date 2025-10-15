@@ -27,6 +27,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.0.2] - 2025-01-15
+
+### Added
+- React Leaflet integration for better React component lifecycle management
+- Error boundary component for map loading failures with retry functionality
+- Enhanced loading states with animated spinner for better UX
+- Automatic map bounds fitting component using React Leaflet hooks
+
+### Changed
+- Migrated Map component from manual Leaflet to React Leaflet components
+- Replaced complex manual map lifecycle management with declarative React components
+- Simplified marker management using React's reconciliation algorithm
+- Improved TypeScript integration with proper Leaflet types
+
+### Fixed
+- Resolved map container sizing and responsiveness issues (JUS-7)
+- Fixed Leaflet marker icon loading problems
+- Eliminated CSS z-index conflicts with map elements
+- Removed complex ResizeObserver integration - React Leaflet handles responsiveness automatically
+- Reduced code complexity by ~50% (300+ lines → 145 lines)
+
+### Removed
+- Manual Leaflet map initialization and cleanup logic
+- Complex ResizeObserver and window resize event handling
+- Manual CSS injection for Leaflet container styling
+- Custom TypeScript interfaces replaced with proper Leaflet types
+
+---
+
 ## [1.0.1] - 2024-12-19
 
 ### Added
@@ -103,6 +132,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date | Description |
 |---------|------|-------------|
+| 1.0.2 | 2025-01-15 | React Leaflet migration and map responsiveness fixes (JUS-7) |
 | 1.0.1 | 2024-12-19 | Map component enhancements and WebSocket fixes |
 | 0.1.0 | 2024-01-15 | Initial release with core PWA functionality |
 
