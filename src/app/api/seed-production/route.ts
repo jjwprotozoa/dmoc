@@ -1,12 +1,12 @@
 // src/app/api/seed-production/route.ts
 // Production database seeding endpoint
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     console.log('🌱 Starting production database seed...');
 
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
         details: error,
       },
       { status: 500 }
@@ -113,7 +113,7 @@ export async function GET() {
     return NextResponse.json(
       {
         success: false,
-        error: error.message,
+        error: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

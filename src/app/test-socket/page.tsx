@@ -24,7 +24,7 @@ export default function TestSocketPage() {
       });
 
       socket.on('connect_error', (error) => {
-        addMessage(`Connection error: ${error.message}`);
+        addMessage(`Connection error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       });
 
       socket.on('ping:new', (ping) => {

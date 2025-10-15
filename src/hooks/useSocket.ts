@@ -31,7 +31,7 @@ export const useSocket = (tenantSlug?: string) => {
     });
 
     socketInstance.on('connect_error', (error) => {
-      setConnectionError(error.message);
+      setConnectionError(error instanceof Error ? error.message : 'Unknown error');
       console.error('Socket connection error:', error);
     });
 

@@ -113,9 +113,9 @@ export const authOptions: NextAuthOptions = {
         } catch (error) {
           console.error('❌ Database authentication error:', error);
           console.error('❌ Error details:', {
-            message: error.message,
-            code: error.code,
-            stack: error.stack?.substring(0, 200)
+            message: error instanceof Error ? error.message : 'Unknown error',
+            code: (error as { code?: string })?.code,
+            stack: error instanceof Error ? error.stack?.substring(0, 200) : undefined
           });
           
           // Fallback to hardcoded credentials if database fails
@@ -135,9 +135,6 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  session: {
-    strategy: 'jwt',
-  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -156,8 +153,5 @@ export const authOptions: NextAuthOptions = {
       }
       return session;
     },
-  },
-  pages: {
-    signIn: '/sign-in',
   },
 };
