@@ -11,8 +11,11 @@ export const initSocket = (server: HTTPServer) => {
     cors: {
       origin: process.env.NEXTAUTH_URL || 'http://localhost:3000',
       methods: ['GET', 'POST'],
+      credentials: true,
     },
     path: '/api/socketio',
+    transports: ['polling', 'websocket'],
+    allowEIO3: true,
   });
 
   io.on('connection', async (socket) => {

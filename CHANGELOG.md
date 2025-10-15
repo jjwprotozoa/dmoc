@@ -12,12 +12,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Service Worker event type interfaces (PushEvent, NotificationEvent, PushMessageData)
 - Client and WindowClient interfaces for service worker client management
 - Proper ExecutionContext interface for Cloudflare Workers
+- Custom Next.js server with Socket.IO integration for real-time features
+- Socket.IO server configuration with tenant, company, and manifest room management
+- Enhanced Socket.IO client hook with connection error handling and status monitoring
+- Socket.IO test page for connection verification and debugging
+- Real-time activity feed with Socket.IO connection status indicator
 
 ### Changed
 - Updated manifest router to properly handle JSON field serialization
 - Enhanced tenants router with proper type conversion for settings field
 - Improved uploads router meta field handling with JSON serialization
 - Refactored service worker with proper TypeScript typing throughout
+- Modified package.json scripts to use custom server for Socket.IO support
+- Updated Socket.IO client configuration with improved transport settings and timeout handling
 
 ### Fixed
 - Resolved TypeScript build errors in manifest router (location field type mismatch)
@@ -30,6 +37,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Resolved missing ServiceWorkerGlobalScope properties (registration, clients)
 - Fixed push notification event data typing
 - Corrected notification click event handling
+- **CRITICAL**: Fixed Socket.IO HTTP headers conflict causing ERR_HTTP_HEADERS_SENT errors
+- **CRITICAL**: Resolved Socket.IO rapid connection looping issue
+- Fixed Socket.IO request routing conflicts with Next.js request handler
+- Corrected Socket.IO server initialization order and configuration
+- Fixed Socket.IO client connection stability and error handling
 
 ### Security
 - N/A

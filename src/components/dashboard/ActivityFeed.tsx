@@ -17,7 +17,7 @@ interface Activity {
 
 export function ActivityFeed() {
   const [activities, setActivities] = useState<Activity[]>([]);
-  const { socket } = useSocket();
+  const { socket, isConnected, connectionError } = useSocket();
 
   // const { data: offenses } = trpc.offenses.getAll.useQuery({});
   // const { data: webhookEvents } = trpc.manifest.getAll.useQuery({});
@@ -69,7 +69,20 @@ export function ActivityFeed() {
   return (
     <div className="bg-white rounded-lg shadow-sm border h-full">
       <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold">Activity Feed</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Activity Feed</h2>
+          <div className="flex items-center space-x-2">
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+            <span className="text-xs text-gray-500">
+              {isConnected ? 'Connected' : 'Disconnected'}
+            </span>
+          </div>
+        </div>
+        {connectionError && (
+          <div className="mt-2 text-xs text-red-500">
+            Error: {connectionError}
+          </div>
+        )}
       </div>
       
       <div className="overflow-y-auto h-[calc(100%-4rem)]">

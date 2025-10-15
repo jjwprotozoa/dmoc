@@ -5,14 +5,19 @@ import { io, Socket } from 'socket.io-client';
 export const useSocket = (tenantSlug?: string) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   useEffect(() => {
     const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000', {
       path: '/api/socketio',
+      transports: ['polling', 'websocket'],
+      timeout: 20000,
+      forceNew: true,
     });
 
     socketInstance.on('connect', () => {
       setIsConnected(true);
+      setConnectionError(null);
       console.log('Connected to socket server');
       
       if (tenantSlug) {
@@ -20,9 +25,18 @@ export const useSocket = (tenantSlug?: string) => {
       }
     });
 
-    socketInstance.on('disconnect', () => {
+    socketInstance.on('disconnect', (reason) => {
       setIsConnected(false);
-      console.log('Disconnected from socket server');
+      console.log('Disconnected from socket server:', reason);
+    });
+
+    socketInstance.on('connect_error', (error) => {
+      setConnectionError(error.message);
+      console.error('Socket connection error:', error);
+    });
+
+    socketInstance.on('error', (error) => {
+      console.error('Socket error:', error);
     });
 
     setSocket(socketInstance);
@@ -32,5 +46,5 @@ export const useSocket = (tenantSlug?: string) => {
     };
   }, [tenantSlug]);
 
-  return { socket, isConnected };
+  return { socket, isConnected, connectionError };
 };

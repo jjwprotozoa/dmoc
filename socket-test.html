@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Test</title>
+    <script src="https://cdn.socket.io/4.7.0/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .connected { background-color: #d4edda; color: #155724; }
+        .disconnected { background-color: #f8d7da; color: #721c24; }
+        .messages { height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Socket.IO Connection Test</h1>
+    
+    <div id="status" class="status disconnected">Disconnected</div>
+    
+    <div>
+        <button onclick="connect()">Connect</button>
+        <button onclick="disconnect()">Disconnect</button>
+        <button onclick="sendTest()">Send Test Message</button>
+        <button onclick="clearMessages()">Clear Messages</button>
+    </div>
+    
+    <div id="messages" class="messages"></div>
+
+    <script>
+        let socket = null;
+        const statusDiv = document.getElementById('status');
+        const messagesDiv = document.getElementById('messages');
+
+        function addMessage(message) {
+            const time = new Date().toLocaleTimeString();
+            messagesDiv.innerHTML += `<div>[${time}] ${message}</div>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function updateStatus(connected) {
+            if (connected) {
+                statusDiv.textContent = 'Connected';
+                statusDiv.className = 'status connected';
+            } else {
+                statusDiv.textContent = 'Disconnected';
+                statusDiv.className = 'status disconnected';
+            }
+        }
+
+        function connect() {
+            if (socket) {
+                socket.disconnect();
+            }
+
+            addMessage('Attempting to connect...');
+            
+            socket = io('http://localhost:3000', {
+                path: '/api/socketio',
+                transports: ['polling', 'websocket'],
+                timeout: 20000,
+                forceNew: true
+            });
+
+            socket.on('connect', () => {
+                addMessage('✅ Connected successfully!');
+                updateStatus(true);
+            });
+
+            socket.on('disconnect', (reason) => {
+                addMessage(`❌ Disconnected: ${reason}`);
+                updateStatus(false);
+            });
+
+            socket.on('connect_error', (error) => {
+                addMessage(`❌ Connection error: ${error.message}`);
+                updateStatus(false);
+            });
+
+            socket.on('ping:new', (ping) => {
+                addMessage(`📍 Received ping: ${JSON.stringify(ping)}`);
+            });
+
+            socket.on('webhook:new', (event) => {
+                addMessage(`📨 Received webhook: ${JSON.stringify(event)}`);
+            });
+
+            socket.on('test-response', (data) => {
+                addMessage(`📤 Test response: ${JSON.stringify(data)}`);
+            });
+        }
+
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+        }
+
+        function sendTest() {
+            if (socket && socket.connected) {
+                socket.emit('test-message', { message: 'Hello from test page!' });
+                addMessage('📤 Sent test message');
+            } else {
+                addMessage('❌ Not connected - cannot send message');
+            }
+        }
+
+        function clearMessages() {
+            messagesDiv.innerHTML = '';
+        }
+
+        // Auto-connect on page load
+        window.onload = () => {
+            addMessage('Page loaded - ready to test Socket.IO connection');
+        };
+    </script>
+</body>
+</html>

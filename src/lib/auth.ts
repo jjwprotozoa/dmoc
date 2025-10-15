@@ -36,6 +36,7 @@ declare module 'next-auth/jwt' {
 export const authOptions: NextAuthOptions = {
   // adapter: PrismaAdapter(db), // Using JWT strategy instead
   secret: process.env.NEXTAUTH_SECRET || 'your-super-secret-jwt-key-that-is-at-least-32-characters-long',
+  debug: process.env.NODE_ENV === 'development',
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -45,34 +46,48 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log('❌ Missing credentials');
           return null;
         }
 
-        const user = await db.user.findUnique({
-          where: { email: credentials.email },
-          include: { tenant: true },
-        });
+        console.log('🔐 Attempting authentication for:', credentials.email);
 
-        if (!user) {
+        try {
+          const user = await db.user.findUnique({
+            where: { email: credentials.email },
+            include: { tenant: true },
+          });
+
+          if (!user) {
+            console.log('❌ User not found:', credentials.email);
+            return null;
+          }
+
+          console.log('✅ User found:', user.email, 'Role:', user.role);
+
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.passwordHash
+          );
+
+          if (!isPasswordValid) {
+            console.log('❌ Invalid password for:', credentials.email);
+            return null;
+          }
+
+          console.log('🎉 Authentication successful for:', credentials.email);
+
+          return {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            tenantId: user.tenantId,
+            tenantSlug: user.tenant.slug,
+          };
+        } catch (error) {
+          console.error('❌ Authentication error:', error);
           return null;
         }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash
-        );
-
-        if (!isPasswordValid) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          role: user.role,
-          tenantId: user.tenantId,
-          tenantSlug: user.tenant.slug,
-        };
       },
     }),
   ],
