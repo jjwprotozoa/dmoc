@@ -37,6 +37,10 @@ export const authOptions: NextAuthOptions = {
   // adapter: PrismaAdapter(db), // Using JWT strategy instead
   secret: process.env.NEXTAUTH_SECRET || 'your-super-secret-jwt-key-that-is-at-least-32-characters-long',
   debug: process.env.NODE_ENV === 'development',
+  pages: {
+    signIn: '/sign-in',
+    error: '/sign-in',
+  },
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -51,8 +55,14 @@ export const authOptions: NextAuthOptions = {
         }
 
         console.log('🔐 Attempting authentication for:', credentials.email);
+        console.log('🌍 Environment:', process.env.NODE_ENV);
+        console.log('🗄️ Database URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
 
         try {
+          // Test database connection first
+          await db.$connect();
+          console.log('✅ Database connection successful');
+
           const user = await db.user.findUnique({
             where: { email: credentials.email },
             include: { tenant: true },
@@ -86,6 +96,11 @@ export const authOptions: NextAuthOptions = {
           };
         } catch (error) {
           console.error('❌ Authentication error:', error);
+          console.error('❌ Error details:', {
+            message: error.message,
+            code: error.code,
+            stack: error.stack?.substring(0, 200)
+          });
           return null;
         }
       },
