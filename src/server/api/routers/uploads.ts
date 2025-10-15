@@ -24,10 +24,10 @@ export const uploadsRouter = router({
           entityId: input.entityId,
           url,
           mime: input.mimeType,
-          meta: {
+          meta: JSON.stringify({
             fileName: input.fileName,
             size: buffer.length,
-          },
+          }),
         },
       });
 

@@ -41,12 +41,21 @@ const tenantRoutes = [
 ];
 
 // Role-based access control mapping
-const rolePermissions = {
+type Permission = '*' | 'dashboard' | 'manifests' | 'tracking' | 'offenses';
+
+type RolePermissions = {
+  ADMIN: Permission[];
+  MANAGER: Permission[];
+  OPERATOR: Permission[];
+  VIEWER: Permission[];
+};
+
+const rolePermissions: RolePermissions = {
   ADMIN: ['*'], // Digiwize admins can access everything
   MANAGER: ['dashboard', 'manifests', 'tracking', 'offenses'],
   OPERATOR: ['dashboard', 'manifests', 'tracking'],
   VIEWER: ['dashboard'],
-} as const;
+};
 
 // Helper function to check if a path matches any of the given patterns
 function isPublicRoute(pathname: string): boolean {

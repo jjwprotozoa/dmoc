@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 import { initTRPC, TRPCError } from '@trpc/server';
 import { getServerSession } from 'next-auth';
 
-export const createTRPCContext = async (opts: { req: Request; res?: any }) => {
+export const createTRPCContext = async () => {
   const session = await getServerSession(authOptions);
 
   return {

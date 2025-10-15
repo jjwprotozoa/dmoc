@@ -74,18 +74,45 @@ export const getSocketIO = () => {
   return io;
 };
 
+interface LocationPing {
+  id: string;
+  lat: number;
+  lng: number;
+  speed: number | null;
+  heading: number | null;
+  timestamp: string;
+  device: {
+    id: string;
+    externalId: string;
+  };
+}
+
+interface Manifest {
+  id: string;
+  [key: string]: unknown;
+}
+
+interface WebhookEvent {
+  id: string;
+  createdAt: string;
+  payload: {
+    message?: string;
+    [key: string]: unknown;
+  };
+}
+
 // Socket event emitters
-export const emitLocationPing = (tenantSlug: string, ping: any) => {
+export const emitLocationPing = (tenantSlug: string, ping: LocationPing) => {
   const socketIO = getSocketIO();
   socketIO.to(`tenant:${tenantSlug}`).emit('ping:new', ping);
 };
 
-export const emitManifestUpdate = (companyId: string, manifest: any) => {
+export const emitManifestUpdate = (companyId: string, manifest: Manifest) => {
   const socketIO = getSocketIO();
   socketIO.to(`company:${companyId}`).emit('manifest:update', manifest);
 };
 
-export const emitWebhookEvent = (tenantSlug: string, event: any) => {
+export const emitWebhookEvent = (tenantSlug: string, event: WebhookEvent) => {
   const socketIO = getSocketIO();
   socketIO.to(`tenant:${tenantSlug}`).emit('webhook:new', event);
 };

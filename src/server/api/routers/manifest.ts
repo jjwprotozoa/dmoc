@@ -66,7 +66,10 @@ export const manifestRouter = router({
           title: input.title,
           scheduledAt: input.scheduledAt,
           stops: {
-            create: input.stops,
+            create: input.stops.map(stop => ({
+              order: stop.order,
+              location: JSON.stringify(stop.location),
+            })),
           },
         },
         include: {

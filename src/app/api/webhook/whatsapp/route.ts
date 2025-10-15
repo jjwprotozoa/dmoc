@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const webhookEvent = await db.webhookEvent.create({
       data: {
         source: 'whatsapp',
-        payload: validatedData,
+        payload: JSON.stringify(validatedData),
         status: 'PENDING',
       },
     });
@@ -62,7 +62,8 @@ export async function POST(request: NextRequest) {
     const tenants = await db.tenant.findMany();
     for (const tenant of tenants) {
       emitWebhookEvent(tenant.slug, {
-        ...webhookEvent,
+        id: webhookEvent.id,
+        createdAt: webhookEvent.createdAt.toISOString(),
         payload: validatedData,
       });
     }

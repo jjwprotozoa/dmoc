@@ -8,6 +8,12 @@ export interface Env {
   // CACHE_TTL?: string;
 }
 
+// Cloudflare Workers types
+interface ExecutionContext {
+  waitUntil(promise: Promise<unknown>): void;
+  passThroughOnException(): void;
+}
+
 // Cache configuration
 const CACHE_TTL = 5 * 60; // 5 minutes in seconds
 const CACHE_VERSION = 'v1'; // For cache invalidation when needed
@@ -77,7 +83,7 @@ function createCachedResponse(response: Response): Response {
 }
 
 // Main fetch handler
-export default {
+const workerHandler = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     try {
       // Only handle GET requests for caching
@@ -89,7 +95,7 @@ export default {
       const cacheKey = generateCacheKey(request);
       
       // Try to get from cache first
-      const cache = caches.default;
+      const cache = await caches.open('api-cache');
       const cachedResponse = await cache.match(cacheKey);
       
       if (cachedResponse) {
@@ -140,3 +146,5 @@ export default {
     }
   }
 };
+
+export default workerHandler;

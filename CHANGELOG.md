@@ -8,13 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- N/A
+- Comprehensive TypeScript type definitions for Cloudflare Workers
+- Service Worker event type interfaces (PushEvent, NotificationEvent, PushMessageData)
+- Client and WindowClient interfaces for service worker client management
+- Proper ExecutionContext interface for Cloudflare Workers
 
 ### Changed
-- N/A
+- Updated manifest router to properly handle JSON field serialization
+- Enhanced tenants router with proper type conversion for settings field
+- Improved uploads router meta field handling with JSON serialization
+- Refactored service worker with proper TypeScript typing throughout
 
 ### Fixed
-- N/A
+- Resolved TypeScript build errors in manifest router (location field type mismatch)
+- Fixed ESLint warning in Map component (replaced 'any' with proper type assertion)
+- Corrected tenants router settings field type conversion issue
+- Fixed uploads router meta field JSON serialization
+- Resolved Cloudflare Workers ExecutionContext type definition
+- Fixed service worker NavigationRoute return type issue
+- Corrected service worker event listener typing problems
+- Resolved missing ServiceWorkerGlobalScope properties (registration, clients)
+- Fixed push notification event data typing
+- Corrected notification click event handling
 
 ### Security
 - N/A

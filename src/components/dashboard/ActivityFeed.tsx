@@ -2,16 +2,25 @@
 'use client';
 
 import { useSocket } from '@/hooks/useSocket';
-import { trpc } from '@/lib/trpc';
+// import { trpc } from '@/lib/trpc';
 import { AlertTriangle, Clock, MapPin, MessageSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+interface Activity {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  timestamp: string;
+  data: unknown;
+}
+
 export function ActivityFeed() {
-  const [activities, setActivities] = useState<any[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const { socket } = useSocket();
 
-  const { data: offenses } = trpc.offenses.getAll.useQuery({});
-  const { data: webhookEvents } = trpc.manifest.getAll.useQuery({});
+  // const { data: offenses } = trpc.offenses.getAll.useQuery({});
+  // const { data: webhookEvents } = trpc.manifest.getAll.useQuery({});
 
   useEffect(() => {
     if (socket) {

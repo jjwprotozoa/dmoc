@@ -39,7 +39,7 @@ export async function getFile(key: string): Promise<Buffer> {
   const chunks: Uint8Array[] = [];
   
   if (response.Body) {
-    for await (const chunk of response.Body as any) {
+    for await (const chunk of response.Body as AsyncIterable<Uint8Array>) {
       chunks.push(chunk);
     }
   }

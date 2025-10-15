@@ -67,7 +67,7 @@ export const tenantsRouter = router({
         data: {
           name: input.name,
           slug: input.slug,
-          settings: input.settings || {},
+          settings: JSON.stringify(input.settings || {}),
         },
       });
 
@@ -82,7 +82,25 @@ export const tenantsRouter = router({
       settings: z.record(z.any()).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input;
+      const { id, ...inputData } = input;
+      
+      // Prepare data with proper type conversion
+      const data: {
+        name?: string;
+        slug?: string;
+        settings?: string;
+      } = {};
+      
+      if (inputData.name !== undefined) {
+        data.name = inputData.name;
+      }
+      if (inputData.slug !== undefined) {
+        data.slug = inputData.slug;
+      }
+      if (inputData.settings !== undefined) {
+        data.settings = JSON.stringify(inputData.settings);
+      }
+      
       const tenant = await ctx.db.tenant.update({
         where: { id },
         data,

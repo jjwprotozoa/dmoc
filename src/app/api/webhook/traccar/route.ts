@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
     // Emit real-time update
     emitLocationPing(device.tenant.slug, {
       ...ping,
+      timestamp: ping.timestamp.toISOString(),
       device: {
         id: device.id,
         externalId: device.externalId,

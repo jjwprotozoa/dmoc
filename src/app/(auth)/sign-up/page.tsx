@@ -2,7 +2,7 @@
 'use client';
 
 import { Lock, Mail, User, UserPlus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function SignUpPage() {
@@ -14,7 +14,7 @@ export default function SignUpPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const router = useRouter();
+  // const router = useRouter(); // TODO: Implement sign up logic
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +30,7 @@ export default function SignUpPage() {
     try {
       // TODO: Implement sign up logic
       setError('Sign up is not implemented yet. Please contact your administrator.');
-    } catch (error) {
+    } catch {
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);

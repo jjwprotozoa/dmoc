@@ -1,9 +1,50 @@
 // src/workers/service-worker.ts
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
+import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
 import { NavigationRoute, registerRoute } from 'workbox-routing';
-import { StaleWhileRevalidate, NetworkFirst } from 'workbox-strategies';
+import { NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
 
-declare const self: ServiceWorkerGlobalScope;
+// Service Worker event types
+interface PushEvent extends Event {
+  data?: PushMessageData;
+  waitUntil(promise: Promise<unknown>): void;
+}
+
+interface NotificationEvent extends Event {
+  notification: Notification;
+  waitUntil(promise: Promise<unknown>): void;
+}
+
+interface PushMessageData {
+  json(): unknown;
+  text(): string;
+  arrayBuffer(): ArrayBuffer;
+  blob(): Blob;
+}
+
+interface Client {
+  id: string;
+  type: string;
+  url: string;
+}
+
+interface WindowClient extends Client {
+  focused: boolean;
+  visible: boolean;
+  focus(): Promise<WindowClient>;
+  navigate(url: string): Promise<WindowClient>;
+}
+
+interface Clients {
+  openWindow(url: string): Promise<WindowClient | null>;
+  matchAll(): Promise<Client[]>;
+  claim(): Promise<void>;
+}
+
+declare const self: ServiceWorkerGlobalScope & {
+  addEventListener: typeof addEventListener;
+  registration: ServiceWorkerRegistration;
+  clients: Clients;
+};
 
 // Precache all static assets
 precacheAndRoute(self.__WB_MANIFEST);
@@ -15,8 +56,9 @@ cleanupOutdatedCaches();
 const navigationRoute = new NavigationRoute(async ({ request }) => {
   try {
     return await fetch(request);
-  } catch (error) {
-    return caches.match('/offline.html');
+  } catch {
+    const offlineResponse = await caches.match('/offline.html');
+    return offlineResponse || new Response('Offline', { status: 503 });
   }
 });
 
@@ -43,8 +85,9 @@ registerRoute(
 
 // Handle push notifications (placeholder)
 self.addEventListener('push', (event) => {
-  if (event.data) {
-    const data = event.data.json();
+  const pushEvent = event as PushEvent;
+  if (pushEvent.data) {
+    const data = pushEvent.data.json() as { title: string; body: string };
     const options = {
       body: data.body,
       icon: '/icons/icon-192x192.png',
@@ -56,7 +99,7 @@ self.addEventListener('push', (event) => {
       },
     };
     
-    event.waitUntil(
+    pushEvent.waitUntil(
       self.registration.showNotification(data.title, options)
     );
   }
@@ -64,9 +107,10 @@ self.addEventListener('push', (event) => {
 
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
+  const notificationEvent = event as NotificationEvent;
+  notificationEvent.notification.close();
   
-  event.waitUntil(
-    clients.openWindow('/')
+  notificationEvent.waitUntil(
+    self.clients.openWindow('/')
   );
 });

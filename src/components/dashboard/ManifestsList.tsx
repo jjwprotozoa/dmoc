@@ -2,6 +2,7 @@
 'use client';
 
 import { AlertCircle, CheckCircle, Clock, MapPin, XCircle } from 'lucide-react';
+import React from 'react';
 
 interface Manifest {
   id: string;
