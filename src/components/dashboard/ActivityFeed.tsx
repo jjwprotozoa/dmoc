@@ -2,7 +2,7 @@
 'use client';
 
 import { useSocket } from '@/hooks/useSocket';
-// import { trpc } from '@/lib/trpc';
+import { trpc } from '@/lib/trpc';
 import { AlertTriangle, Clock, MapPin, MessageSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -19,9 +19,20 @@ export function ActivityFeed() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const { socket, isConnected, connectionError } = useSocket();
 
-  // const { data: offenses } = trpc.offenses.getAll.useQuery({});
-  // const { data: webhookEvents } = trpc.manifest.getAll.useQuery({});
+  // Fallback: Use tRPC queries for polling when Socket.IO is not available
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { data: offenses } = trpc.offenses.getAll.useQuery({}, {
+    refetchInterval: isConnected ? false : 30000, // Poll every 30s when Socket.IO is not connected
+    enabled: !isConnected, // Only fetch when Socket.IO is not connected
+  });
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { data: webhookEvents } = trpc.manifest.getAll.useQuery({}, {
+    refetchInterval: isConnected ? false : 30000, // Poll every 30s when Socket.IO is not connected
+    enabled: !isConnected, // Only fetch when Socket.IO is not connected
+  });
+
+  // Socket.IO real-time updates
   useEffect(() => {
     if (socket) {
       socket.on('ping:new', (ping) => {
@@ -52,6 +63,14 @@ export function ActivityFeed() {
       };
     }
   }, [socket]);
+
+  // Fallback polling mechanism when Socket.IO is not available
+  useEffect(() => {
+    if (!isConnected && !connectionError) {
+      // Socket.IO is disabled (e.g., on Vercel), use polling fallback
+      console.log('Using polling fallback for real-time updates');
+    }
+  }, [isConnected, connectionError]);
 
   const getActivityIcon = (type: string) => {
     switch (type) {

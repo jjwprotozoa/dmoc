@@ -42,12 +42,17 @@ export default function TestSocketPage() {
         socket.off('ping:new');
         socket.off('webhook:new');
       };
+    } else if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+      // Show message when Socket.IO is disabled on Vercel
+      setMessages(prev => [...prev, `${new Date().toLocaleTimeString()}: Socket.IO disabled for Vercel deployment`]);
     }
   }, [socket]);
 
   const sendTestMessage = () => {
     if (socket) {
       socket.emit('test-message', { message: 'Hello from client!' });
+    } else {
+      setMessages(prev => [...prev, `${new Date().toLocaleTimeString()}: Cannot send message - Socket.IO not available`]);
     }
   };
 

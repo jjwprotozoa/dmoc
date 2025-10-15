@@ -11,6 +11,12 @@ export const useSocket = (tenantSlug?: string) => {
     // Only create socket connection on client side
     if (typeof window === 'undefined') return;
 
+    // Skip Socket.IO on Vercel deployments (serverless doesn't support persistent connections)
+    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+      console.log('Socket.IO disabled for Vercel deployment');
+      return;
+    }
+
     const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000', {
       path: '/api/socketio',
       transports: ['polling', 'websocket'],

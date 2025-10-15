@@ -1,7 +1,7 @@
 // src/app/dashboard/manifests/active/page.tsx
 'use client';
 
-import { FileText, Clock, MapPin, Truck } from 'lucide-react';
+import { Clock, FileText, MapPin, Truck } from 'lucide-react';
 import { trpc } from '../../../../lib/trpc';
 
 export default function ActiveManifestsPage() {

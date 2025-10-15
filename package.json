@@ -7,6 +7,7 @@
     "dev": "npm run db:dev && node server.js",
     "build": "npm run db:dev && prisma generate && next build",
     "start": "NODE_ENV=production node server.js",
+    "vercel-build": "npm run db:dev && prisma generate && next build",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "test": "vitest",
