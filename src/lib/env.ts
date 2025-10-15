@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   // Database
-  DATABASE_URL: z.string().url().optional().default("postgresql://postgres:password@localhost:5432/dmoc_dev"),
+  DATABASE_URL: z.string().optional().default("file:./dev.db"),
   
   // NextAuth
   NEXTAUTH_URL: z.string().url().optional().default("http://localhost:3000"),

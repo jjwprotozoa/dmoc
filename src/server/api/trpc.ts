@@ -5,7 +5,13 @@ import { initTRPC, TRPCError } from '@trpc/server';
 import { getServerSession } from 'next-auth';
 
 export const createTRPCContext = async () => {
-  const session = await getServerSession(authOptions);
+  let session = null;
+  
+  try {
+    session = await getServerSession(authOptions);
+  } catch (error) {
+    console.warn('Failed to get session during build:', error);
+  }
 
   return {
     session,
