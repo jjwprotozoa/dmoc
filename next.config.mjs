@@ -8,6 +8,12 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client'],
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push('@prisma/client');
+    }
+    return config;
+  },
   async headers() {
     return [
       {

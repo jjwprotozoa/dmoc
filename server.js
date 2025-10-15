@@ -18,6 +18,13 @@ app.prepare().then(() => {
   const httpServer = createServer(async (req, res) => {
     try {
       const parsedUrl = parse(req.url, true);
+      
+      // Handle Socket.IO requests
+      if (parsedUrl.pathname?.startsWith('/api/socketio')) {
+        // Let Socket.IO handle these requests
+        return;
+      }
+      
       await handle(req, res, parsedUrl);
     } catch (err) {
       console.error('Error occurred handling', req.url, err);
@@ -29,9 +36,15 @@ app.prepare().then(() => {
   // Initialize Socket.IO after creating the server
   const io = initSocket(httpServer);
 
+  // Add error handling for the server
+  httpServer.on('error', (err) => {
+    console.error('HTTP Server error:', err);
+  });
+
   httpServer.listen(port, (err) => {
     if (err) throw err;
     console.log(`> Ready on http://${hostname}:${port}`);
     console.log(`> Socket.IO server initialized on path: /api/socketio`);
+    console.log(`> Environment: ${dev ? 'development' : 'production'}`);
   });
 });

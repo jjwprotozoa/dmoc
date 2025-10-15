@@ -14,6 +14,7 @@ const publicRoutes = [
   '/api/auth',
   '/api/webhook',
   '/api/alpr',
+  '/api/socketio',
   '/offline.html',
   '/site.webmanifest',
   '/robots.txt',
@@ -220,6 +221,7 @@ export const config = {
      * - api/auth (NextAuth.js routes)
      * - api/webhook (external webhooks)
      * - api/alpr (external ALPR service)
+     * - api/socketio (Socket.IO server)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
@@ -228,6 +230,6 @@ export const config = {
      * - icons (PWA icons)
      * - offline.html (PWA offline page)
      */
-    '/((?!api/auth|api/webhook|api/alpr|_next/static|_next/image|favicon.ico|site.webmanifest|robots.txt|icons|offline.html).*)',
+    '/((?!api/auth|api/webhook|api/alpr|api/socketio|_next/static|_next/image|favicon.ico|site.webmanifest|robots.txt|icons|offline.html).*)',
   ],
 };

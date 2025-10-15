@@ -1,7 +1,7 @@
 // src/app/dashboard/settings/page.tsx
 'use client';
 
-import { Settings, User, Bell, Shield, Database, Globe, Key, Save } from 'lucide-react';
+import { Settings, User, Bell, Shield, Save } from 'lucide-react';
 
 export default function SettingsPage() {
   return (

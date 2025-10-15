@@ -7,7 +7,7 @@ import { trpc } from '../../../../lib/trpc';
 export default function ActiveManifestsPage() {
   const { data: manifests, isLoading } = trpc.manifest.getAll.useQuery({});
 
-  const activeManifests = manifests?.filter(manifest => 
+  const activeManifests = manifests?.filter((manifest: any) => 
     manifest.status === 'IN_PROGRESS'
   ) || [];
 
@@ -43,7 +43,7 @@ export default function ActiveManifestsPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">In Transit</p>
               <p className="text-2xl font-bold text-gray-900">
-                {activeManifests.filter(m => m.status === 'IN_PROGRESS').length}
+                {activeManifests.filter((m: any) => m.status === 'IN_PROGRESS').length}
               </p>
             </div>
           </div>
@@ -93,7 +93,7 @@ export default function ActiveManifestsPage() {
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
-            {activeManifests.map((manifest) => (
+            {activeManifests.map((manifest: any) => (
               <div key={manifest.id} className="p-6 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">

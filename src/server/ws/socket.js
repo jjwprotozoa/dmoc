@@ -7,7 +7,11 @@ let io = null;
 const initSocket = (server) => {
   io = new Server(server, {
     cors: {
-      origin: process.env.NEXTAUTH_URL || 'http://localhost:3000',
+      origin: [
+        process.env.NEXTAUTH_URL || 'http://localhost:3000',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000'
+      ],
       methods: ['GET', 'POST'],
       credentials: true,
     },
@@ -19,19 +23,30 @@ const initSocket = (server) => {
     upgradeTimeout: 10000,
     maxHttpBufferSize: 1e6,
     serveClient: false, // Don't serve the client files
+    connectTimeout: 45000,
+    allowUpgrades: true,
   });
 
-  // Add error handling
+  // Add comprehensive error handling
   io.engine.on('connection_error', (err) => {
     console.error('Socket.IO connection error:', err);
   });
 
+  io.engine.on('upgrade_error', (err) => {
+    console.error('Socket.IO upgrade error:', err);
+  });
+
   io.on('connection', async (socket) => {
-    console.log('Client connected', { socketId: socket.id });
+    console.log('Client connected', { socketId: socket.id, transport: socket.conn.transport.name });
 
     // Add error handling for individual sockets
     socket.on('error', (error) => {
       console.error('Socket error:', error);
+    });
+
+    // Handle connection errors
+    socket.conn.on('error', (error) => {
+      console.error('Socket connection error:', error);
     });
 
     // Join tenant-specific room
@@ -67,6 +82,16 @@ const initSocket = (server) => {
       console.log('Client joined manifest room', { 
         socketId: socket.id, 
         manifestId 
+      });
+    });
+
+    // Handle test messages for debugging
+    socket.on('test-message', (data) => {
+      console.log('Received test message:', data);
+      socket.emit('test-response', { 
+        message: 'Test response received', 
+        timestamp: new Date().toISOString(),
+        data 
       });
     });
 

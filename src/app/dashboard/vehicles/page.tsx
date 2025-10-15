@@ -1,7 +1,7 @@
 // src/app/dashboard/vehicles/page.tsx
 'use client';
 
-import { Car, MapPin, Clock, Fuel, Wrench, CheckCircle } from 'lucide-react';
+import { Car, MapPin, Clock, Fuel, Wrench } from 'lucide-react';
 
 export default function VehiclesPage() {
   // Mock data - replace with actual data from your API
