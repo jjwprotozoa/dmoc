@@ -1,213 +1,274 @@
-# JSON API Cache Worker
+# DMOC Web (PWA)
 
-A Cloudflare Worker script that caches JSON API responses for 5 minutes, improving performance and reducing origin server load.
+**Multi-tenant logistics operations app converted from Windows to web**
 
-## Features
+A comprehensive Progressive Web Application (PWA) for logistics operations management, built with modern web technologies and designed for multi-tenant deployment.
 
-- ✅ **5-minute TTL**: Automatic cache expiration after 5 minutes
-- ✅ **JSON-only caching**: Only caches successful JSON responses
-- ✅ **Smart cache keys**: Includes method, path, and query parameters
-- ✅ **Cache headers**: Proper Cache-Control and custom headers
-- ✅ **Error handling**: Graceful fallbacks and error responses
-- ✅ **Cache invalidation**: Version-based cache keys for easy invalidation
-- ✅ **Development ready**: Local development with wrangler dev
+## 🚀 Features
 
-## Quick Start
+### Core Functionality
+- **Multi-tenant Architecture** - Support for multiple logistics clients (Delta, Cobra, etc.) under Digiwize
+- **Real-time Tracking** - Live vehicle and manifest updates via Socket.IO
+- **Fleet Management** - Comprehensive vehicle, driver, and client management
+- **Manifest System** - Complete logistics manifest tracking and management
+- **PWA Support** - Offline functionality with service worker and Dexie storage
+- **Mobile-First Design** - Responsive design optimized for mobile devices
 
-### 1. Install Dependencies
+### Security & Privacy
+- **POPIA Compliance** - Comprehensive data protection for personal information
+- **Role-Based Access Control** - Admin/Manager/Operator/Viewer roles with granular permissions
+- **Data Masking** - Sensitive information automatically masked for unauthorized users
+- **Tenant Isolation** - Strict data separation between different logistics clients
+- **Authentication** - NextAuth.js with JWT tokens and secure session management
 
-```bash
-npm install
-```
+### Advanced Features
+- **ANPR Integration** - Automatic Number Plate Recognition with YOLOv8 + PaddleOCR
+- **Biometric Verification** - Selfie/ID matching with InsightFace/DeepFace
+- **WhatsApp Integration** - Real-time communication and status updates
+- **GPS Tracking** - Real-time location tracking with Traccar integration
+- **Background Processing** - BullMQ job queue system for heavy operations
+- **File Storage** - S3-compatible storage for media and documents
 
-### 2. Configure Routes
+## 🛠️ Tech Stack
 
-Edit `wrangler.toml` and update the routes to match your API endpoints:
+### Frontend
+- **Next.js 14** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **shadcn/ui** - Modern component library
+- **React Leaflet** - Interactive maps
+- **Lucide React** - Beautiful icons
 
-```toml
-routes = [
-  "api.yourdomain.com/api/*",
-  "yourdomain.com/api/v1/*"
-]
-```
+### Backend
+- **NestJS** - Scalable Node.js framework
+- **tRPC** - End-to-end typesafe APIs
+- **Prisma ORM** - Database toolkit and ORM
+- **Socket.IO** - Real-time bidirectional communication
+- **BullMQ** - Redis-based job queue
+- **NextAuth.js** - Authentication framework
 
-### 3. Deploy
+### Database & Storage
+- **MySQL 8.0+** - Primary database (PostgreSQL for production)
+- **Redis** - Caching and job queue
+- **S3/MinIO** - Object storage for media files
+- **Dexie** - Client-side database for offline support
 
-```bash
-# Deploy to staging
-npm run deploy:staging
+### DevOps & Deployment
+- **Vercel** - Hosting and deployment platform
+- **Docker** - Containerization for local development
+- **GitHub Actions** - CI/CD pipeline
+- **PWA** - Service worker and offline capabilities
 
-# Deploy to production
-npm run deploy:production
-```
+## 📦 Installation
 
-## Configuration
-
-### Environment Variables
-
-Set in `wrangler.toml` or as secrets:
-
-```toml
-[vars]
-CACHE_TTL = "300"  # 5 minutes in seconds
-CACHE_VERSION = "v1"
-```
-
-### Cache Behavior
-
-The worker will cache responses that meet these criteria:
-
-- ✅ HTTP method is GET
-- ✅ Response status is 200 (successful)
-- ✅ Content-Type includes `application/json`
-- ✅ No `no-cache` header present
-
-### Cache Headers
-
-The worker adds these headers to responses:
-
-- `Cache-Control: public, max-age=300, s-maxage=300`
-- `X-Cache-Status: HIT` or `MISS`
-- `X-Cache-TTL: 300`
-
-## Usage Examples
-
-### Basic API Caching
-
-```javascript
-// Your API endpoint
-fetch('https://api.yourdomain.com/users')
-  .then(response => response.json())
-  .then(data => console.log(data));
-```
-
-### Cache Invalidation
-
-To invalidate cache, update the `CACHE_VERSION` in `wrangler.toml`:
-
-```toml
-[vars]
-CACHE_VERSION = "v2"  # This will invalidate all cached responses
-```
-
-### Custom Cache TTL
-
-Override the default 5-minute TTL by setting environment variables:
-
-```bash
-wrangler secret put CACHE_TTL
-# Enter: 600 (for 10 minutes)
-```
-
-## Development
+### Prerequisites
+- Node.js 18.0.0 or higher
+- MySQL 8.0+ or PostgreSQL
+- Redis (optional, for background jobs)
 
 ### Local Development
 
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/digiwize/dmoc-web.git
+   cd dmoc-web
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   # Edit .env.local with your configuration
+   ```
+
+4. **Set up the database**
+   ```bash
+   # For development (SQLite)
+   npm run db:dev
+   
+   # For production (MySQL/PostgreSQL)
+   npm run db:prod
+   npm run db:push
+   ```
+
+5. **Seed the database**
+   ```bash
+   # Development data
+   npm run db:seed
+   
+   # Production data
+   npm run db:seed:prod
+   ```
+
+6. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+The application will be available at `http://localhost:3000`
+
+## 🚀 Deployment
+
+### Vercel Deployment (Recommended)
+
+1. **Connect to Vercel**
+   ```bash
+   vercel --prod
+   ```
+
+2. **Set environment variables** in Vercel dashboard:
+   ```bash
+   NEXTAUTH_URL=https://your-app.vercel.app
+   NEXTAUTH_SECRET=your-super-secret-jwt-key-that-is-at-least-32-characters-long
+   DATABASE_URL=postgresql://username:password@host:port/database_name
+   REDIS_URL=redis://username:password@host:port
+   S3_ENDPOINT=https://your-s3-endpoint.com
+   S3_REGION=us-east-1
+   S3_BUCKET=your-bucket-name
+   S3_ACCESS_KEY_ID=your-access-key
+   S3_SECRET_ACCESS_KEY=your-secret-key
+   ```
+
+3. **Run database setup**
+   ```bash
+   npx prisma db push
+   npx tsx prisma/seed-production.ts
+   ```
+
+### Docker Deployment
+
+1. **Start services**
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Build and run the application**
+   ```bash
+   npm run build
+   npm start
+   ```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | Database connection string | `file:./dev.db` |
+| `NEXTAUTH_URL` | Application URL | `http://localhost:3000` |
+| `NEXTAUTH_SECRET` | JWT secret key | `your-super-secret-jwt-key...` |
+| `REDIS_URL` | Redis connection string | `redis://localhost:6379` |
+| `S3_ENDPOINT` | S3-compatible storage endpoint | `http://localhost:9000` |
+| `S3_REGION` | S3 region | `us-east-1` |
+| `S3_BUCKET` | S3 bucket name | `logistics-media` |
+| `S3_ACCESS_KEY_ID` | S3 access key | `minioadmin` |
+| `S3_SECRET_ACCESS_KEY` | S3 secret key | `minioadmin` |
+
+### Multi-tenant Configuration
+
+The application supports multiple tenants with different themes:
+
+- **Delta** - Blue theme
+- **Cobra** - Red theme  
+- **Digiwize** - Amber theme (admin)
+
+## 📱 PWA Features
+
+- **Offline Support** - Works without internet connection
+- **Install Prompt** - Native app-like installation
+- **Push Notifications** - Real-time updates
+- **Background Sync** - Data synchronization when online
+- **Service Worker** - Caching and offline functionality
+
+## 🔐 Security
+
+### Authentication
+- JWT-based authentication with NextAuth.js
+- Role-based access control (Admin/Manager/Operator/Viewer)
+- Multi-factor authentication support
+- Session management with secure cookies
+
+### Data Protection
+- POPIA compliance for personal data
+- Automatic data masking for sensitive information
+- Tenant isolation with strict data separation
+- Audit logging for compliance
+
+### API Security
+- Rate limiting on webhook endpoints
+- Input validation with Zod schemas
+- CORS configuration
+- Security headers (CSP, HSTS, etc.)
+
+## 🧪 Testing
+
 ```bash
-npm run dev
-```
+# Run tests
+npm test
 
-This starts a local development server at `http://localhost:8787`
+# Run tests in watch mode
+npm run test:watch
 
-### Testing
-
-```bash
-npm run test
-```
-
-### Type Checking
-
-```bash
+# Type checking
 npm run type-check
+
+# Linting
+npm run lint
+
+# Format code
+npm run format
 ```
 
-## API Reference
+## 📊 Monitoring
 
-### Cache Key Generation
+### Health Checks
+- `/api/health` - Application health status
+- Database connection monitoring
+- Redis connection status
+- S3 storage availability
 
-Cache keys are generated using this pattern:
-```
-{CACHE_VERSION}:{METHOD}:{PATHNAME}{SEARCH}
-```
+### Logging
+- Structured logging with Winston
+- Error tracking and monitoring
+- Performance metrics
+- Audit trail for sensitive operations
 
-Example: `v1:GET:/api/users?page=1&limit=10`
-
-### Response Headers
-
-| Header | Description | Values |
-|--------|-------------|---------|
-| `X-Cache-Status` | Cache hit/miss status | `HIT`, `MISS`, `ERROR` |
-| `X-Cache-TTL` | Cache TTL in seconds | `300` (default) |
-| `Cache-Control` | Browser cache control | `public, max-age=300, s-maxage=300` |
-
-## Deployment
-
-### Staging Environment
-
-```bash
-wrangler deploy --env staging
-```
-
-### Production Environment
-
-```bash
-wrangler deploy --env production
-```
-
-### Custom Domains
-
-Add custom domains in `wrangler.toml`:
-
-```toml
-[[env.production.routes]]
-pattern = "api.yourdomain.com/*"
-custom_domain = true
-```
-
-## Monitoring
-
-### Analytics
-
-Enable analytics in `wrangler.toml`:
-
-```toml
-[analytics]
-enabled = true
-```
-
-### Logs
-
-View logs in the Cloudflare dashboard or via CLI:
-
-```bash
-wrangler tail
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Cache not working**: Check that routes are properly configured
-2. **Wrong TTL**: Verify `CACHE_TTL` environment variable
-3. **JSON not cached**: Ensure response has `application/json` content-type
-
-### Debug Mode
-
-Enable debug logging by setting log level:
-
-```toml
-[log]
-level = "debug"
-```
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## License
+### Development Guidelines
 
-MIT License - see LICENSE file for details.
+- Follow the existing code style and conventions
+- Write tests for new features
+- Update documentation as needed
+- Ensure all TypeScript and ESLint checks pass
+- Follow semantic versioning for releases
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+For support and questions:
+
+- **Documentation**: Check the [DEPLOYMENT.md](DEPLOYMENT.md) guide
+- **Issues**: Open an issue on GitHub
+- **Email**: support@digiwize.com
+
+## 🏢 About Digiwize
+
+Digiwize is a technology company specializing in logistics and transportation management solutions. This PWA represents our commitment to modernizing traditional Windows-based logistics applications for the web.
+
+---
+
+**Built with ❤️ by the Digiwize team**

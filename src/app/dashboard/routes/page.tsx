@@ -1,7 +1,7 @@
 // src/app/dashboard/routes/page.tsx
 'use client';
 
-import { Route, MapPin, Clock, Truck, Navigation, Zap } from 'lucide-react';
+import { Clock, CloudLightning, MapPin, Navigation, Route, Truck } from 'lucide-react';
 
 export default function RoutesPage() {
   // Mock data - replace with actual data from your API
@@ -119,7 +119,7 @@ export default function RoutesPage() {
 
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
-            <Zap className="h-8 w-8 text-purple-600" />
+            <CloudLightning className="h-8 w-8 text-purple-600" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Avg Efficiency</p>
               <p className="text-2xl font-bold text-gray-900">
@@ -167,7 +167,7 @@ export default function RoutesPage() {
                       {route.vehicles} vehicles
                     </div>
                     <div className="flex items-center">
-                      <Zap className="h-4 w-4 mr-1" />
+                      <CloudLightning className="h-4 w-4 mr-1" />
                       <span className={getEfficiencyColor(route.efficiency)}>
                         {route.efficiency}% efficient
                       </span>

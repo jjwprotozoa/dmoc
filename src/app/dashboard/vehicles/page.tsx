@@ -1,7 +1,7 @@
 // src/app/dashboard/vehicles/page.tsx
 'use client';
 
-import { Car, MapPin, Clock, Fuel, Wrench } from 'lucide-react';
+import { Car, Clock, Fuel, MapPin, Wrench } from 'lucide-react';
 
 export default function VehiclesPage() {
   // Mock data - replace with actual data from your API
@@ -58,9 +58,18 @@ export default function VehiclesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Fleet Management</h1>
-          <p className="text-gray-600">Monitor and manage your vehicle fleet</p>
+        <div className="flex items-center space-x-3">
+          <Car className="w-8 h-8 text-amber-600" />
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Fleet Management</h1>
+            <p className="text-gray-600">Monitor and manage your vehicle fleet</p>
+          </div>
+          <a 
+            href="/dashboard/vehicles/card-view" 
+            className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors"
+          >
+            Try Card View
+          </a>
         </div>
         <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
           Add Vehicle

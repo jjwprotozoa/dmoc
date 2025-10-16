@@ -4,10 +4,32 @@
 import { Clock, FileText, MapPin, Truck } from 'lucide-react';
 import { trpc } from '../../../../lib/trpc';
 
+interface Manifest {
+  id: string;
+  title: string;
+  status: string;
+  scheduledAt: string;
+  createdAt: string;
+  company: {
+    id: string;
+    name: string;
+  };
+  stops: Array<{
+    id: string;
+    order: number;
+    location: string;
+    arrivedAt: string | null;
+    departedAt: string | null;
+    createdAt: string;
+    updatedAt: string;
+    manifestId: string;
+  }>;
+}
+
 export default function ActiveManifestsPage() {
   const { data: manifests, isLoading } = trpc.manifest.getAll.useQuery({});
 
-  const activeManifests = manifests?.filter((manifest: any) => 
+  const activeManifests = manifests?.filter((manifest: Manifest) => 
     manifest.status === 'IN_PROGRESS'
   ) || [];
 
@@ -43,7 +65,7 @@ export default function ActiveManifestsPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">In Transit</p>
               <p className="text-2xl font-bold text-gray-900">
-                {activeManifests.filter((m: any) => m.status === 'IN_PROGRESS').length}
+                {activeManifests.filter((m: Manifest) => m.status === 'IN_PROGRESS').length}
               </p>
             </div>
           </div>
@@ -93,7 +115,7 @@ export default function ActiveManifestsPage() {
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
-            {activeManifests.map((manifest: any) => (
+            {activeManifests.map((manifest: Manifest) => (
               <div key={manifest.id} className="p-6 hover:bg-gray-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">

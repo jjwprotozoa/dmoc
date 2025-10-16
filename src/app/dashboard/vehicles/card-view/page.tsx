@@ -1,0 +1,1159 @@
+// src/app/dashboard/vehicles/card-view/page.tsx
+'use client';
+
+import {
+    Activity,
+    AlertTriangle,
+    BookOpen,
+    Calendar,
+    Car,
+    Edit,
+    Eye,
+    Fuel,
+    Gauge,
+    Link,
+    MapPin,
+    MoreHorizontal,
+    Plus,
+    RefreshCw,
+    Search,
+    Truck,
+    Unlink,
+    Wrench
+} from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '../../../../components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '../../../../components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '../../../../components/ui/dropdown-menu';
+
+interface Vehicle {
+  vehicleId: number;
+  vehicleTypeId: number;
+  entityTypeDescription: string;
+  registration: string;
+  color?: string;
+  countryOfOrigin: string;
+  dateTimeAdded: string;
+  id: number;
+  displayValue: string;
+  // Additional fields for enhanced functionality
+  lastFuelEntry?: {
+    date: string;
+    amount: number;
+    cost: number;
+    driver: string;
+    odometerReading: number;
+  };
+  mileage?: number;
+  lastServiceDate?: string;
+  nextServiceDue?: string;
+  status?: 'Active' | 'In Transit' | 'Maintenance' | 'Out of Service';
+  currentDriver?: string;
+  location?: string;
+  lastSeen?: string;
+  // Combination tracking
+  attachedTrailers?: number[];
+  attachedToHorse?: number;
+}
+
+interface VehicleCombination {
+  id: string;
+  horse: Vehicle;
+  trailers: Vehicle[];
+  driver: string;
+  status: 'Active' | 'In Transit' | 'Loading' | 'Unloading';
+  startDate: string;
+  cargo?: string;
+  route?: string;
+}
+
+// Mock data based on the desktop application screenshot
+const mockVehicles: Vehicle[] = [
+  {
+    vehicleId: 4319,
+    vehicleTypeId: 8,
+    entityTypeDescription: 'HORSE',
+    registration: '0 (TBA)',
+    color: '',
+    countryOfOrigin: 'UNKNOWN',
+    dateTimeAdded: '12/6/2022 4:32 PM',
+    id: 4319,
+    displayValue: '0 (TBA)',
+    lastFuelEntry: {
+      date: '2024-03-15',
+      amount: 85,
+      cost: 1275,
+      driver: 'John Doe',
+      odometerReading: 125000
+    },
+    mileage: 125000,
+    lastServiceDate: '2024-01-15',
+    nextServiceDue: '2024-04-15',
+    status: 'Active',
+    currentDriver: 'John Doe',
+    location: 'Johannesburg, SA',
+    lastSeen: '2 minutes ago'
+  },
+  {
+    vehicleId: 23483,
+    vehicleTypeId: 8,
+    entityTypeDescription: 'HORSE',
+    registration: '0057AA21 (DRC)',
+    color: '',
+    countryOfOrigin: 'CONGO (DRC)',
+    dateTimeAdded: '3/1/2024 12:30 PM',
+    id: 23483,
+    displayValue: '0057AA21 (DRC)',
+    lastFuelEntry: {
+      date: '2024-03-12',
+      amount: 95,
+      cost: 1425,
+      driver: 'Jane Smith',
+      odometerReading: 89000
+    },
+    mileage: 89000,
+    lastServiceDate: '2024-02-10',
+    nextServiceDue: '2024-05-10',
+    status: 'In Transit',
+    currentDriver: 'Jane Smith',
+    location: 'Cape Town, SA',
+    lastSeen: '5 minutes ago'
+  },
+  {
+    vehicleId: 23007,
+    vehicleTypeId: 10,
+    entityTypeDescription: 'TRAILER',
+    registration: '0193AE10 (DRC)',
+    color: '',
+    countryOfOrigin: 'CONGO (DRC)',
+    dateTimeAdded: '2/15/2024 10:26 PM',
+    id: 23007,
+    displayValue: '0193AE10 (DRC)',
+    // Trailers don't have fuel entries
+    mileage: 67000,
+    lastServiceDate: '2024-01-20',
+    nextServiceDue: '2024-04-20',
+    status: 'Active',
+    currentDriver: 'Mike Johnson',
+    location: 'Durban, SA',
+    lastSeen: '1 hour ago'
+  },
+  {
+    vehicleId: 15298,
+    vehicleTypeId: 8,
+    entityTypeDescription: 'HORSE',
+    registration: '0249AB14 (TBA)',
+    color: '',
+    countryOfOrigin: 'UNKNOWN',
+    dateTimeAdded: '8/24/2023 11:25 AM',
+    id: 15298,
+    displayValue: '0249AB14 (TBA)',
+    lastFuelEntry: {
+      date: '2024-03-10',
+      amount: 78,
+      cost: 1170,
+      driver: 'Sarah Wilson',
+      odometerReading: 145000
+    },
+    mileage: 145000,
+    lastServiceDate: '2024-02-05',
+    nextServiceDue: '2024-05-05',
+    status: 'Maintenance',
+    currentDriver: 'Sarah Wilson',
+    location: 'Pretoria, SA',
+    lastSeen: '3 hours ago'
+  },
+  {
+    vehicleId: 21873,
+    vehicleTypeId: 8,
+    entityTypeDescription: 'HORSE',
+    registration: '0360AQ05 (DRC)',
+    color: '',
+    countryOfOrigin: 'CONGO (DRC)',
+    dateTimeAdded: '1/20/2024 1:10 AM',
+    id: 21873,
+    displayValue: '0360AQ05 (DRC)',
+    lastFuelEntry: {
+      date: '2024-03-08',
+      amount: 88,
+      cost: 1320,
+      driver: 'David Brown',
+      odometerReading: 98000
+    },
+    mileage: 98000,
+    lastServiceDate: '2024-01-30',
+    nextServiceDue: '2024-04-30',
+    status: 'Active',
+    currentDriver: 'David Brown',
+    location: 'Port Elizabeth, SA',
+    lastSeen: '10 minutes ago'
+  },
+  {
+    vehicleId: 22962,
+    vehicleTypeId: 10,
+    entityTypeDescription: 'TRAILER',
+    registration: '0362AQ05 (DRC)',
+    color: '',
+    countryOfOrigin: 'CONGO (DRC)',
+    dateTimeAdded: '2/13/2024 11:33 PM',
+    id: 22962,
+    displayValue: '0362AQ05 (DRC)',
+    // Trailers don't have fuel entries
+    mileage: 45000,
+    lastServiceDate: '2024-02-15',
+    nextServiceDue: '2024-05-15',
+    status: 'Active',
+    currentDriver: 'Lisa Anderson',
+    location: 'Bloemfontein, SA',
+    lastSeen: '30 minutes ago'
+  },
+  {
+    vehicleId: 23056,
+    vehicleTypeId: 8,
+    entityTypeDescription: 'HORSE',
+    registration: '0365AQ05 (DRC)',
+    color: '',
+    countryOfOrigin: 'CONGO (DRC)',
+    dateTimeAdded: '2/16/2024 5:34 PM',
+    id: 23056,
+    displayValue: '0365AQ05 (DRC)',
+    lastFuelEntry: {
+      date: '2024-03-05',
+      amount: 92,
+      cost: 1380,
+      driver: 'Robert Taylor',
+      odometerReading: 112000
+    },
+    mileage: 112000,
+    lastServiceDate: '2024-01-25',
+    nextServiceDue: '2024-04-25',
+    status: 'In Transit',
+    currentDriver: 'Robert Taylor',
+    location: 'East London, SA',
+    lastSeen: '15 minutes ago'
+  },
+  {
+    vehicleId: 29056,
+    vehicleTypeId: 8,
+    entityTypeDescription: 'HORSE',
+    registration: '0777AS01 (ZB)',
+    color: '',
+    countryOfOrigin: 'ZIMBABWE',
+    dateTimeAdded: '7/30/2024 3:25 PM',
+    id: 29056,
+    displayValue: '0777AS01 (ZB)',
+    lastFuelEntry: {
+      date: '2024-03-14',
+      amount: 76,
+      cost: 1140,
+      driver: 'Emma Davis',
+      odometerReading: 76000
+    },
+    mileage: 76000,
+    lastServiceDate: '2024-02-20',
+    nextServiceDue: '2024-05-20',
+    status: 'Active',
+    currentDriver: 'Emma Davis',
+    location: 'Nelspruit, SA',
+    lastSeen: '5 minutes ago'
+  }
+];
+
+// Mock combinations - active horse-trailer pairs
+const mockCombinations: VehicleCombination[] = [
+  {
+    id: 'combo-1',
+    horse: mockVehicles[0], // 4319 - 0 (TBA)
+    trailers: [mockVehicles[2]], // 23007 - 0193AE10 (DRC)
+    driver: 'John Doe',
+    status: 'In Transit',
+    startDate: '2024-03-15',
+    cargo: 'Copper Ore',
+    route: 'Johannesburg → Cape Town'
+  },
+  {
+    id: 'combo-2',
+    horse: mockVehicles[1], // 23483 - 0057AA21 (DRC)
+    trailers: [mockVehicles[5], mockVehicles[6]], // Two trailers
+    driver: 'Jane Smith',
+    status: 'Loading',
+    startDate: '2024-03-16',
+    cargo: 'Agricultural Products',
+    route: 'Cape Town → Durban'
+  },
+  {
+    id: 'combo-3',
+    horse: mockVehicles[4], // 21873 - 0360AQ05 (DRC)
+    trailers: [mockVehicles[3]], // 15298 - 0249AB14 (TBA)
+    driver: 'David Brown',
+    status: 'Active',
+    startDate: '2024-03-14',
+    cargo: 'General Freight',
+    route: 'Port Elizabeth → Bloemfontein'
+  }
+];
+
+export default function VehiclesCardViewPage() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedVehicles, setSelectedVehicles] = useState<number[]>([]);
+  const [vehicles] = useState<Vehicle[]>(mockVehicles);
+  const [combinations] = useState<VehicleCombination[]>(mockCombinations);
+  const [activeTab, setActiveTab] = useState<'horses' | 'trailers' | 'combinations'>('horses');
+  const [showLogbookDialog, setShowLogbookDialog] = useState(false);
+  const [logbookVehicle, setLogbookVehicle] = useState<Vehicle | null>(null);
+  const [showFuelEntryDialog, setShowFuelEntryDialog] = useState(false);
+  const [fuelEntryVehicle, setFuelEntryVehicle] = useState<Vehicle | null>(null);
+
+  const filteredVehicles = vehicles.filter(vehicle => {
+    const matchesSearch = vehicle.registration.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      vehicle.countryOfOrigin.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      vehicle.entityTypeDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      vehicle.currentDriver?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      vehicle.location?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Filter by tab
+    if (activeTab === 'horses') return matchesSearch && vehicle.entityTypeDescription === 'HORSE';
+    if (activeTab === 'trailers') return matchesSearch && vehicle.entityTypeDescription === 'TRAILER';
+    return matchesSearch;
+  });
+
+  const filteredCombinations = combinations.filter(combo => {
+    const matchesSearch = combo.horse.registration.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      combo.driver.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      combo.cargo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      combo.route?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      combo.trailers.some(trailer => trailer.registration.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    return activeTab === 'combinations' && matchesSearch;
+  });
+
+  const handleSelectVehicle = (vehicleId: number) => {
+    setSelectedVehicles(prev =>
+      prev.includes(vehicleId)
+        ? prev.filter(id => id !== vehicleId)
+        : [...prev, vehicleId]
+    );
+  };
+
+
+  const handleVehicleAction = (action: string, vehicle: Vehicle) => {
+    console.log(`${action} action for vehicle:`, vehicle.registration);
+    // TODO: Implement actual action handlers
+    switch (action) {
+      case 'add':
+        // Open add vehicle dialog
+        break;
+      case 'edit':
+        // Open edit vehicle dialog
+        break;
+      case 'view-logbook':
+        setLogbookVehicle(vehicle);
+        setShowLogbookDialog(true);
+        break;
+      case 'add-fuel-entry':
+        setFuelEntryVehicle(vehicle);
+        setShowFuelEntryDialog(true);
+        break;
+      case 'schedule-service':
+        // Open service scheduling dialog
+        break;
+      case 'track':
+        // Open tracking interface
+        break;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getCountryFlag = (country: string) => {
+    const flags: { [key: string]: string } = {
+      'CONGO (DRC)': '🇨🇩',
+      'ZIMBABWE': '🇿🇼',
+      'ZAMBIA': '🇿🇲',
+      'TANZANIA': '🇹🇿',
+      'UNKNOWN': '❓'
+    };
+    return flags[country] || '🌍';
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Active':
+        return 'bg-green-100 text-green-800';
+      case 'In Transit':
+        return 'bg-blue-100 text-blue-800';
+      case 'Maintenance':
+        return 'bg-red-100 text-red-800';
+      case 'Out of Service':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getDaysSinceLastFuel = (lastFuelDate: string) => {
+    const lastFuel = new Date(lastFuelDate);
+    const today = new Date();
+    const diffTime = Math.abs(today.getTime() - lastFuel.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const getFuelStatusColor = (daysSinceFuel: number) => {
+    if (daysSinceFuel > 7) return 'text-red-500';
+    if (daysSinceFuel > 3) return 'text-orange-500';
+    return 'text-green-500';
+  };
+
+  const isServiceDue = (nextServiceDate: string) => {
+    const serviceDate = new Date(nextServiceDate);
+    const today = new Date();
+    const daysUntilService = Math.ceil((serviceDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    return daysUntilService <= 30; // Service due within 30 days
+  };
+
+  return (
+    <div className="p-6">
+      <div className="mb-8">
+        <div className="flex items-center space-x-3 mb-2">
+          <Car className="w-8 h-8 text-amber-600" />
+          <h1 className="text-3xl font-bold text-gray-900">Vehicles (Card View)</h1>
+          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Enhanced</span>
+          <a 
+            href="/dashboard/vehicles" 
+            className="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors"
+          >
+            Back to Table View
+          </a>
+        </div>
+        <p className="text-gray-600">Fleet management with fuel monitoring and vehicle logbook</p>
+        
+        {/* Tab Navigation */}
+        <div className="mt-6 border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('horses')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'horses'
+                  ? 'border-amber-500 text-amber-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Truck className="w-4 h-4" />
+                <span>Horses ({vehicles.filter(v => v.entityTypeDescription === 'HORSE').length})</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('trailers')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'trailers'
+                  ? 'border-amber-500 text-amber-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Car className="w-4 h-4" />
+                <span>Trailers ({vehicles.filter(v => v.entityTypeDescription === 'TRAILER').length})</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setActiveTab('combinations')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'combinations'
+                  ? 'border-amber-500 text-amber-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <Link className="w-4 h-4" />
+                <span>Combinations ({combinations.length})</span>
+              </div>
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      {/* Search and Actions */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search vehicles..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent w-64"
+              />
+            </div>
+            <button className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+              Clear
+            </button>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button 
+              onClick={() => handleVehicleAction('add', {} as Vehicle)}
+              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Vehicle</span>
+            </button>
+            <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2">
+              <RefreshCw className="w-4 h-4" />
+              <span>Refresh</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Results Summary */}
+        <div className="text-sm text-gray-600">
+          {activeTab === 'combinations' ? (
+            <>
+              Showing {filteredCombinations.length} of {combinations.length} combinations
+              {selectedVehicles.length > 0 && (
+                <span className="ml-2 text-amber-600">
+                  • {selectedVehicles.length} selected
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              Showing {filteredVehicles.length} of {vehicles.filter(v => 
+                activeTab === 'horses' ? v.entityTypeDescription === 'HORSE' : 
+                activeTab === 'trailers' ? v.entityTypeDescription === 'TRAILER' : true
+              ).length} {activeTab}
+              {selectedVehicles.length > 0 && (
+                <span className="ml-2 text-amber-600">
+                  • {selectedVehicles.length} selected
+                </span>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Content based on active tab */}
+      {activeTab === 'combinations' ? (
+        /* Combinations Cards Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {filteredCombinations.map((combo) => (
+            <div 
+              key={combo.id}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <Link className="w-5 h-5 text-amber-600" />
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-lg">
+                      {combo.horse.registration}
+                    </h3>
+                    <p className="text-sm text-gray-500">+ {combo.trailers.length} trailer(s)</p>
+                  </div>
+                </div>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(combo.status)}`}>
+                  {combo.status}
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Driver:</span>
+                  <span className="text-gray-900 font-medium">{combo.driver}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Cargo:</span>
+                  <span className="text-gray-900">{combo.cargo || 'General'}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Route:</span>
+                  <span className="text-gray-900">{combo.route || 'TBD'}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-500">Started:</span>
+                  <span className="text-gray-900">{formatDate(combo.startDate)}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-700">Trailers:</h4>
+                  <div className="space-y-1">
+                    {combo.trailers.map((trailer) => (
+                      <div key={trailer.id} className="flex items-center space-x-2 text-sm">
+                        <Car className="w-3 h-3 text-gray-400" />
+                        <span className="text-gray-900">{trailer.registration}</span>
+                        <span className="text-gray-500">({trailer.countryOfOrigin})</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" size="sm">
+                    <Eye className="w-3 h-3 mr-1" />
+                    View Details
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Unlink className="w-3 h-3 mr-1" />
+                    Disconnect
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        /* Vehicles Cards Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
+          {filteredVehicles.map((vehicle) => (
+          <div 
+            key={vehicle.id}
+            className={`bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow ${
+              selectedVehicles.includes(vehicle.id) ? 'ring-2 ring-amber-500 bg-amber-50' : ''
+            }`}
+          >
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={selectedVehicles.includes(vehicle.id)}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    handleSelectVehicle(vehicle.id);
+                  }}
+                  className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                />
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg">{getCountryFlag(vehicle.countryOfOrigin)}</span>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-sm leading-tight">
+                      {vehicle.registration}
+                    </h3>
+                    <p className="text-xs text-gray-500">{vehicle.entityTypeDescription}</p>
+                  </div>
+                </div>
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    className="h-6 w-6 p-0"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoreHorizontal className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>Vehicle Actions</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleVehicleAction('edit', vehicle)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Vehicle
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleVehicleAction('view-logbook', vehicle)}>
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    View Logbook
+                  </DropdownMenuItem>
+                  {vehicle.entityTypeDescription === 'HORSE' && (
+                    <DropdownMenuItem onClick={() => handleVehicleAction('add-fuel-entry', vehicle)}>
+                      <Fuel className="mr-2 h-4 w-4" />
+                      Add Fuel Entry
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleVehicleAction('schedule-service', vehicle)}>
+                    <Wrench className="mr-2 h-4 w-4" />
+                    Schedule Service
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleVehicleAction('track', vehicle)}>
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Track Vehicle
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="space-y-2">
+              {/* Status */}
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500">Status:</span>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(vehicle.status || 'Active')}`}>
+                  {vehicle.status || 'Active'}
+                </span>
+              </div>
+
+              {/* Last Fuel Entry */}
+              {vehicle.entityTypeDescription === 'HORSE' && vehicle.lastFuelEntry && (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-gray-500">Last Refuel:</span>
+                  <div className="flex items-center space-x-1">
+                    <Fuel className={`w-3 h-3 ${getFuelStatusColor(getDaysSinceLastFuel(vehicle.lastFuelEntry.date))}`} />
+                    <span className={`font-medium ${getFuelStatusColor(getDaysSinceLastFuel(vehicle.lastFuelEntry.date))}`}>
+                      {getDaysSinceLastFuel(vehicle.lastFuelEntry.date)}d ago
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Mileage */}
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500">Mileage:</span>
+                <span className="text-gray-900 font-mono">
+                  {(vehicle.mileage || 0).toLocaleString()} km
+                </span>
+              </div>
+
+              {/* Current Driver */}
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500">Driver:</span>
+                <span className="text-gray-900 truncate max-w-24">
+                  {vehicle.currentDriver || 'Unassigned'}
+                </span>
+              </div>
+
+              {/* Location */}
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500">Location:</span>
+                <span className="text-gray-900 truncate max-w-24">
+                  {vehicle.location || 'Unknown'}
+                </span>
+              </div>
+
+              {/* Service Due Warning */}
+              {vehicle.nextServiceDue && isServiceDue(vehicle.nextServiceDue) && (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-red-500">Service Due:</span>
+                  <div className="flex items-center space-x-1">
+                    <AlertTriangle className="w-3 h-3 text-red-500" />
+                    <span className="text-red-500 font-medium">
+                      {new Date(vehicle.nextServiceDue).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-gray-500">
+                  Added {formatDate(vehicle.dateTimeAdded)}
+                </span>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-6 px-2 text-xs"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      View Details
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center space-x-2">
+                        <span className="text-2xl">{getCountryFlag(vehicle.countryOfOrigin)}</span>
+                        <span>{vehicle.registration}</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(vehicle.status || 'Active')}`}>
+                          {vehicle.status || 'Active'}
+                        </span>
+                      </DialogTitle>
+                      <DialogDescription>
+                        Complete vehicle information and maintenance details
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                      {/* Vehicle Photo Section */}
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-gray-900">Vehicle Photo</h3>
+                        <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                          <div className="text-center">
+                            {vehicle.entityTypeDescription === 'HORSE' ? (
+                              <Truck className="w-16 h-16 text-gray-400 mx-auto mb-2" />
+                            ) : (
+                              <Car className="w-16 h-16 text-gray-400 mx-auto mb-2" />
+                            )}
+                            <p className="text-sm text-gray-600">Photo Available</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Vehicle Details */}
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-gray-900">Vehicle Information</h3>
+                        <div className="space-y-3">
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">Registration</label>
+                            <p className="text-gray-900">{vehicle.registration}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">Vehicle Type</label>
+                            <p className="text-gray-900">{vehicle.entityTypeDescription}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">Country of Origin</label>
+                            <p className="text-gray-900">{vehicle.countryOfOrigin}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">Current Driver</label>
+                            <p className="text-gray-900">{vehicle.currentDriver || 'Unassigned'}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">Location</label>
+                            <p className="text-gray-900">{vehicle.location || 'Unknown'}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">Last Seen</label>
+                            <p className="text-gray-900">{vehicle.lastSeen || 'Unknown'}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">Date Added</label>
+                            <p className="text-gray-900">{formatDate(vehicle.dateTimeAdded)}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">Vehicle ID</label>
+                            <p className="text-gray-900 font-mono text-sm">{vehicle.vehicleId}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Maintenance and Performance Section */}
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <h3 className="font-semibold text-gray-900 mb-4">Maintenance & Performance</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Fuel className="w-4 h-4 text-blue-600" />
+                            <span className="text-sm font-medium text-gray-700">Last Refuel</span>
+                          </div>
+                          {vehicle.entityTypeDescription === 'HORSE' && vehicle.lastFuelEntry ? (
+                            <>
+                              <p className="text-lg font-bold text-gray-900">
+                                {vehicle.lastFuelEntry.amount}L
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {getDaysSinceLastFuel(vehicle.lastFuelEntry.date)} days ago
+                              </p>
+                            </>
+                          ) : (
+                            <p className="text-sm text-gray-500">N/A for trailers</p>
+                          )}
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Gauge className="w-4 h-4 text-green-600" />
+                            <span className="text-sm font-medium text-gray-700">Mileage</span>
+                          </div>
+                          <p className="text-2xl font-bold text-gray-900">
+                            {(vehicle.mileage || 0).toLocaleString()} km
+                          </p>
+                        </div>
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <Calendar className="w-4 h-4 text-orange-600" />
+                            <span className="text-sm font-medium text-gray-700">Next Service</span>
+                          </div>
+                          <p className="text-lg font-bold text-gray-900">
+                            {vehicle.nextServiceDue ? new Date(vehicle.nextServiceDue).toLocaleDateString() : 'Not scheduled'}
+                          </p>
+                          {vehicle.nextServiceDue && isServiceDue(vehicle.nextServiceDue) && (
+                            <p className="text-xs text-red-500">Service due soon!</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex justify-end space-x-2 mt-6 pt-6 border-t border-gray-200">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleVehicleAction('edit', vehicle)}
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit Vehicle
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleVehicleAction('view-logbook', vehicle)}
+                      >
+                        <BookOpen className="w-4 h-4 mr-2" />
+                        View Logbook
+                      </Button>
+                      <Button 
+                        onClick={() => handleVehicleAction('track', vehicle)}
+                      >
+                        <MapPin className="w-4 h-4 mr-2" />
+                        Track Vehicle
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+          </div>
+        ))}
+        </div>
+      )}
+
+      {/* Empty State */}
+      {(activeTab === 'combinations' ? filteredCombinations.length === 0 : filteredVehicles.length === 0) && (
+        <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
+          {activeTab === 'combinations' ? (
+            <>
+              <Link className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No combinations found</h3>
+              <p className="text-gray-500">
+                {searchQuery ? 'Try adjusting your search criteria' : 'No horse-trailer combinations are currently active'}
+              </p>
+            </>
+          ) : (
+            <>
+              <Car className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No {activeTab} found</h3>
+              <p className="text-gray-500">
+                {searchQuery ? 'Try adjusting your search criteria' : `No ${activeTab} have been added yet`}
+              </p>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Feature Cards */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <Fuel className="w-8 h-8 text-amber-600 mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Fuel Monitoring</h3>
+          <p className="text-gray-600 mb-4">Track fuel consumption and optimize efficiency</p>
+          <button className="text-amber-600 hover:text-amber-700 font-medium">
+            View Fuel Reports →
+          </button>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <BookOpen className="w-8 h-8 text-amber-600 mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Vehicle Logbook</h3>
+          <p className="text-gray-600 mb-4">Comprehensive maintenance and service history</p>
+          <button className="text-amber-600 hover:text-amber-700 font-medium">
+            Open Logbook →
+          </button>
+        </div>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <Activity className="w-8 h-8 text-amber-600 mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Performance Analytics</h3>
+          <p className="text-gray-600 mb-4">Monitor vehicle performance and efficiency metrics</p>
+          <button className="text-amber-600 hover:text-amber-700 font-medium">
+            View Analytics →
+          </button>
+        </div>
+      </div>
+
+      {/* Vehicle Logbook Dialog */}
+      {logbookVehicle && (
+        <Dialog open={showLogbookDialog} onOpenChange={setShowLogbookDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2">
+                <BookOpen className="w-6 h-6 text-amber-600" />
+                <span>Vehicle Logbook - {logbookVehicle.registration}</span>
+              </DialogTitle>
+              <DialogDescription>
+                Complete maintenance history and fuel consumption tracking
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              {/* Logbook Summary */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Fuel className="w-4 h-4 text-blue-600" />
+                    <span className="text-sm font-medium text-blue-700">Total Fuel Used</span>
+                  </div>
+                  <p className="text-2xl font-bold text-blue-900">2,450 L</p>
+                  <p className="text-xs text-blue-600">This month</p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Gauge className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-green-700">Average Efficiency</span>
+                  </div>
+                  <p className="text-2xl font-bold text-green-900">8.2 km/L</p>
+                  <p className="text-xs text-green-600">Last 30 days</p>
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Wrench className="w-4 h-4 text-orange-600" />
+                    <span className="text-sm font-medium text-orange-700">Services Completed</span>
+                  </div>
+                  <p className="text-2xl font-bold text-orange-900">12</p>
+                  <p className="text-xs text-orange-600">This year</p>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Calendar className="w-4 h-4 text-purple-600" />
+                    <span className="text-sm font-medium text-purple-700">Days Since Service</span>
+                  </div>
+                  <p className="text-2xl font-bold text-purple-900">45</p>
+                  <p className="text-xs text-purple-600">Last service</p>
+                </div>
+              </div>
+
+              {/* Recent Entries */}
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Logbook Entries</h3>
+                <div className="space-y-3">
+                  {[
+                    { date: '2024-03-15', type: 'Fuel Fill', amount: '85L', cost: 'R1,275', driver: 'John Doe' },
+                    { date: '2024-03-10', type: 'Maintenance', amount: 'Oil Change', cost: 'R450', driver: 'Service Center' },
+                    { date: '2024-03-08', type: 'Fuel Fill', amount: '92L', cost: 'R1,380', driver: 'Jane Smith' },
+                    { date: '2024-03-05', type: 'Inspection', amount: 'Annual', cost: 'R300', driver: 'Inspector' },
+                    { date: '2024-03-01', type: 'Fuel Fill', amount: '78L', cost: 'R1,170', driver: 'Mike Johnson' }
+                  ].map((entry, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                        <span className="text-sm font-medium text-gray-900">{entry.date}</span>
+                        <span className="text-sm text-gray-600">{entry.type}</span>
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm text-gray-600">
+                        <span>{entry.amount}</span>
+                        <span className="font-medium">{entry.cost}</span>
+                        <span>{entry.driver}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-2 mt-6 pt-6 border-t border-gray-200">
+              <Button variant="outline" onClick={() => setShowLogbookDialog(false)}>
+                Close
+              </Button>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Entry
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Fuel Entry Dialog */}
+      {fuelEntryVehicle && (
+        <Dialog open={showFuelEntryDialog} onOpenChange={setShowFuelEntryDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2">
+                <Fuel className="w-6 h-6 text-amber-600" />
+                <span>Add Fuel Entry - {fuelEntryVehicle.registration}</span>
+              </DialogTitle>
+              <DialogDescription>
+                Record a new fuel refill for this vehicle
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fuel Amount (L)</label>
+                  <input
+                    type="number"
+                    placeholder="85"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Cost (R)</label>
+                  <input
+                    type="number"
+                    placeholder="1275"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Odometer Reading (km)</label>
+                <input
+                  type="number"
+                  placeholder="125000"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Driver</label>
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <input
+                  type="text"
+                  placeholder="Johannesburg, SA"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <input
+                  type="date"
+                  defaultValue={new Date().toISOString().split('T')[0]}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-2 mt-6 pt-6 border-t border-gray-200">
+              <Button variant="outline" onClick={() => setShowFuelEntryDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                console.log('Fuel entry added for', fuelEntryVehicle.registration);
+                setShowFuelEntryDialog(false);
+              }}>
+                <Fuel className="w-4 h-4 mr-2" />
+                Add Entry
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
+}

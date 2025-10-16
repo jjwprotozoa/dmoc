@@ -7,7 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
+### Fixed
+- **TypeScript Build Errors** - Resolved all unused variable errors in dashboard components
+- **ESLint Compliance** - Fixed unescaped entities and explicit any types throughout codebase
+- **Production Build** - Eliminated all compilation errors preventing production deployment
+- **Code Quality** - Removed unused state variables and onClick handlers in card view components
+- **Type Safety** - Added proper Manifest interface with company and createdAt properties
+- **Component Cleanup** - Removed unused selectedClient, selectedDriver, selectedVehicle state variables
+- **Handler Cleanup** - Removed unused handleSelectAll functions from card view components
+- **Index Parameter** - Fixed unused index parameter in vehicle combinations mapping
+- **Entity Escaping** - Fixed unescaped apostrophe in call dialog component
+- **Type Definitions** - Replaced explicit any types with proper Manifest interface in active manifests page
+
+### Changed
+- **Build Process** - Streamlined build process with proper error handling and validation
+- **Code Standards** - Enhanced code quality standards with stricter TypeScript and ESLint rules
+- **Production Readiness** - Improved production deployment readiness with comprehensive error fixes
+- **Vehicles Card View with Tabbed Interface** - Comprehensive fleet management with Horses, Trailers, and Combinations tabs
+- **Manual Fuel Monitoring System** - Realistic fuel entry logging with driver input for refuel tracking
+- **Horse-Trailer Combination Management** - Track active combinations with multiple trailers per horse
+- **Vehicle Logbook System** - Complete maintenance and fuel consumption history tracking
+- **Multi-Trailer Support** - Support for road trains with multiple trailers attached to one horse
+- **Fuel Entry Dialog** - Manual fuel logging form with amount, cost, odometer, driver, location, and date
+- **Combination Status Tracking** - Active, In Transit, Loading, Unloading status for horse-trailer pairs
+- **Cargo and Route Management** - Track what each combination is carrying and where it's going
+- **Service Due Alerts** - Visual warnings for upcoming maintenance with color-coded status indicators
+- **Days Since Last Fuel Tracking** - Smart fuel status with green/orange/red indicators based on refuel frequency
+- **Tab-Based Vehicle Filtering** - Separate views for Horses (trucks), Trailers, and active Combinations
+- **Enhanced Vehicle Details Modal** - Comprehensive vehicle information with maintenance history
+- **Disconnect Combination Functionality** - Break up horse-trailer combinations when needed
+- **Context-Aware Empty States** - Different messages and icons for each tab when no vehicles found
+- **Individual Card Authentication** - Each driver card requires separate authentication for unlocking sensitive data
+- **Call Dialog Component** - Professional modal for phone call confirmation with privacy controls
+- **Per-Card Privacy State** - Independent lock/unlock state management for each driver card
+- **Enhanced Phone Calling** - Click-to-call functionality with masked number display for privacy protection
+- **POPIA-Compliant Privacy Controls** - Comprehensive data protection system for sensitive driver information
+- **Role-Based Access Control** - Admin/Manager roles with full access, Operator/Viewer roles with masked data
+- **Data Masking System** - ID numbers and contact details masked for unauthorized users (e.g., TAE***089, 255***0307)
+- **Authentication Dialog** - Password-protected access to sensitive driver details with audit trail
+- **Click-to-Dial Functionality** - Direct phone dialing for authorized users with proper privacy controls
+- **Driver Card View (A/B Test)** - Mobile-optimized card layout with progressive disclosure of information
+- **Driver Details Modal** - Comprehensive modal with full driver information and privacy-controlled actions
+- **Privacy Notice Banner** - Real-time display of user role and data access level
+- **shadcn/ui Component Library** - Professional UI components (Button, DropdownMenu, Dialog, Input, Label)
 - **Modernized Navigation System** - Complete redesign with steampunk/industrial theme
 - **Responsive Sidebar Navigation** - Collapsible desktop sidebar with all 19 navigation categories
 - **Mobile Bottom Navigation** - Touch-friendly bottom nav with expandable "More" menu
@@ -27,6 +69,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time activity feed with Socket.IO connection status indicator
 
 ### Changed
+- **Vehicle Management Architecture** - Replaced single vehicle list with tabbed interface for better fleet organization
+- **Fuel Monitoring Approach** - Changed from automatic fuel level monitoring to manual refuel entry system
+- **Vehicle Data Structure** - Enhanced with combination tracking, fuel entries, and maintenance scheduling
+- **Fleet Organization** - Separated Horses (prime movers) and Trailers for specialized management
+- **Search Functionality** - Enhanced to work across all tabs with appropriate context filtering
+- **Authentication Flow** - Removed global authentication state, now requires individual authentication per driver card
+- **Phone Calling Behavior** - Phone calls now show masked numbers in call dialog until individual card is authenticated
+- **Privacy Controls** - Enhanced per-card privacy state management with independent lock/unlock functionality
+- **Call Dialog UX** - Improved call confirmation modal with privacy notices and masked number display
+- **Driver Actions Layout** - Moved actions column to left side for better visibility and accessibility
+- **Driver Actions Organization** - Separated global actions (Add Driver) from driver-specific actions (Edit, Capture, Generate)
+- **Table vs Card View** - Created A/B test setup with easy navigation between traditional table and modern card layouts
+- **Privacy-First Design** - All sensitive data now properly masked with visual indicators for unauthorized users
+- **Mobile-First Approach** - Card view optimized for mobile devices with responsive grid layout
 - **Dashboard Layout Architecture** - Replaced basic DashboardNav with comprehensive MainNav system
 - **Navigation Component Structure** - Modularized navigation into SidebarNav, TopNav, and BottomNav components
 - **Theme Integration** - Updated all navigation components to support dynamic tenant theming
@@ -40,6 +96,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Socket.IO client configuration with improved transport settings and timeout handling
 
 ### Fixed
+- **Individual Card Authentication** - Fixed issue where authenticating one card would unlock all driver cards
+- **Phone Call Privacy** - Resolved phone number exposure in call dialogs for unauthorized users
+- **Lock Icon Behavior** - Corrected lock/unlock state management to be per-card instead of global
 - **CRITICAL**: Fixed Socket.IO connection error "Could not establish connection. Receiving end does not exist"
 - **Socket.IO Server Configuration** - Enhanced server setup with proper request handling and error management
 - **Socket.IO Client Connection** - Improved client configuration with robust reconnection logic and error handling
@@ -78,7 +137,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Socket.IO client connection stability and error handling
 
 ### Security
-- N/A
+- **Enhanced Per-Card Privacy** - Individual authentication required for each driver card, preventing bulk data exposure
+- **Call Dialog Privacy Protection** - Phone numbers remain masked in call dialogs until individual authentication
+- **Granular Access Control** - Each driver's sensitive data requires separate authentication for maximum security
+- **POPIA Compliance** - Implemented comprehensive data protection measures for personal information
+- **Sensitive Data Masking** - ID numbers and contact details automatically masked for unauthorized users
+- **Role-Based Data Access** - Strict access controls based on user roles (Admin/Manager vs Operator/Viewer)
+- **Authentication Required** - Password protection for accessing sensitive driver information
+- **Audit Trail** - All sensitive data access logged for compliance and security monitoring
+- **Privacy by Design** - Data masking applied by default with clear visual indicators
+- **Click-to-Dial Security** - Phone dialing functionality restricted to authorized users only
 
 ### Deprecated
 - N/A
