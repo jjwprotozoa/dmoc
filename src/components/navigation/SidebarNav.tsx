@@ -2,30 +2,30 @@
 'use client';
 
 import {
-  Archive,
-  Building2,
-  Car,
-  CarFront,
-  ChevronDown,
-  ChevronRight,
-  ClipboardList,
-  FileText,
-  Globe,
-  Heart,
-  MapPin,
-  Menu,
-  Monitor,
-  Navigation,
-  Phone,
-  Radar,
-  Receipt,
-  Route,
-  Settings,
-  Shield,
-  Truck,
-  User,
-  Users,
-  X,
+    Archive,
+    Building2,
+    Car,
+    CarFront,
+    ChevronDown,
+    ChevronRight,
+    ClipboardList,
+    FileText,
+    Globe,
+    Heart,
+    MapPin,
+    Menu,
+    Monitor,
+    Navigation,
+    Phone,
+    Radar,
+    Receipt,
+    Route,
+    Settings,
+    Shield,
+    Truck,
+    User,
+    Users,
+    X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -82,7 +82,7 @@ const navigationGroups: NavGroup[] = [
     id: 'fleet',
     label: 'Fleet Management',
     icon: CarFront,
-    defaultOpen: true,
+    defaultOpen: false,
     items: [
       {
         id: 'vehicles',
@@ -356,14 +356,8 @@ export function SidebarNav({ user }: SidebarNavProps) {
                   </button>
 
                   {/* Group Items */}
-                  {!isCollapsed && (
-                    <div
-                      className={`
-                      transition-all duration-300 ease-in-out
-                      ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
-                    `}
-                    >
-                      <div className="ml-4 space-y-1 pt-1">
+                  {!isCollapsed && isExpanded && (
+                    <div className="ml-4 space-y-1 pt-1">
                         {group.items.map((item, index) => {
                           const isActive = pathname === item.href;
                           const Icon = item.icon;
@@ -412,7 +406,6 @@ export function SidebarNav({ user }: SidebarNavProps) {
                             </Link>
                           );
                         })}
-                      </div>
                     </div>
                   )}
                 </div>

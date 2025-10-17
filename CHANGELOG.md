@@ -48,6 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Navigation Menu Collapse Issue** - Fixed Fleet Management and other navigation groups not collapsing properly (JUS-28)
 - **Database Connection Issues** - Resolved SQLite/MySQL configuration conflicts and connection errors
 - **TypeScript Router Errors** - Fixed all TypeScript errors in new tRPC routers including proper imports and context access
 - **Database Schema Validation** - Corrected Prisma schema relationships and field types for proper data integrity

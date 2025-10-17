@@ -4,9 +4,9 @@
   "description": "DMOC Web (PWA) - Multi-tenant logistics operations app",
   "private": true,
   "scripts": {
-    "dev": "npm run db:dev && node server.js",
+    "dev": "npm run db:dev && tsx server.js",
     "build": "npm run db:dev && prisma generate && next build",
-    "start": "NODE_ENV=production node server.js",
+    "start": "NODE_ENV=production tsx server.js",
     "vercel-build": "npm run db:dev && prisma generate && next build",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
