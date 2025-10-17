@@ -18,7 +18,7 @@ try {
   if (!fs.existsSync(targetDir)) {
     fs.mkdirSync(targetDir, { recursive: true });
   }
-  
+
   // Copy the file
   fs.copyFileSync(sourceFile, targetFile);
   console.log(`✅ Copied ${sourceFile} to ${targetFile}`);

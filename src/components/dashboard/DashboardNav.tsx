@@ -31,7 +31,7 @@ export function DashboardNav({ user }: DashboardNavProps) {
             <button className="p-2 text-gray-400 hover:text-gray-500">
               <Bell className="h-5 w-5" />
             </button>
-            
+
             <button className="p-2 text-gray-400 hover:text-gray-500">
               <Settings className="h-5 w-5" />
             </button>

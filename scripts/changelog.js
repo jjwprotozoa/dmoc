@@ -2,7 +2,7 @@
 
 /**
  * scripts/changelog.js
- * 
+ *
  * Automated changelog management script for DMOC Web (PWA)
  * Supports adding entries, version bumping, and git integration
  */
@@ -50,7 +50,11 @@ class ChangelogManager {
 
   writePackageJson(content) {
     try {
-      fs.writeFileSync(PACKAGE_JSON_PATH, JSON.stringify(content, null, 2) + '\n', 'utf8');
+      fs.writeFileSync(
+        PACKAGE_JSON_PATH,
+        JSON.stringify(content, null, 2) + '\n',
+        'utf8'
+      );
       console.log('✅ package.json updated successfully');
     } catch (error) {
       console.error('Error writing package.json:', error.message);
@@ -90,7 +94,7 @@ class ChangelogManager {
   addEntry(type, description, category = 'Added') {
     const entry = `- ${description}`;
     const unreleasedSection = '## [Unreleased]';
-    
+
     if (!this.changelogContent.includes(unreleasedSection)) {
       console.error('❌ [Unreleased] section not found in CHANGELOG.md');
       process.exit(1);
@@ -103,33 +107,33 @@ class ChangelogManager {
     );
 
     const match = categoryRegex.exec(this.changelogContent);
-    
+
     if (match) {
       // Category exists, add entry
       const beforeCategory = match[1];
       const categoryHeader = match[2];
       const categoryContent = match[3];
-      
+
       const newContent = this.changelogContent.replace(
         match[0],
         `${beforeCategory}${categoryHeader}${categoryContent}${entry}\n`
       );
-      
+
       this.writeChangelog(newContent);
     } else {
       // Category doesn't exist, create it
       const unreleasedRegex = /(## \[Unreleased\]\n)([\s\S]*?)(?=---)/;
       const unreleasedMatch = unreleasedRegex.exec(this.changelogContent);
-      
+
       if (unreleasedMatch) {
         const beforeUnreleased = unreleasedMatch[1];
         const unreleasedContent = unreleasedMatch[2];
-        
+
         const newContent = this.changelogContent.replace(
           unreleasedMatch[0],
           `${beforeUnreleased}${unreleasedContent}\n### ${category}\n${entry}\n`
         );
-        
+
         this.writeChangelog(newContent);
       }
     }
@@ -140,14 +144,14 @@ class ChangelogManager {
   createVersion(version, type = 'patch') {
     const newVersion = version || this.bumpVersion(type);
     const date = this.getCurrentDate();
-    
+
     // Update package.json version
     this.packageJson.version = newVersion;
     this.writePackageJson(this.packageJson);
 
     // Create new version section
     const versionSection = `## [${newVersion}] - ${date}\n\n### Added\n- N/A\n\n### Changed\n- N/A\n\n### Fixed\n- N/A\n\n### Security\n- N/A\n\n### Deprecated\n- N/A\n\n### Removed\n- N/A\n\n---\n\n`;
-    
+
     // Replace [Unreleased] with new version
     const unreleasedRegex = /## \[Unreleased\][\s\S]*?(?=---)/;
     const newContent = this.changelogContent.replace(
@@ -157,28 +161,29 @@ class ChangelogManager {
 
     // Add new [Unreleased] section
     const unreleasedSection = `## [Unreleased]\n\n### Added\n- N/A\n\n### Changed\n- N/A\n\n### Fixed\n- N/A\n\n### Security\n- N/A\n\n### Deprecated\n- N/A\n\n### Removed\n- N/A\n\n---\n\n`;
-    
+
     const finalContent = unreleasedSection + newContent;
     this.writeChangelog(finalContent);
 
     console.log(`✅ Created version ${newVersion} with date ${date}`);
-    
+
     // Update version history table
     this.updateVersionHistory(newVersion, date);
   }
 
   updateVersionHistory(version, date) {
-    const versionHistoryRegex = /(\| Version \| Date \| Description \|\n\|---------+\|------+\|-------------+\|\n)([\s\S]*?)(\n---)/;
+    const versionHistoryRegex =
+      /(\| Version \| Date \| Description \|\n\|---------+\|------+\|-------------+\|\n)([\s\S]*?)(\n---)/;
     const match = versionHistoryRegex.exec(this.changelogContent);
-    
+
     if (match) {
       const tableHeader = match[1];
       const existingEntries = match[2];
       const afterTable = match[3];
-      
+
       const newEntry = `| ${version} | ${date} | Version ${version} release |\n`;
       const newTable = tableHeader + newEntry + existingEntries + afterTable;
-      
+
       const newContent = this.changelogContent.replace(match[0], newTable);
       this.writeChangelog(newContent);
     }
@@ -186,10 +191,12 @@ class ChangelogManager {
 
   generateFromCommits(since = 'HEAD~10') {
     try {
-      const commits = execSync(`git log --oneline ${since}..HEAD`, { encoding: 'utf8' })
+      const commits = execSync(`git log --oneline ${since}..HEAD`, {
+        encoding: 'utf8',
+      })
         .trim()
         .split('\n')
-        .filter(line => line.trim());
+        .filter((line) => line.trim());
 
       if (commits.length === 0) {
         console.log('No new commits found');
@@ -197,7 +204,7 @@ class ChangelogManager {
       }
 
       console.log(`Found ${commits.length} commits since ${since}:`);
-      commits.forEach(commit => console.log(`  ${commit}`));
+      commits.forEach((commit) => console.log(`  ${commit}`));
 
       // Categorize commits
       const added = [];
@@ -205,7 +212,7 @@ class ChangelogManager {
       const fixed = [];
       const security = [];
 
-      commits.forEach(commit => {
+      commits.forEach((commit) => {
         const message = commit.toLowerCase();
         if (message.includes('fix') || message.includes('bug')) {
           fixed.push(commit);
@@ -219,10 +226,12 @@ class ChangelogManager {
       });
 
       // Add entries to changelog
-      added.forEach(commit => this.addEntry('feat', commit, 'Added'));
-      changed.forEach(commit => this.addEntry('change', commit, 'Changed'));
-      fixed.forEach(commit => this.addEntry('fix', commit, 'Fixed'));
-      security.forEach(commit => this.addEntry('security', commit, 'Security'));
+      added.forEach((commit) => this.addEntry('feat', commit, 'Added'));
+      changed.forEach((commit) => this.addEntry('change', commit, 'Changed'));
+      fixed.forEach((commit) => this.addEntry('fix', commit, 'Fixed'));
+      security.forEach((commit) =>
+        this.addEntry('security', commit, 'Security')
+      );
 
       console.log('✅ Generated changelog entries from git commits');
     } catch (error) {
@@ -240,9 +249,13 @@ function main() {
   switch (command) {
     case 'add':
       if (args.length < 3) {
-        console.log('Usage: npm run changelog:add <type> <description> [category]');
+        console.log(
+          'Usage: npm run changelog:add <type> <description> [category]'
+        );
         console.log('Types: feat, fix, change, security');
-        console.log('Categories: Added, Changed, Fixed, Security, Deprecated, Removed');
+        console.log(
+          'Categories: Added, Changed, Fixed, Security, Deprecated, Removed'
+        );
         process.exit(1);
       }
       const type = args[1];
@@ -270,14 +283,24 @@ function main() {
       console.log('DMOC Web Changelog Manager');
       console.log('');
       console.log('Usage:');
-      console.log('  npm run changelog:add <type> <description> [category]  - Add changelog entry');
-      console.log('  npm run changelog:version [type] [version]             - Create new version');
-      console.log('  npm run changelog:generate [since]                     - Generate from git commits');
-      console.log('  npm run changelog:current                              - Show current version');
+      console.log(
+        '  npm run changelog:add <type> <description> [category]  - Add changelog entry'
+      );
+      console.log(
+        '  npm run changelog:version [type] [version]             - Create new version'
+      );
+      console.log(
+        '  npm run changelog:generate [since]                     - Generate from git commits'
+      );
+      console.log(
+        '  npm run changelog:current                              - Show current version'
+      );
       console.log('');
       console.log('Examples:');
       console.log('  npm run changelog:add feat "Add real-time notifications"');
-      console.log('  npm run changelog:add fix "Fix manifest loading bug" Fixed');
+      console.log(
+        '  npm run changelog:add fix "Fix manifest loading bug" Fixed'
+      );
       console.log('  npm run changelog:version minor');
       console.log('  npm run changelog:generate HEAD~5');
       break;

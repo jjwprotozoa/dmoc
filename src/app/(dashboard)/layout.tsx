@@ -26,9 +26,7 @@ export default async function DashboardLayout({
 
   return (
     <MainNav user={session.user as User}>
-      <div className="p-6">
-        {children}
-      </div>
+      <div className="p-6">{children}</div>
     </MainNav>
   );
 }

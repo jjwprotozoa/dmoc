@@ -1,14 +1,14 @@
 // src/components/navigation/BottomNav.tsx
 'use client';
 
-import { 
-  FileText, 
-  Archive, 
-  Receipt, 
-  Users, 
-  Truck, 
-  User, 
-  Shield, 
+import {
+  FileText,
+  Archive,
+  Receipt,
+  Users,
+  Truck,
+  User,
+  Shield,
   Car,
   Route,
   MapPin,
@@ -17,7 +17,7 @@ import {
   Settings,
   Globe,
   Heart,
-  MoreHorizontal
+  MoreHorizontal,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -61,7 +61,7 @@ const primaryNavItems: NavItem[] = [
     label: 'More',
     href: '#',
     icon: MoreHorizontal,
-  }
+  },
 ];
 
 // Secondary navigation items (shown in expanded menu)
@@ -143,7 +143,7 @@ const secondaryNavItems: NavItem[] = [
     label: 'Health',
     href: '/dashboard/manifest-health',
     icon: Heart,
-  }
+  },
 ];
 
 export function BottomNav() {
@@ -163,7 +163,7 @@ export function BottomNav() {
           {primaryNavItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
-            
+
             if (item.id === 'more') {
               return (
                 <button
@@ -171,9 +171,10 @@ export function BottomNav() {
                   onClick={handleMoreClick}
                   className={`
                     flex flex-col items-center p-2 rounded-lg transition-all duration-200
-                    ${showMore 
-                      ? 'bg-amber-600 text-amber-100' 
-                      : 'text-amber-300 hover:text-amber-100 hover:bg-amber-700'
+                    ${
+                      showMore
+                        ? 'bg-amber-600 text-amber-100'
+                        : 'text-amber-300 hover:text-amber-100 hover:bg-amber-700'
                     }
                   `}
                 >
@@ -189,9 +190,10 @@ export function BottomNav() {
                 href={item.href}
                 className={`
                   flex flex-col items-center p-2 rounded-lg transition-all duration-200
-                  ${isActive 
-                    ? 'bg-amber-600 text-amber-100' 
-                    : 'text-amber-300 hover:text-amber-100 hover:bg-amber-700'
+                  ${
+                    isActive
+                      ? 'bg-amber-600 text-amber-100'
+                      : 'text-amber-300 hover:text-amber-100 hover:bg-amber-700'
                   }
                 `}
               >
@@ -214,7 +216,7 @@ export function BottomNav() {
               {secondaryNavItems.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
-                
+
                 return (
                   <Link
                     key={item.id}
@@ -222,9 +224,10 @@ export function BottomNav() {
                     onClick={() => setShowMore(false)}
                     className={`
                       flex flex-col items-center p-3 rounded-lg transition-all duration-200
-                      ${isActive 
-                        ? 'bg-amber-600 text-amber-100' 
-                        : 'text-amber-300 hover:text-amber-100 hover:bg-amber-700'
+                      ${
+                        isActive
+                          ? 'bg-amber-600 text-amber-100'
+                          : 'text-amber-300 hover:text-amber-100 hover:bg-amber-700'
                       }
                     `}
                   >
@@ -245,7 +248,7 @@ export function BottomNav() {
 
       {/* Overlay for more menu */}
       {showMore && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
           onClick={() => setShowMore(false)}
         />

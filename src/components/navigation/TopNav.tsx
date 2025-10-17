@@ -16,7 +16,11 @@ interface TopNavProps {
   showMenuButton?: boolean;
 }
 
-export function TopNav({ user, onMenuClick, showMenuButton = false }: TopNavProps) {
+export function TopNav({
+  user,
+  onMenuClick,
+  showMenuButton = false,
+}: TopNavProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -31,8 +35,18 @@ export function TopNav({ user, onMenuClick, showMenuButton = false }: TopNavProp
                 onClick={onMenuClick}
                 className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               </button>
             )}
@@ -77,8 +91,12 @@ export function TopNav({ user, onMenuClick, showMenuButton = false }: TopNavProp
                   <User className="h-4 w-4 text-white" />
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-gray-900">{user.email}</p>
-                  <p className="text-xs text-gray-500">{user.role} • {user.tenantSlug}</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {user.email}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {user.role} • {user.tenantSlug}
+                  </p>
                 </div>
               </button>
 
@@ -86,7 +104,9 @@ export function TopNav({ user, onMenuClick, showMenuButton = false }: TopNavProp
               {showUserMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
                   <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-sm font-medium text-gray-900">{user.email}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {user.email}
+                    </p>
                     <p className="text-xs text-gray-500">{user.role}</p>
                   </div>
                   <button

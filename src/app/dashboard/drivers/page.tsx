@@ -1,7 +1,21 @@
 // src/app/dashboard/drivers/page.tsx
 'use client';
 
-import { Camera, CheckCircle, Clock, CreditCard, Edit, FileText, MoreHorizontal, Plus, RefreshCw, Search, Shield, User, XCircle } from 'lucide-react';
+import {
+  Camera,
+  CheckCircle,
+  Clock,
+  CreditCard,
+  Edit,
+  FileText,
+  MoreHorizontal,
+  Plus,
+  RefreshCw,
+  Search,
+  Shield,
+  User,
+  XCircle,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../../../components/ui/button';
 import {
@@ -29,84 +43,84 @@ interface Driver {
 const mockDrivers: Driver[] = [
   {
     id: 21677,
-    name: "LONGINO TOLOT",
-    contactNr: "255755340307",
-    idNumber: "TAE719089",
+    name: 'LONGINO TOLOT',
+    contactNr: '255755340307',
+    idNumber: 'TAE719089',
     pictureLoaded: false,
-    countryOfOrigin: "TANZANIA",
-    dateTimeAdded: "6/22/2024 8:35 PM",
-    displayValue: "LONGINO TOLOT(TZ)"
+    countryOfOrigin: 'TANZANIA',
+    dateTimeAdded: '6/22/2024 8:35 PM',
+    displayValue: 'LONGINO TOLOT(TZ)',
   },
   {
     id: 19280,
-    name: "OMARY SAID OM",
-    contactNr: "0973143403",
-    idNumber: "1459820",
+    name: 'OMARY SAID OM',
+    contactNr: '0973143403',
+    idNumber: '1459820',
     pictureLoaded: false,
-    countryOfOrigin: "TANZANIA",
-    dateTimeAdded: "2/23/2024 6:08 AM",
-    displayValue: "OMARY SAID OM(TZ)"
+    countryOfOrigin: 'TANZANIA',
+    dateTimeAdded: '2/23/2024 6:08 AM',
+    displayValue: 'OMARY SAID OM(TZ)',
   },
   {
     id: 10797,
-    name: "SALANJE MWADI",
-    contactNr: "",
-    idNumber: "TAE049377",
+    name: 'SALANJE MWADI',
+    contactNr: '',
+    idNumber: 'TAE049377',
     pictureLoaded: false,
-    countryOfOrigin: "TANZANIA",
-    dateTimeAdded: "3/2/2023 1:58 PM",
-    displayValue: "SALANJE MWADI(TZ)"
+    countryOfOrigin: 'TANZANIA',
+    dateTimeAdded: '3/2/2023 1:58 PM',
+    displayValue: 'SALANJE MWADI(TZ)',
   },
   {
     id: 19579,
-    name: "ABDALLAH MOH",
-    contactNr: "250689078310",
-    idNumber: "TAE684555",
+    name: 'ABDALLAH MOH',
+    contactNr: '250689078310',
+    idNumber: 'TAE684555',
     pictureLoaded: true,
-    countryOfOrigin: "ZAMBIA",
-    dateTimeAdded: "3/9/2024 12:22 PM",
-    displayValue: "ABDALLAH MOH(ZM)"
+    countryOfOrigin: 'ZAMBIA',
+    dateTimeAdded: '3/9/2024 12:22 PM',
+    displayValue: 'ABDALLAH MOH(ZM)',
   },
   {
     id: 18432,
-    name: "JOHN DOE",
-    contactNr: "1234567890",
-    idNumber: "US123456",
+    name: 'JOHN DOE',
+    contactNr: '1234567890',
+    idNumber: 'US123456',
     pictureLoaded: true,
-    countryOfOrigin: "UNKNOWN",
-    dateTimeAdded: "1/15/2024 10:30 AM",
-    displayValue: "JOHN DOE(US)"
+    countryOfOrigin: 'UNKNOWN',
+    dateTimeAdded: '1/15/2024 10:30 AM',
+    displayValue: 'JOHN DOE(US)',
   },
   {
     id: 34751,
-    name: "DALE JONES MWANACHAMPA",
-    contactNr: "260977123456",
-    idNumber: "ZM123456",
+    name: 'DALE JONES MWANACHAMPA',
+    contactNr: '260977123456',
+    idNumber: 'ZM123456',
     pictureLoaded: false,
-    countryOfOrigin: "ZAMBIA",
-    dateTimeAdded: "1/20/2024 2:15 PM",
-    displayValue: "DALE JONES MWANACHAMPA(ZM)"
+    countryOfOrigin: 'ZAMBIA',
+    dateTimeAdded: '1/20/2024 2:15 PM',
+    displayValue: 'DALE JONES MWANACHAMPA(ZM)',
   },
   {
     id: 15532,
-    name: "DAMAS KASIAN MISUNZA",
-    contactNr: "255123456789",
-    idNumber: "TZ789012",
+    name: 'DAMAS KASIAN MISUNZA',
+    contactNr: '255123456789',
+    idNumber: 'TZ789012',
     pictureLoaded: true,
-    countryOfOrigin: "TANZANIA",
-    dateTimeAdded: "2/15/2024 9:30 AM",
-    displayValue: "DAMAS KASIAN MISUNZA(TZ)"
+    countryOfOrigin: 'TANZANIA',
+    dateTimeAdded: '2/15/2024 9:30 AM',
+    displayValue: 'DAMAS KASIAN MISUNZA(TZ)',
   },
   {
     id: 22362,
-    name: "DANIEL AMOS",
-    contactNr: "255987654321",
-    idNumber: "TZ345678",
+    name: 'DANIEL AMOS',
+    contactNr: '255987654321',
+    idNumber: 'TZ345678',
     pictureLoaded: false,
-    countryOfOrigin: "TANZANIA",
-    dateTimeAdded: "3/10/2024 4:45 PM",
-    displayValue: "DANIEL AMOS(TZ)"
-  }
+    countryOfOrigin: 'TANZANIA',
+    dateTimeAdded: '3/10/2024 4:45 PM',
+    displayValue: 'DANIEL AMOS(TZ)',
+  },
 ];
 
 export default function DriversPage() {
@@ -114,17 +128,18 @@ export default function DriversPage() {
   const [selectedDrivers, setSelectedDrivers] = useState<number[]>([]);
   const [drivers] = useState<Driver[]>(mockDrivers);
 
-  const filteredDrivers = drivers.filter(driver =>
-    driver.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    driver.contactNr.includes(searchQuery) ||
-    driver.idNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    driver.countryOfOrigin.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredDrivers = drivers.filter(
+    (driver) =>
+      driver.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      driver.contactNr.includes(searchQuery) ||
+      driver.idNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      driver.countryOfOrigin.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleSelectDriver = (driverId: number) => {
-    setSelectedDrivers(prev =>
+    setSelectedDrivers((prev) =>
       prev.includes(driverId)
-        ? prev.filter(id => id !== driverId)
+        ? prev.filter((id) => id !== driverId)
         : [...prev, driverId]
     );
   };
@@ -133,7 +148,7 @@ export default function DriversPage() {
     if (selectedDrivers.length === filteredDrivers.length) {
       setSelectedDrivers([]);
     } else {
-      setSelectedDrivers(filteredDrivers.map(driver => driver.id));
+      setSelectedDrivers(filteredDrivers.map((driver) => driver.id));
     }
   };
 
@@ -162,7 +177,7 @@ export default function DriversPage() {
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -172,14 +187,16 @@ export default function DriversPage() {
         <div className="flex items-center space-x-3 mb-2">
           <User className="w-8 h-8 text-amber-600" />
           <h1 className="text-3xl font-bold text-gray-900">Drivers</h1>
-          <a 
-            href="/dashboard/drivers/card-view" 
+          <a
+            href="/dashboard/drivers/card-view"
             className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors"
           >
             Try Card View
           </a>
         </div>
-        <p className="text-gray-600">Manage driver profiles, licenses, and performance</p>
+        <p className="text-gray-600">
+          Manage driver profiles, licenses, and performance
+        </p>
       </div>
 
       {/* Search and Actions */}
@@ -201,7 +218,7 @@ export default function DriversPage() {
             </button>
           </div>
           <div className="flex items-center space-x-2">
-            <button 
+            <button
               onClick={() => handleDriverAction('add', {} as Driver)}
               className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-2"
             >
@@ -235,7 +252,10 @@ export default function DriversPage() {
                 <th className="px-6 py-3 text-left">
                   <input
                     type="checkbox"
-                    checked={selectedDrivers.length === filteredDrivers.length && filteredDrivers.length > 0}
+                    checked={
+                      selectedDrivers.length === filteredDrivers.length &&
+                      filteredDrivers.length > 0
+                    }
                     onChange={handleSelectAll}
                     className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                   />
@@ -271,8 +291,8 @@ export default function DriversPage() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredDrivers.map((driver) => (
-                <tr 
-                  key={driver.id} 
+                <tr
+                  key={driver.id}
                   className={`hover:bg-gray-50 ${
                     selectedDrivers.includes(driver.id) ? 'bg-amber-50' : ''
                   }`}
@@ -296,16 +316,26 @@ export default function DriversPage() {
                       <DropdownMenuContent align="start">
                         <DropdownMenuLabel>Driver Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleDriverAction('edit', driver)}>
+                        <DropdownMenuItem
+                          onClick={() => handleDriverAction('edit', driver)}
+                        >
                           <Edit className="mr-2 h-4 w-4" />
                           Edit Driver
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleDriverAction('capture-incident', driver)}>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleDriverAction('capture-incident', driver)
+                          }
+                        >
                           <Camera className="mr-2 h-4 w-4" />
                           Capture Incident
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleDriverAction('generate-report', driver)}>
+                        <DropdownMenuItem
+                          onClick={() =>
+                            handleDriverAction('generate-report', driver)
+                          }
+                        >
                           <FileText className="mr-2 h-4 w-4" />
                           Generate Incident Report
                         </DropdownMenuItem>
@@ -349,9 +379,13 @@ export default function DriversPage() {
         {filteredDrivers.length === 0 && (
           <div className="text-center py-12">
             <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No drivers found</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No drivers found
+            </h3>
             <p className="text-gray-500">
-              {searchQuery ? 'Try adjusting your search criteria' : 'No drivers have been added yet'}
+              {searchQuery
+                ? 'Try adjusting your search criteria'
+                : 'No drivers have been added yet'}
             </p>
           </div>
         )}
@@ -361,24 +395,36 @@ export default function DriversPage() {
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <CreditCard className="w-8 h-8 text-amber-600 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">License Management</h3>
-          <p className="text-gray-600 mb-4">Track driver licenses and certifications</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            License Management
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Track driver licenses and certifications
+          </p>
           <button className="text-amber-600 hover:text-amber-700 font-medium">
             View Licenses →
           </button>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <Shield className="w-8 h-8 text-amber-600 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Safety Records</h3>
-          <p className="text-gray-600 mb-4">Monitor safety performance and incidents</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Safety Records
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Monitor safety performance and incidents
+          </p>
           <button className="text-amber-600 hover:text-amber-700 font-medium">
             View Records →
           </button>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <Clock className="w-8 h-8 text-amber-600 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Work Hours</h3>
-          <p className="text-gray-600 mb-4">Track driving hours and compliance</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Work Hours
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Track driving hours and compliance
+          </p>
           <button className="text-amber-600 hover:text-amber-700 font-medium">
             View Hours →
           </button>

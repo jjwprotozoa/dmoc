@@ -7,7 +7,8 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export const useInstallPrompt = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
@@ -33,7 +34,10 @@ export const useInstallPrompt = () => {
     }
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener(
+        'beforeinstallprompt',
+        handleBeforeInstallPrompt
+      );
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
@@ -44,7 +48,7 @@ export const useInstallPrompt = () => {
     try {
       await deferredPrompt.prompt();
       const choiceResult = await deferredPrompt.userChoice;
-      
+
       if (choiceResult.outcome === 'accepted') {
         setIsInstalled(true);
         setIsInstallable(false);
@@ -54,7 +58,7 @@ export const useInstallPrompt = () => {
     } catch (error) {
       console.error('Error installing app:', error);
     }
-    
+
     return false;
   };
 

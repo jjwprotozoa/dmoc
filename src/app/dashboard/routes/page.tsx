@@ -1,7 +1,14 @@
 // src/app/dashboard/routes/page.tsx
 'use client';
 
-import { Clock, CloudLightning, MapPin, Navigation, Route, Truck } from 'lucide-react';
+import {
+  Clock,
+  CloudLightning,
+  MapPin,
+  Navigation,
+  Route,
+  Truck,
+} from 'lucide-react';
 
 export default function RoutesPage() {
   // Mock data - replace with actual data from your API
@@ -16,7 +23,7 @@ export default function RoutesPage() {
       status: 'Active',
       vehicles: 3,
       efficiency: 92,
-      lastOptimized: '2 hours ago'
+      lastOptimized: '2 hours ago',
     },
     {
       id: '2',
@@ -28,7 +35,7 @@ export default function RoutesPage() {
       status: 'Optimizing',
       vehicles: 2,
       efficiency: 87,
-      lastOptimized: '30 minutes ago'
+      lastOptimized: '30 minutes ago',
     },
     {
       id: '3',
@@ -40,8 +47,8 @@ export default function RoutesPage() {
       status: 'Inactive',
       vehicles: 1,
       efficiency: 95,
-      lastOptimized: '1 day ago'
-    }
+      lastOptimized: '1 day ago',
+    },
   ];
 
   const getStatusColor = (status: string) => {
@@ -69,7 +76,9 @@ export default function RoutesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Route Management</h1>
-          <p className="text-gray-600">Plan, optimize, and monitor delivery routes</p>
+          <p className="text-gray-600">
+            Plan, optimize, and monitor delivery routes
+          </p>
         </div>
         <div className="flex space-x-3">
           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
@@ -88,7 +97,9 @@ export default function RoutesPage() {
             <Route className="h-8 w-8 text-blue-600" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Routes</p>
-              <p className="text-2xl font-bold text-gray-900">{routes.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {routes.length}
+              </p>
             </div>
           </div>
         </div>
@@ -99,7 +110,7 @@ export default function RoutesPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Active Routes</p>
               <p className="text-2xl font-bold text-gray-900">
-                {routes.filter(r => r.status === 'Active').length}
+                {routes.filter((r) => r.status === 'Active').length}
               </p>
             </div>
           </div>
@@ -109,7 +120,9 @@ export default function RoutesPage() {
           <div className="flex items-center">
             <Truck className="h-8 w-8 text-amber-600" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Vehicles</p>
+              <p className="text-sm font-medium text-gray-600">
+                Total Vehicles
+              </p>
               <p className="text-2xl font-bold text-gray-900">
                 {routes.reduce((sum, r) => sum + r.vehicles, 0)}
               </p>
@@ -121,9 +134,15 @@ export default function RoutesPage() {
           <div className="flex items-center">
             <CloudLightning className="h-8 w-8 text-purple-600" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Avg Efficiency</p>
+              <p className="text-sm font-medium text-gray-600">
+                Avg Efficiency
+              </p>
               <p className="text-2xl font-bold text-gray-900">
-                {Math.round(routes.reduce((sum, r) => sum + r.efficiency, 0) / routes.length)}%
+                {Math.round(
+                  routes.reduce((sum, r) => sum + r.efficiency, 0) /
+                    routes.length
+                )}
+                %
               </p>
             </div>
           </div>
@@ -135,10 +154,13 @@ export default function RoutesPage() {
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Route Network</h2>
         </div>
-        
+
         <div className="divide-y divide-gray-200">
           {routes.map((route) => (
-            <div key={route.id} className="p-6 hover:bg-gray-50 transition-colors">
+            <div
+              key={route.id}
+              className="p-6 hover:bg-gray-50 transition-colors"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3">
@@ -146,7 +168,9 @@ export default function RoutesPage() {
                     <h3 className="text-lg font-medium text-gray-900">
                       {route.name}
                     </h3>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(route.status)}`}>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(route.status)}`}
+                    >
                       {route.status}
                     </span>
                   </div>

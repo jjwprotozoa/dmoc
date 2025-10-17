@@ -17,28 +17,31 @@ export const useSocket = (tenantSlug?: string) => {
       return;
     }
 
-    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000', {
-      path: '/api/socketio',
-      transports: ['polling', 'websocket'],
-      timeout: 20000,
-      forceNew: true,
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      upgrade: true,
-      rememberUpgrade: true,
-    });
+    const socketInstance = io(
+      process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000',
+      {
+        path: '/api/socketio',
+        transports: ['polling', 'websocket'],
+        timeout: 20000,
+        forceNew: true,
+        autoConnect: true,
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        upgrade: true,
+        rememberUpgrade: true,
+      }
+    );
 
     socketInstance.on('connect', () => {
       setIsConnected(true);
       setConnectionError(null);
-      console.log('Connected to socket server', { 
-        id: socketInstance.id, 
-        transport: socketInstance.io.engine.transport.name 
+      console.log('Connected to socket server', {
+        id: socketInstance.id,
+        transport: socketInstance.io.engine.transport.name,
       });
-      
+
       if (tenantSlug) {
         socketInstance.emit('join-tenant', tenantSlug);
       }
@@ -50,7 +53,9 @@ export const useSocket = (tenantSlug?: string) => {
     });
 
     socketInstance.on('connect_error', (error) => {
-      setConnectionError(error instanceof Error ? error.message : 'Unknown error');
+      setConnectionError(
+        error instanceof Error ? error.message : 'Unknown error'
+      );
       console.error('Socket connection error:', error);
     });
 

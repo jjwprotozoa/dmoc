@@ -3,30 +3,31 @@ import { z } from 'zod';
 import { protectedProcedure, router } from '../trpc';
 
 export const trackingRouter = router({
-  getDevices: protectedProcedure
-    .query(async ({ ctx }) => {
-      const devices = await ctx.db.device.findMany({
-        where: {
-          tenantId: ctx.session.user.tenantId,
+  getDevices: protectedProcedure.query(async ({ ctx }) => {
+    const devices = await ctx.db.device.findMany({
+      where: {
+        tenantId: ctx.session.user.tenantId,
+      },
+      include: {
+        locationPings: {
+          orderBy: { timestamp: 'desc' },
+          take: 1,
         },
-        include: {
-          locationPings: {
-            orderBy: { timestamp: 'desc' },
-            take: 1,
-          },
-        },
-      });
+      },
+    });
 
-      return devices;
-    }),
+    return devices;
+  }),
 
   getLocationHistory: protectedProcedure
-    .input(z.object({
-      deviceId: z.string(),
-      from: z.date().optional(),
-      to: z.date().optional(),
-      limit: z.number().default(100),
-    }))
+    .input(
+      z.object({
+        deviceId: z.string(),
+        from: z.date().optional(),
+        to: z.date().optional(),
+        limit: z.number().default(100),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const pings = await ctx.db.locationPing.findMany({
         where: {
@@ -44,9 +45,11 @@ export const trackingRouter = router({
     }),
 
   getLatestPings: protectedProcedure
-    .input(z.object({
-      deviceIds: z.array(z.string()).optional(),
-    }))
+    .input(
+      z.object({
+        deviceIds: z.array(z.string()).optional(),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const pings = await ctx.db.locationPing.findMany({
         where: {

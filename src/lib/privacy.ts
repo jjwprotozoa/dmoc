@@ -21,19 +21,19 @@ export interface MaskedData {
  * Masks contact numbers based on user role and authentication status
  */
 export function maskContactNumber(
-  contactNumber: string, 
-  config: PrivacyConfig, 
+  contactNumber: string,
+  config: PrivacyConfig,
   itemId?: number
 ): MaskedData {
   if (!contactNumber || contactNumber.length === 0) {
     return { display: 'N/A', masked: false };
   }
-  
+
   const isUnlocked = itemId ? config.unlockedItems?.has(itemId) : false;
   const masked = !config.canViewSensitive && !isUnlocked;
   let display = contactNumber;
   let link = undefined;
-  
+
   if (masked) {
     if (contactNumber.length <= 7) {
       display = '*'.repeat(contactNumber.length);
@@ -46,7 +46,7 @@ export function maskContactNumber(
   } else {
     link = `tel:${contactNumber}`;
   }
-  
+
   return { display, link, masked };
 }
 
@@ -54,8 +54,8 @@ export function maskContactNumber(
  * Masks ID numbers based on user role and authentication status
  */
 export function maskIdNumber(
-  idNumber: string, 
-  config: PrivacyConfig, 
+  idNumber: string,
+  config: PrivacyConfig,
   itemId?: number
 ): string {
   const isUnlocked = itemId ? config.unlockedItems?.has(itemId) : false;
@@ -71,19 +71,19 @@ export function maskIdNumber(
  * Masks email addresses based on user role and authentication status
  */
 export function maskEmail(
-  email: string, 
-  config: PrivacyConfig, 
+  email: string,
+  config: PrivacyConfig,
   itemId?: number
 ): MaskedData {
   if (!email || email.length === 0) {
     return { display: 'N/A', masked: false };
   }
-  
+
   const isUnlocked = itemId ? config.unlockedItems?.has(itemId) : false;
   const masked = !config.canViewSensitive && !isUnlocked;
   let display = email;
   let link = undefined;
-  
+
   if (masked) {
     const [localPart, domain] = email.split('@');
     if (localPart.length <= 2) {
@@ -97,7 +97,7 @@ export function maskEmail(
   } else {
     link = `mailto:${email}`;
   }
-  
+
   return { display, link, masked };
 }
 
@@ -105,26 +105,28 @@ export function maskEmail(
  * Masks addresses based on user role and authentication status
  */
 export function maskAddress(
-  address: string, 
-  config: PrivacyConfig, 
+  address: string,
+  config: PrivacyConfig,
   itemId?: number
 ): string {
   if (!address || address.length === 0) {
     return 'No address';
   }
-  
+
   const isUnlocked = itemId ? config.unlockedItems?.has(itemId) : false;
   if (config.canViewSensitive || isUnlocked) return address;
-  
+
   // For addresses, show only city/country, mask street details
   const parts = address.split(',');
   if (parts.length <= 1) {
     return '*'.repeat(Math.min(address.length, 10));
   }
-  
+
   // Show last part (usually city/country), mask the rest
   const lastPart = parts[parts.length - 1].trim();
-  const maskedParts = parts.slice(0, -1).map(part => '*'.repeat(Math.min(part.trim().length, 8)));
+  const maskedParts = parts
+    .slice(0, -1)
+    .map((part) => '*'.repeat(Math.min(part.trim().length, 8)));
   return [...maskedParts, lastPart].join(', ');
 }
 
@@ -140,7 +142,7 @@ export function canViewSensitive(userRole: string): boolean {
  */
 export function getPrivacyNotice(userRole: string): string {
   const canView = canViewSensitive(userRole);
-  return canView 
+  return canView
     ? 'Full access to sensitive data'
     : 'Limited access - each item requires individual authentication';
 }
@@ -148,11 +150,14 @@ export function getPrivacyNotice(userRole: string): string {
 /**
  * Privacy configuration hook for React components
  */
-export function usePrivacyConfig(userRole: string, unlockedItems: Set<number> = new Set()) {
+export function usePrivacyConfig(
+  userRole: string,
+  unlockedItems: Set<number> = new Set()
+) {
   return {
     userRole,
     canViewSensitive: canViewSensitive(userRole),
     unlockedItems,
-    privacyNotice: getPrivacyNotice(userRole)
+    privacyNotice: getPrivacyNotice(userRole),
   };
 }

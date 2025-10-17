@@ -23,49 +23,69 @@ export function SensitiveDataField({
   itemId,
   onUnlock,
   onCall,
-  className = ''
+  className = '',
 }: SensitiveDataFieldProps) {
   const isUnlocked = itemId ? config.unlockedItems?.has(itemId) : false;
-  
+
   const getMaskedData = () => {
     switch (type) {
       case 'contact':
         return {
-          display: config.canViewSensitive || isUnlocked ? value : 
-            value.length <= 7 ? '*'.repeat(value.length) :
-            `${value.substring(0, 3)}${'*'.repeat(value.length - 7)}${value.substring(value.length - 4)}`,
+          display:
+            config.canViewSensitive || isUnlocked
+              ? value
+              : value.length <= 7
+                ? '*'.repeat(value.length)
+                : `${value.substring(0, 3)}${'*'.repeat(value.length - 7)}${value.substring(value.length - 4)}`,
           masked: !config.canViewSensitive && !isUnlocked,
-          link: (config.canViewSensitive || isUnlocked) ? `tel:${value}` : undefined
+          link:
+            config.canViewSensitive || isUnlocked ? `tel:${value}` : undefined,
         };
       case 'id':
         return {
-          display: config.canViewSensitive || isUnlocked ? value :
-            value.length <= 4 ? '*'.repeat(value.length) :
-            `${value.substring(0, 2)}${'*'.repeat(value.length - 4)}${value.substring(value.length - 2)}`,
-          masked: !config.canViewSensitive && !isUnlocked
+          display:
+            config.canViewSensitive || isUnlocked
+              ? value
+              : value.length <= 4
+                ? '*'.repeat(value.length)
+                : `${value.substring(0, 2)}${'*'.repeat(value.length - 4)}${value.substring(value.length - 2)}`,
+          masked: !config.canViewSensitive && !isUnlocked,
         };
       case 'email':
         return {
-          display: config.canViewSensitive || isUnlocked ? value :
-            (() => {
-              const [local, domain] = value.split('@');
-              return local.length <= 2 ? '*'.repeat(local.length) + '@' + domain :
-                `${local[0]}${'*'.repeat(local.length - 2)}${local[local.length - 1]}@${domain}`;
-            })(),
+          display:
+            config.canViewSensitive || isUnlocked
+              ? value
+              : (() => {
+                  const [local, domain] = value.split('@');
+                  return local.length <= 2
+                    ? '*'.repeat(local.length) + '@' + domain
+                    : `${local[0]}${'*'.repeat(local.length - 2)}${local[local.length - 1]}@${domain}`;
+                })(),
           masked: !config.canViewSensitive && !isUnlocked,
-          link: (config.canViewSensitive || isUnlocked) ? `mailto:${value}` : undefined
+          link:
+            config.canViewSensitive || isUnlocked
+              ? `mailto:${value}`
+              : undefined,
         };
       case 'address':
         return {
-          display: config.canViewSensitive || isUnlocked ? value :
-            value.split(',').length <= 1 ? '*'.repeat(Math.min(value.length, 10)) :
-            (() => {
-              const parts = value.split(',');
-              const lastPart = parts[parts.length - 1].trim();
-              const maskedParts = parts.slice(0, -1).map(part => '*'.repeat(Math.min(part.trim().length, 8)));
-              return [...maskedParts, lastPart].join(', ');
-            })(),
-          masked: !config.canViewSensitive && !isUnlocked
+          display:
+            config.canViewSensitive || isUnlocked
+              ? value
+              : value.split(',').length <= 1
+                ? '*'.repeat(Math.min(value.length, 10))
+                : (() => {
+                    const parts = value.split(',');
+                    const lastPart = parts[parts.length - 1].trim();
+                    const maskedParts = parts
+                      .slice(0, -1)
+                      .map((part) =>
+                        '*'.repeat(Math.min(part.trim().length, 8))
+                      );
+                    return [...maskedParts, lastPart].join(', ');
+                  })(),
+          masked: !config.canViewSensitive && !isUnlocked,
         };
       default:
         return { display: value, masked: false };
@@ -78,7 +98,9 @@ export function SensitiveDataField({
     <div className={`flex items-center justify-between text-xs ${className}`}>
       <span className="text-gray-500">{label}:</span>
       <div className="flex items-center space-x-1">
-        <span className={`text-gray-900 ${maskedData.masked ? 'font-mono' : ''}`}>
+        <span
+          className={`text-gray-900 ${maskedData.masked ? 'font-mono' : ''}`}
+        >
           {maskedData.display}
         </span>
         {type === 'contact' && maskedData.link && (
@@ -94,7 +116,7 @@ export function SensitiveDataField({
           <button
             onClick={() => onUnlock(itemId)}
             className="text-gray-400 hover:text-gray-600"
-            title={isUnlocked ? "Lock information" : "Unlock information"}
+            title={isUnlocked ? 'Lock information' : 'Unlock information'}
           >
             {isUnlocked ? (
               <Unlock className="w-3 h-3" />

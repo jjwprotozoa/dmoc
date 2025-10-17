@@ -31,12 +31,12 @@ const defaultTheme: ThemeConfig = {
   text: 'gray-900',
   textSecondary: 'gray-600',
   border: 'gray-200',
-  shadow: 'gray-200'
+  shadow: 'gray-200',
 };
 
 // Predefined themes for different tenants
 const tenantThemes: Record<string, ThemeConfig> = {
-  'delta': {
+  delta: {
     primary: 'blue',
     secondary: 'gray',
     accent: 'blue',
@@ -45,9 +45,9 @@ const tenantThemes: Record<string, ThemeConfig> = {
     text: 'blue-900',
     textSecondary: 'blue-600',
     border: 'blue-200',
-    shadow: 'blue-200'
+    shadow: 'blue-200',
   },
-  'cobra': {
+  cobra: {
     primary: 'red',
     secondary: 'gray',
     accent: 'red',
@@ -56,9 +56,9 @@ const tenantThemes: Record<string, ThemeConfig> = {
     text: 'red-900',
     textSecondary: 'red-600',
     border: 'red-200',
-    shadow: 'red-200'
+    shadow: 'red-200',
   },
-  'digiwize': {
+  digiwize: {
     primary: 'amber',
     secondary: 'gray',
     accent: 'amber',
@@ -67,16 +67,16 @@ const tenantThemes: Record<string, ThemeConfig> = {
     text: 'amber-900',
     textSecondary: 'amber-600',
     border: 'amber-200',
-    shadow: 'amber-200'
-  }
+    shadow: 'amber-200',
+  },
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export function ThemeProvider({ 
-  children, 
-  initialTenantSlug = 'digiwize' 
-}: { 
+export function ThemeProvider({
+  children,
+  initialTenantSlug = 'digiwize',
+}: {
   children: React.ReactNode;
   initialTenantSlug?: string;
 }) {
@@ -93,7 +93,9 @@ export function ThemeProvider({
   }, [tenantSlug]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, tenantSlug, setTenantSlug }}>
+    <ThemeContext.Provider
+      value={{ theme, setTheme, tenantSlug, setTenantSlug }}
+    >
       {children}
     </ThemeContext.Provider>
   );
@@ -108,12 +110,15 @@ export function useTheme() {
 }
 
 // Helper function to get theme classes
-export function getThemeClasses(theme: ThemeConfig, component: 'sidebar' | 'topbar' | 'button' | 'card') {
+export function getThemeClasses(
+  theme: ThemeConfig,
+  component: 'sidebar' | 'topbar' | 'button' | 'card'
+) {
   const baseClasses = {
     sidebar: `bg-gradient-to-b from-${theme.primary}-900 via-${theme.primary}-800 to-${theme.primary}-900 border-${theme.primary}-700`,
     topbar: `bg-${theme.surface} border-${theme.border}`,
     button: `bg-${theme.primary}-600 hover:bg-${theme.primary}-700 text-white`,
-    card: `bg-${theme.surface} border-${theme.border} shadow-${theme.shadow}`
+    card: `bg-${theme.surface} border-${theme.border} shadow-${theme.shadow}`,
   };
 
   return baseClasses[component] || '';

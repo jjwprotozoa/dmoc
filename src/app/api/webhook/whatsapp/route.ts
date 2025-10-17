@@ -18,7 +18,8 @@ const whatsappWebhookSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
-    const clientIP = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    const clientIP =
+      request.ip || request.headers.get('x-forwarded-for') || 'unknown';
     if (!webhookRateLimit.isAllowed(clientIP)) {
       return NextResponse.json(
         { error: 'Rate limit exceeded' },
@@ -29,10 +30,7 @@ export async function POST(request: NextRequest) {
     // Verify webhook secret
     const secret = request.headers.get('x-webhook-secret');
     if (secret !== env.WHATSAPP_WEBHOOK_SECRET) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -52,7 +50,7 @@ export async function POST(request: NextRequest) {
     // For now, we'll just mark it as completed
     await db.webhookEvent.update({
       where: { id: webhookEvent.id },
-      data: { 
+      data: {
         status: 'COMPLETED',
         processedAt: new Date(),
       },
@@ -74,9 +72,9 @@ export async function POST(request: NextRequest) {
       messageType: validatedData.mediaType,
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      webhookId: webhookEvent.id 
+    return NextResponse.json({
+      success: true,
+      webhookId: webhookEvent.id,
     });
   } catch (error) {
     logger.error('WhatsApp webhook error', { error });

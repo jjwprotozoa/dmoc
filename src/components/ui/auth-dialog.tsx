@@ -5,11 +5,11 @@ import { Eye, EyeOff, Lock, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from './button';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from './dialog';
 import { Input } from './input';
 import { Label } from './label';
@@ -26,8 +26,8 @@ export function AuthDialog({
   open,
   onOpenChange,
   onAuthenticated,
-  title = "Authentication Required",
-  description = "Please authenticate to view sensitive information"
+  title = 'Authentication Required',
+  description = 'Please authenticate to view sensitive information',
 }: AuthDialogProps) {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -61,9 +61,7 @@ export function AuthDialog({
             <Shield className="w-5 h-5 text-amber-600" />
             <span>{title}</span>
           </DialogTitle>
-          <DialogDescription>
-            {description}
-          </DialogDescription>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -72,7 +70,7 @@ export function AuthDialog({
             <div className="relative">
               <Input
                 id="password"
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
@@ -127,8 +125,9 @@ export function AuthDialog({
         </form>
 
         <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-md">
-          <strong>Privacy Notice:</strong> Accessing sensitive information is logged for audit purposes. 
-          Only authorized personnel should view this data.
+          <strong>Privacy Notice:</strong> Accessing sensitive information is
+          logged for audit purposes. Only authorized personnel should view this
+          data.
         </div>
       </DialogContent>
     </Dialog>

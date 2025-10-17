@@ -1,7 +1,15 @@
 // src/app/dashboard/trackers/page.tsx
 'use client';
 
-import { Radar, MapPin, Signal, Battery, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
+import {
+  Radar,
+  MapPin,
+  Signal,
+  Battery,
+  Clock,
+  AlertTriangle,
+  CheckCircle,
+} from 'lucide-react';
 
 export default function TrackersPage() {
   // Mock data - replace with actual data from your API
@@ -17,7 +25,7 @@ export default function TrackersPage() {
       location: 'Johannesburg, SA',
       speed: 65,
       heading: 'South',
-      temperature: 24
+      temperature: 24,
     },
     {
       id: '2',
@@ -30,7 +38,7 @@ export default function TrackersPage() {
       location: 'Cape Town, SA',
       speed: 0,
       heading: 'North',
-      temperature: 22
+      temperature: 22,
     },
     {
       id: '3',
@@ -43,8 +51,8 @@ export default function TrackersPage() {
       location: 'Durban, SA',
       speed: 0,
       heading: 'Unknown',
-      temperature: 0
-    }
+      temperature: 0,
+    },
   ];
 
   const getStatusColor = (status: string) => {
@@ -78,7 +86,9 @@ export default function TrackersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">GPS Tracking</h1>
-          <p className="text-gray-600">Monitor vehicle locations and tracking devices</p>
+          <p className="text-gray-600">
+            Monitor vehicle locations and tracking devices
+          </p>
         </div>
         <div className="flex space-x-3">
           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
@@ -96,8 +106,12 @@ export default function TrackersPage() {
           <div className="flex items-center">
             <Radar className="h-8 w-8 text-blue-600" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Trackers</p>
-              <p className="text-2xl font-bold text-gray-900">{trackers.length}</p>
+              <p className="text-sm font-medium text-gray-600">
+                Total Trackers
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {trackers.length}
+              </p>
             </div>
           </div>
         </div>
@@ -108,7 +122,7 @@ export default function TrackersPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Online</p>
               <p className="text-2xl font-bold text-gray-900">
-                {trackers.filter(t => t.status === 'Online').length}
+                {trackers.filter((t) => t.status === 'Online').length}
               </p>
             </div>
           </div>
@@ -120,7 +134,7 @@ export default function TrackersPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Offline</p>
               <p className="text-2xl font-bold text-gray-900">
-                {trackers.filter(t => t.status === 'Offline').length}
+                {trackers.filter((t) => t.status === 'Offline').length}
               </p>
             </div>
           </div>
@@ -132,7 +146,7 @@ export default function TrackersPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Low Battery</p>
               <p className="text-2xl font-bold text-gray-900">
-                {trackers.filter(t => t.battery < 20).length}
+                {trackers.filter((t) => t.battery < 20).length}
               </p>
             </div>
           </div>
@@ -142,12 +156,17 @@ export default function TrackersPage() {
       {/* Trackers List */}
       <div className="bg-white rounded-lg shadow-sm border">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Tracking Devices</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Tracking Devices
+          </h2>
         </div>
-        
+
         <div className="divide-y divide-gray-200">
           {trackers.map((tracker) => (
-            <div key={tracker.id} className="p-6 hover:bg-gray-50 transition-colors">
+            <div
+              key={tracker.id}
+              className="p-6 hover:bg-gray-50 transition-colors"
+            >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3">
@@ -155,7 +174,9 @@ export default function TrackersPage() {
                     <h3 className="text-lg font-medium text-gray-900">
                       {tracker.deviceId}
                     </h3>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(tracker.status)}`}>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(tracker.status)}`}
+                    >
                       {tracker.status}
                     </span>
                     {tracker.battery < 20 && (
@@ -183,9 +204,7 @@ export default function TrackersPage() {
                     </div>
                     <div className="flex items-center">
                       <Clock className="h-4 w-4 mr-2 text-gray-400" />
-                      <span className="text-gray-500">
-                        {tracker.lastPing}
-                      </span>
+                      <span className="text-gray-500">{tracker.lastPing}</span>
                     </div>
                     <div className="flex items-center">
                       <MapPin className="h-4 w-4 mr-2 text-gray-400" />

@@ -18,13 +18,13 @@ app.prepare().then(() => {
   const httpServer = createServer(async (req, res) => {
     try {
       const parsedUrl = parse(req.url, true);
-      
+
       // Handle Socket.IO requests
       if (parsedUrl.pathname?.startsWith('/api/socketio')) {
         // Let Socket.IO handle these requests
         return;
       }
-      
+
       await handle(req, res, parsedUrl);
     } catch (err) {
       console.error('Error occurred handling', req.url, err);

@@ -29,9 +29,10 @@ interface Manifest {
 export default function ActiveManifestsPage() {
   const { data: manifests, isLoading } = trpc.manifest.getAll.useQuery({});
 
-  const activeManifests = manifests?.filter((manifest: Manifest) => 
-    manifest.status === 'IN_PROGRESS'
-  ) || [];
+  const activeManifests =
+    manifests?.filter(
+      (manifest: Manifest) => manifest.status === 'IN_PROGRESS'
+    ) || [];
 
   return (
     <div className="space-y-6">
@@ -39,11 +40,15 @@ export default function ActiveManifestsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Active Manifests</h1>
-          <p className="text-gray-600">Manage your active logistics manifests</p>
+          <p className="text-gray-600">
+            Manage your active logistics manifests
+          </p>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm text-gray-600">{activeManifests.length} active</span>
+          <span className="text-sm text-gray-600">
+            {activeManifests.length} active
+          </span>
         </div>
       </div>
 
@@ -54,7 +59,9 @@ export default function ActiveManifestsPage() {
             <FileText className="h-8 w-8 text-blue-600" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Active</p>
-              <p className="text-2xl font-bold text-gray-900">{activeManifests.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {activeManifests.length}
+              </p>
             </div>
           </div>
         </div>
@@ -65,7 +72,11 @@ export default function ActiveManifestsPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">In Transit</p>
               <p className="text-2xl font-bold text-gray-900">
-                {activeManifests.filter((m: Manifest) => m.status === 'IN_PROGRESS').length}
+                {
+                  activeManifests.filter(
+                    (m: Manifest) => m.status === 'IN_PROGRESS'
+                  ).length
+                }
               </p>
             </div>
           </div>
@@ -77,7 +88,9 @@ export default function ActiveManifestsPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Locations</p>
               <p className="text-2xl font-bold text-gray-900">
-                {activeManifests.length > 0 ? activeManifests[0].stops.length : 0}
+                {activeManifests.length > 0
+                  ? activeManifests[0].stops.length
+                  : 0}
               </p>
             </div>
           </div>
@@ -99,9 +112,11 @@ export default function ActiveManifestsPage() {
       {/* Manifests List */}
       <div className="bg-white rounded-lg shadow-sm border">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Active Manifests</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Active Manifests
+          </h2>
         </div>
-        
+
         {isLoading ? (
           <div className="p-6 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto"></div>
@@ -110,33 +125,49 @@ export default function ActiveManifestsPage() {
         ) : activeManifests.length === 0 ? (
           <div className="p-6 text-center">
             <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Manifests</h3>
-            <p className="text-gray-600">All manifests are currently completed or inactive.</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              No Active Manifests
+            </h3>
+            <p className="text-gray-600">
+              All manifests are currently completed or inactive.
+            </p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">
             {activeManifests.map((manifest: Manifest) => (
-              <div key={manifest.id} className="p-6 hover:bg-gray-50 transition-colors">
+              <div
+                key={manifest.id}
+                className="p-6 hover:bg-gray-50 transition-colors"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3">
                       <h3 className="text-lg font-medium text-gray-900">
                         {manifest.title}
                       </h3>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        manifest.status === 'IN_PROGRESS' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-amber-100 text-amber-800'
-                      }`}>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          manifest.status === 'IN_PROGRESS'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-amber-100 text-amber-800'
+                        }`}
+                      >
                         {manifest.status}
                       </span>
                     </div>
                     <p className="mt-1 text-sm text-gray-600">
-                      Company: {manifest.company.name} • Stops: {manifest.stops.length}
+                      Company: {manifest.company.name} • Stops:{' '}
+                      {manifest.stops.length}
                     </p>
                     <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
-                      <span>Scheduled: {new Date(manifest.scheduledAt).toLocaleDateString()}</span>
-                      <span>Created: {new Date(manifest.createdAt).toLocaleDateString()}</span>
+                      <span>
+                        Scheduled:{' '}
+                        {new Date(manifest.scheduledAt).toLocaleDateString()}
+                      </span>
+                      <span>
+                        Created:{' '}
+                        {new Date(manifest.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">

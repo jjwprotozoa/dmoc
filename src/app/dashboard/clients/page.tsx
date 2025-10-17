@@ -1,7 +1,18 @@
 // src/app/dashboard/clients/page.tsx
 'use client';
 
-import { Building, Calendar, CheckSquare2, Download, Filter, MapPin, MoreHorizontal, Plus, Search, Users } from 'lucide-react';
+import {
+  Building,
+  Calendar,
+  CheckSquare2,
+  Download,
+  Filter,
+  MapPin,
+  MoreHorizontal,
+  Plus,
+  Search,
+  Users,
+} from 'lucide-react';
 import { useState } from 'react';
 
 interface Client {
@@ -30,7 +41,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '12/10/2022 10:22 AM',
       id: 3103,
-      displayValue: 'ACCESS'
+      displayValue: 'ACCESS',
     },
     {
       companyId: 3881,
@@ -40,7 +51,7 @@ export default function ClientsPage() {
       address: 'TANZANIA',
       dateTimeAdded: '11/16/2024 8:57 AM',
       id: 3881,
-      displayValue: 'AFRICA WAKAWAKA'
+      displayValue: 'AFRICA WAKAWAKA',
     },
     {
       companyId: 3300,
@@ -50,7 +61,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '4/13/2023 5:50 PM',
       id: 3300,
-      displayValue: 'AFRICLAN'
+      displayValue: 'AFRICLAN',
     },
     {
       companyId: 4087,
@@ -60,7 +71,7 @@ export default function ClientsPage() {
       address: 'CML / Nyati Mufulira to Durban',
       dateTimeAdded: '6/24/2025 10:04 AM',
       id: 4087,
-      displayValue: 'CML / NYATI MUFULIRA TO ['
+      displayValue: 'CML / NYATI MUFULIRA TO [',
     },
     {
       companyId: 3725,
@@ -70,7 +81,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:44 PM',
       id: 3725,
-      displayValue: 'DELTA'
+      displayValue: 'DELTA',
     },
     {
       companyId: 3726,
@@ -80,7 +91,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:45 PM',
       id: 3726,
-      displayValue: 'DELTA FORCE / ZERODEGREES'
+      displayValue: 'DELTA FORCE / ZERODEGREES',
     },
     {
       companyId: 3727,
@@ -90,7 +101,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:46 PM',
       id: 3727,
-      displayValue: 'DELTA PUMA RISK'
+      displayValue: 'DELTA PUMA RISK',
     },
     {
       companyId: 3728,
@@ -100,7 +111,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:47 PM',
       id: 3728,
-      displayValue: 'DELTA ESCORTS/CML KANSANSHI-DAR'
+      displayValue: 'DELTA ESCORTS/CML KANSANSHI-DAR',
     },
     {
       companyId: 3729,
@@ -110,7 +121,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:48 PM',
       id: 3729,
-      displayValue: 'DELTA/POLYTRA'
+      displayValue: 'DELTA/POLYTRA',
     },
     {
       companyId: 3730,
@@ -120,7 +131,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:49 PM',
       id: 3730,
-      displayValue: 'GREENDOOR'
+      displayValue: 'GREENDOOR',
     },
     {
       companyId: 3731,
@@ -130,7 +141,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:50 PM',
       id: 3731,
-      displayValue: 'INARA'
+      displayValue: 'INARA',
     },
     {
       companyId: 3732,
@@ -140,7 +151,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:51 PM',
       id: 3732,
-      displayValue: 'INARA (LIBERTY)'
+      displayValue: 'INARA (LIBERTY)',
     },
     {
       companyId: 3733,
@@ -150,7 +161,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:52 PM',
       id: 3733,
-      displayValue: 'INARA MOXICO'
+      displayValue: 'INARA MOXICO',
     },
     {
       companyId: 3734,
@@ -160,7 +171,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:53 PM',
       id: 3734,
-      displayValue: 'KOBRACLIENT2'
+      displayValue: 'KOBRACLIENT2',
     },
     {
       companyId: 3735,
@@ -170,7 +181,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:54 PM',
       id: 3735,
-      displayValue: 'LINK AFRICA'
+      displayValue: 'LINK AFRICA',
     },
     {
       companyId: 3736,
@@ -180,7 +191,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:55 PM',
       id: 3736,
-      displayValue: 'MYSTICAL'
+      displayValue: 'MYSTICAL',
     },
     {
       companyId: 3737,
@@ -190,7 +201,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:56 PM',
       id: 3737,
-      displayValue: 'RELOAD ADD'
+      displayValue: 'RELOAD ADD',
     },
     {
       companyId: 3738,
@@ -200,7 +211,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:57 PM',
       id: 3738,
-      displayValue: 'RELOAD CITIC'
+      displayValue: 'RELOAD CITIC',
     },
     {
       companyId: 3739,
@@ -210,7 +221,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:58 PM',
       id: 3739,
-      displayValue: 'RELOAD CNMC/IXMTRACKING'
+      displayValue: 'RELOAD CNMC/IXMTRACKING',
     },
     {
       companyId: 3740,
@@ -220,7 +231,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 9:59 PM',
       id: 3740,
-      displayValue: 'RELOAD DELTA ASK'
+      displayValue: 'RELOAD DELTA ASK',
     },
     {
       companyId: 3741,
@@ -230,7 +241,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:00 PM',
       id: 3741,
-      displayValue: 'RELOAD KABWE/GRB'
+      displayValue: 'RELOAD KABWE/GRB',
     },
     {
       companyId: 3742,
@@ -240,7 +251,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:01 PM',
       id: 3742,
-      displayValue: 'RELOAD LCS'
+      displayValue: 'RELOAD LCS',
     },
     {
       companyId: 3743,
@@ -250,7 +261,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:02 PM',
       id: 3743,
-      displayValue: 'RELOAD TFC ASK'
+      displayValue: 'RELOAD TFC ASK',
     },
     {
       companyId: 3744,
@@ -260,7 +271,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:03 PM',
       id: 3744,
-      displayValue: 'RELOAD TFC HMC'
+      displayValue: 'RELOAD TFC HMC',
     },
     {
       companyId: 3745,
@@ -270,7 +281,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:04 PM',
       id: 3745,
-      displayValue: 'RELOAD TFC OCTAGON/RLD-CMS/KCM'
+      displayValue: 'RELOAD TFC OCTAGON/RLD-CMS/KCM',
     },
     {
       companyId: 3746,
@@ -280,7 +291,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:05 PM',
       id: 3746,
-      displayValue: 'RELOAD TFC RGT'
+      displayValue: 'RELOAD TFC RGT',
     },
     {
       companyId: 3747,
@@ -290,7 +301,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:06 PM',
       id: 3747,
-      displayValue: 'RELOAD TRAFIGURA'
+      displayValue: 'RELOAD TRAFIGURA',
     },
     {
       companyId: 3748,
@@ -300,7 +311,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:07 PM',
       id: 3748,
-      displayValue: 'RELOAD/DELTA LONSHI TRACKING'
+      displayValue: 'RELOAD/DELTA LONSHI TRACKING',
     },
     {
       companyId: 3749,
@@ -310,7 +321,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:08 PM',
       id: 3749,
-      displayValue: 'RELOAD/DELTA/TFC/MRI (ZAM_MZ)'
+      displayValue: 'RELOAD/DELTA/TFC/MRI (ZAM_MZ)',
     },
     {
       companyId: 3750,
@@ -320,7 +331,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:09 PM',
       id: 3750,
-      displayValue: 'RELOAD/MALMOZA/DELTA - TFC'
+      displayValue: 'RELOAD/MALMOZA/DELTA - TFC',
     },
     {
       companyId: 3751,
@@ -330,7 +341,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:10 PM',
       id: 3751,
-      displayValue: 'RELOAD/ZOPCO/DELTA BLISTERS'
+      displayValue: 'RELOAD/ZOPCO/DELTA BLISTERS',
     },
     {
       companyId: 3752,
@@ -340,7 +351,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:11 PM',
       id: 3752,
-      displayValue: 'RELOAD/ZOPCO/DELTA CATHODES'
+      displayValue: 'RELOAD/ZOPCO/DELTA CATHODES',
     },
     {
       companyId: 3753,
@@ -350,7 +361,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:12 PM',
       id: 3753,
-      displayValue: 'RL/DELTA/ZAM - TN/BBR/GRB'
+      displayValue: 'RL/DELTA/ZAM - TN/BBR/GRB',
     },
     {
       companyId: 3754,
@@ -360,7 +371,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:13 PM',
       id: 3754,
-      displayValue: 'RL/DELTA/TFC NDOLA TO DAR'
+      displayValue: 'RL/DELTA/TFC NDOLA TO DAR',
     },
     {
       companyId: 3755,
@@ -370,7 +381,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:14 PM',
       id: 3755,
-      displayValue: 'TEST CLIENT'
+      displayValue: 'TEST CLIENT',
     },
     {
       companyId: 3756,
@@ -380,7 +391,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:15 PM',
       id: 3756,
-      displayValue: 'TEST CLIENT 3'
+      displayValue: 'TEST CLIENT 3',
     },
     {
       companyId: 3757,
@@ -390,7 +401,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:16 PM',
       id: 3757,
-      displayValue: 'TEST CLIENT2'
+      displayValue: 'TEST CLIENT2',
     },
     {
       companyId: 3758,
@@ -400,7 +411,7 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:17 PM',
       id: 3758,
-      displayValue: 'TESTING CLIENT'
+      displayValue: 'TESTING CLIENT',
     },
     {
       companyId: 3759,
@@ -410,32 +421,32 @@ export default function ClientsPage() {
       address: '',
       dateTimeAdded: '5/17/2024 10:18 PM',
       id: 3759,
-      displayValue: 'ZALAWI ZAMBIA'
-    }
+      displayValue: 'ZALAWI ZAMBIA',
+    },
   ];
 
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.displayValue.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredClients = clients.filter(
+    (client) =>
+      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.displayValue.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleSelectAll = () => {
     if (selectedClients.length === filteredClients.length) {
       setSelectedClients([]);
     } else {
-      setSelectedClients(filteredClients.map(client => client.id));
+      setSelectedClients(filteredClients.map((client) => client.id));
     }
   };
 
   const handleSelectClient = (clientId: number) => {
-    setSelectedClients(prev =>
+    setSelectedClients((prev) =>
       prev.includes(clientId)
-        ? prev.filter(id => id !== clientId)
+        ? prev.filter((id) => id !== clientId)
         : [...prev, clientId]
     );
   };
-
 
   return (
     <div className="p-6 space-y-6">
@@ -445,10 +456,12 @@ export default function ClientsPage() {
           <Users className="w-8 h-8 text-amber-600" />
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Clients</h1>
-            <p className="text-gray-600">Manage client companies and their information</p>
+            <p className="text-gray-600">
+              Manage client companies and their information
+            </p>
           </div>
-          <a 
-            href="/dashboard/clients/card-view" 
+          <a
+            href="/dashboard/clients/card-view"
             className="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors"
           >
             Card View
@@ -473,7 +486,9 @@ export default function ClientsPage() {
             <Users className="h-8 w-8 text-blue-600" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Clients</p>
-              <p className="text-2xl font-bold text-gray-900">{clients.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {clients.length}
+              </p>
             </div>
           </div>
         </div>
@@ -482,8 +497,12 @@ export default function ClientsPage() {
           <div className="flex items-center">
             <Building className="h-8 w-8 text-green-600" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Active Clients</p>
-              <p className="text-2xl font-bold text-gray-900">{clients.length}</p>
+              <p className="text-sm font-medium text-gray-600">
+                Active Clients
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {clients.length}
+              </p>
             </div>
           </div>
         </div>
@@ -494,7 +513,11 @@ export default function ClientsPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Locations</p>
               <p className="text-2xl font-bold text-gray-900">
-                {new Set(clients.filter(c => c.address).map(c => c.address)).size}
+                {
+                  new Set(
+                    clients.filter((c) => c.address).map((c) => c.address)
+                  ).size
+                }
               </p>
             </div>
           </div>
@@ -506,11 +529,16 @@ export default function ClientsPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">This Month</p>
               <p className="text-2xl font-bold text-gray-900">
-                {clients.filter(c => {
-                  const date = new Date(c.dateTimeAdded);
-                  const now = new Date();
-                  return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-                }).length}
+                {
+                  clients.filter((c) => {
+                    const date = new Date(c.dateTimeAdded);
+                    const now = new Date();
+                    return (
+                      date.getMonth() === now.getMonth() &&
+                      date.getFullYear() === now.getFullYear()
+                    );
+                  }).length
+                }
               </p>
             </div>
           </div>
@@ -533,11 +561,11 @@ export default function ClientsPage() {
             </div>
           </div>
           <div className="flex space-x-2">
-            <button 
+            <button
               onClick={() => setShowFilters(!showFilters)}
               className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
-                showFilters 
-                  ? 'bg-amber-100 text-amber-800 border border-amber-300' 
+                showFilters
+                  ? 'bg-amber-100 text-amber-800 border border-amber-300'
                   : 'border border-gray-300 hover:bg-gray-50'
               }`}
             >
@@ -558,14 +586,18 @@ export default function ClientsPage() {
           <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Company Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Company Type
+                </label>
                 <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                   <option>All Types</option>
                   <option>CLIENT</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Location
+                </label>
                 <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                   <option>All Locations</option>
                   <option>TANZANIA</option>
@@ -573,7 +605,9 @@ export default function ClientsPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date Added</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date Added
+                </label>
                 <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
                   <option>All Time</option>
                   <option>This Month</option>
@@ -590,13 +624,17 @@ export default function ClientsPage() {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Client Directory</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Client Directory
+            </h2>
             <div className="flex items-center space-x-2 text-sm text-gray-500">
-              <span>{filteredClients.length} of {clients.length} clients</span>
+              <span>
+                {filteredClients.length} of {clients.length} clients
+              </span>
             </div>
           </div>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -604,7 +642,10 @@ export default function ClientsPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   <input
                     type="checkbox"
-                    checked={selectedClients.length === filteredClients.length && filteredClients.length > 0}
+                    checked={
+                      selectedClients.length === filteredClients.length &&
+                      filteredClients.length > 0
+                    }
                     onChange={handleSelectAll}
                     className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
                   />
@@ -631,7 +672,10 @@ export default function ClientsPage() {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredClients.map((client) => (
-                <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+                <tr
+                  key={client.id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <input
                       type="checkbox"
@@ -646,8 +690,12 @@ export default function ClientsPage() {
                         <Building className="w-5 h-5 text-amber-600" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{client.name}</div>
-                        <div className="text-sm text-gray-500">{client.displayValue}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {client.name}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {client.displayValue}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -690,7 +738,8 @@ export default function ClientsPage() {
         <div className="px-6 py-4 border-t border-gray-200">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-700">
-              Showing <span className="font-medium">1</span> to <span className="font-medium">{filteredClients.length}</span> of{' '}
+              Showing <span className="font-medium">1</span> to{' '}
+              <span className="font-medium">{filteredClients.length}</span> of{' '}
               <span className="font-medium">{clients.length}</span> results
             </div>
             <div className="flex items-center space-x-2">

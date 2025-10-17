@@ -12,7 +12,10 @@ export default function TestSocketPage() {
   useEffect(() => {
     if (socket) {
       const addMessage = (msg: string) => {
-        setMessages(prev => [...prev, `${new Date().toLocaleTimeString()}: ${msg}`]);
+        setMessages((prev) => [
+          ...prev,
+          `${new Date().toLocaleTimeString()}: ${msg}`,
+        ]);
       };
 
       socket.on('connect', () => {
@@ -24,7 +27,9 @@ export default function TestSocketPage() {
       });
 
       socket.on('connect_error', (error) => {
-        addMessage(`Connection error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        addMessage(
+          `Connection error: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       });
 
       socket.on('ping:new', (ping) => {
@@ -44,7 +49,10 @@ export default function TestSocketPage() {
       };
     } else if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
       // Show message when Socket.IO is disabled on Vercel
-      setMessages(prev => [...prev, `${new Date().toLocaleTimeString()}: Socket.IO disabled for Vercel deployment`]);
+      setMessages((prev) => [
+        ...prev,
+        `${new Date().toLocaleTimeString()}: Socket.IO disabled for Vercel deployment`,
+      ]);
     }
   }, [socket]);
 
@@ -52,7 +60,10 @@ export default function TestSocketPage() {
     if (socket) {
       socket.emit('test-message', { message: 'Hello from client!' });
     } else {
-      setMessages(prev => [...prev, `${new Date().toLocaleTimeString()}: Cannot send message - Socket.IO not available`]);
+      setMessages((prev) => [
+        ...prev,
+        `${new Date().toLocaleTimeString()}: Cannot send message - Socket.IO not available`,
+      ]);
     }
   };
 
@@ -60,11 +71,13 @@ export default function TestSocketPage() {
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Socket.IO Connection Test</h1>
-        
+
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Connection Status</h2>
           <div className="flex items-center space-x-4">
-            <div className={`w-4 h-4 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+            <div
+              className={`w-4 h-4 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            />
             <span className="text-lg">
               {isConnected ? 'Connected' : 'Disconnected'}
             </span>

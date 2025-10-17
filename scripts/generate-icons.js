@@ -22,11 +22,13 @@ if (!fs.existsSync(iconsDir)) {
 }
 
 // Generate SVG icons
-sizes.forEach(size => {
+sizes.forEach((size) => {
   const svg = generateIcon(size);
   fs.writeFileSync(path.join(iconsDir, `icon-${size}x${size}.svg`), svg);
   console.log(`Generated icon-${size}x${size}.svg`);
 });
 
 console.log('✅ All PWA icons generated successfully!');
-console.log('Note: In production, convert these SVG files to PNG format for better compatibility.');
+console.log(
+  'Note: In production, convert these SVG files to PNG format for better compatibility.'
+);

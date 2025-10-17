@@ -75,9 +75,10 @@ registerRoute(
 
 // Cache static assets with stale-while-revalidate
 registerRoute(
-  ({ request }) => request.destination === 'script' || 
-                request.destination === 'style' ||
-                request.destination === 'image',
+  ({ request }) =>
+    request.destination === 'script' ||
+    request.destination === 'style' ||
+    request.destination === 'image',
   new StaleWhileRevalidate({
     cacheName: 'static-resources',
   })
@@ -98,7 +99,7 @@ self.addEventListener('push', (event) => {
         primaryKey: 1,
       },
     };
-    
+
     pushEvent.waitUntil(
       self.registration.showNotification(data.title, options)
     );
@@ -109,8 +110,6 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   const notificationEvent = event as NotificationEvent;
   notificationEvent.notification.close();
-  
-  notificationEvent.waitUntil(
-    self.clients.openWindow('/')
-  );
+
+  notificationEvent.waitUntil(self.clients.openWindow('/'));
 });

@@ -25,23 +25,21 @@ export function MainNav({ user, children }: MainNavProps) {
       <div className="min-h-screen bg-gray-50">
         {/* Desktop Sidebar */}
         <SidebarNav user={user} />
-        
+
         {/* Mobile Bottom Navigation */}
         <BottomNav />
-        
+
         {/* Main Content Area */}
         <div className="lg:ml-64">
           {/* Top Navigation */}
-          <TopNav 
-            user={user} 
+          <TopNav
+            user={user}
             onMenuClick={() => setSidebarOpen(!sidebarOpen)}
             showMenuButton={true}
           />
-          
+
           {/* Page Content */}
-          <main className="pb-16 lg:pb-0">
-            {children}
-          </main>
+          <main className="pb-16 lg:pb-0">{children}</main>
         </div>
       </div>
     </ThemeProvider>

@@ -6,7 +6,7 @@ import { getServerSession } from 'next-auth';
 
 export const createTRPCContext = async () => {
   let session = null;
-  
+
   try {
     session = await getServerSession(authOptions);
   } catch (error) {

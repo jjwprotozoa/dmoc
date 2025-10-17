@@ -3,26 +3,28 @@ import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-const alprRequestSchema = z.object({
-  imageUrl: z.string().url().optional(),
-  imageBase64: z.string().optional(),
-  confidence: z.number().min(0).max(1).default(0.8),
-}).refine(data => data.imageUrl || data.imageBase64, {
-  message: "Either imageUrl or imageBase64 must be provided",
-});
+const alprRequestSchema = z
+  .object({
+    imageUrl: z.string().url().optional(),
+    imageBase64: z.string().optional(),
+    confidence: z.number().min(0).max(1).default(0.8),
+  })
+  .refine((data) => data.imageUrl || data.imageBase64, {
+    message: 'Either imageUrl or imageBase64 must be provided',
+  });
 
 // Mock ALPR response
 const generateMockPlate = () => {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const numbers = '0123456789';
-  
+
   const letter1 = letters[Math.floor(Math.random() * letters.length)];
   const letter2 = letters[Math.floor(Math.random() * letters.length)];
   const letter3 = letters[Math.floor(Math.random() * letters.length)];
   const number1 = numbers[Math.floor(Math.random() * numbers.length)];
   const number2 = numbers[Math.floor(Math.random() * numbers.length)];
   const number3 = numbers[Math.floor(Math.random() * numbers.length)];
-  
+
   return `${letter1}${letter2}${letter3} ${number1}${number2}${number3}`;
 };
 
@@ -32,7 +34,9 @@ export async function POST(request: NextRequest) {
     const validatedData = alprRequestSchema.parse(body);
 
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+    await new Promise((resolve) =>
+      setTimeout(resolve, 1000 + Math.random() * 2000)
+    );
 
     // Generate mock response
     const mockResponse = {
@@ -48,9 +52,15 @@ export async function POST(request: NextRequest) {
             height: Math.floor(Math.random() * 50) + 30,
           },
           vehicle: {
-            make: ['Toyota', 'Ford', 'BMW', 'Mercedes', 'Honda'][Math.floor(Math.random() * 5)],
-            model: ['Sedan', 'SUV', 'Hatchback', 'Truck'][Math.floor(Math.random() * 4)],
-            color: ['White', 'Black', 'Silver', 'Red', 'Blue'][Math.floor(Math.random() * 5)],
+            make: ['Toyota', 'Ford', 'BMW', 'Mercedes', 'Honda'][
+              Math.floor(Math.random() * 5)
+            ],
+            model: ['Sedan', 'SUV', 'Hatchback', 'Truck'][
+              Math.floor(Math.random() * 4)
+            ],
+            color: ['White', 'Black', 'Silver', 'Red', 'Blue'][
+              Math.floor(Math.random() * 5)
+            ],
           },
         },
       ],
@@ -68,10 +78,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     logger.error('Mock ALPR error', { error });
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Invalid request data',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 400 }
     );

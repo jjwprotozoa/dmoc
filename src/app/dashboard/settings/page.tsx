@@ -10,7 +10,9 @@ export default function SettingsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-          <p className="text-gray-600">Manage your account and system preferences</p>
+          <p className="text-gray-600">
+            Manage your account and system preferences
+          </p>
         </div>
         <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-2">
           <Save className="w-4 h-4" />
@@ -67,23 +69,41 @@ export default function SettingsPage() {
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center space-x-2">
               <Bell className="h-5 w-5 text-gray-600" />
-              <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Notifications
+              </h2>
             </div>
           </div>
           <div className="p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900">Email Notifications</p>
-                <p className="text-xs text-gray-500">Receive updates via email</p>
+                <p className="text-sm font-medium text-gray-900">
+                  Email Notifications
+                </p>
+                <p className="text-xs text-gray-500">
+                  Receive updates via email
+                </p>
               </div>
-              <input type="checkbox" defaultChecked className="h-4 w-4 text-amber-600" />
+              <input
+                type="checkbox"
+                defaultChecked
+                className="h-4 w-4 text-amber-600"
+              />
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-900">Push Notifications</p>
-                <p className="text-xs text-gray-500">Receive browser notifications</p>
+                <p className="text-sm font-medium text-gray-900">
+                  Push Notifications
+                </p>
+                <p className="text-xs text-gray-500">
+                  Receive browser notifications
+                </p>
               </div>
-              <input type="checkbox" defaultChecked className="h-4 w-4 text-amber-600" />
+              <input
+                type="checkbox"
+                defaultChecked
+                className="h-4 w-4 text-amber-600"
+              />
             </div>
             <div className="flex items-center justify-between">
               <div>
@@ -140,7 +160,9 @@ export default function SettingsPage() {
         <div className="px-6 py-4 border-b border-gray-200">
           <div className="flex items-center space-x-2">
             <Settings className="h-5 w-5 text-gray-600" />
-            <h2 className="text-lg font-semibold text-gray-900">System Preferences</h2>
+            <h2 className="text-lg font-semibold text-gray-900">
+              System Preferences
+            </h2>
           </div>
         </div>
         <div className="p-6">

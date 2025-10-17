@@ -5,11 +5,11 @@ import { Phone, PhoneCall, PhoneOff, User } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from './button';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from './dialog';
 
 interface CallDialogProps {
@@ -27,23 +27,23 @@ export function CallDialog({
   driverName,
   phoneNumber,
   maskedPhoneNumber,
-  onCall
+  onCall,
 }: CallDialogProps) {
   const [isCalling, setIsCalling] = useState(false);
 
   const handleCall = () => {
     setIsCalling(true);
-    
+
     // Simulate call initiation
     setTimeout(() => {
       // In a real app, this would integrate with telephony service
       if (onCall) {
         onCall(phoneNumber);
       }
-      
+
       // Open native dialer
       window.open(`tel:${phoneNumber}`, '_self');
-      
+
       setIsCalling(false);
       onOpenChange(false);
     }, 1000);
@@ -96,7 +96,8 @@ export function CallDialog({
             {maskedPhoneNumber && (
               <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
                 <p className="text-xs text-yellow-800">
-                  <strong>Privacy Notice:</strong> Number is masked. Authentication required to view full number.
+                  <strong>Privacy Notice:</strong> Number is masked.
+                  Authentication required to view full number.
                 </p>
               </div>
             )}
@@ -134,8 +135,9 @@ export function CallDialog({
         </div>
 
         <div className="text-xs text-gray-500 bg-blue-50 p-3 rounded-md">
-          <strong>Note:</strong> This will open your device&apos;s default calling app. 
-          Make sure you have sufficient credit or are connected to Wi-Fi for VoIP calls.
+          <strong>Note:</strong> This will open your device&apos;s default
+          calling app. Make sure you have sufficient credit or are connected to
+          Wi-Fi for VoIP calls.
         </div>
       </DialogContent>
     </Dialog>

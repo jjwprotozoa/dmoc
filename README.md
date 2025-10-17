@@ -4,9 +4,36 @@
 
 A comprehensive Progressive Web Application (PWA) for logistics operations management, built with modern web technologies and designed for multi-tenant deployment.
 
+## 📋 Project Management
+
+### Linear Integration
+
+This project uses Linear for issue tracking and project management:
+
+- **Workspace**: [justwessels](https://linear.app/justwessels)
+- **Team**: Justwessels
+- **Issue Prefix**: JUS- (e.g., JUS-16, JUS-17)
+- **Configuration**: See `LINEAR_CONFIG.md` and `MCP_LINEAR_CONFIG.md`
+
+### Current Development Status
+
+- **Active Branch**: `feature/modernized-navigation`
+- **Recent Issues**: JUS-19 through JUS-27 (see Linear workspace)
+- **Major Features**: Navigation overhaul, database migration, vehicle management, privacy controls
+
+### AI Chat Integration
+
+For AI assistants working on this project:
+
+1. **Always use team parameter**: `"justwessels"` in Linear MCP tools
+2. **Reference**: `MCP_LINEAR_CONFIG.md` for complete MCP configuration
+3. **Check**: `LINEAR_CONFIG.md` for detailed setup instructions
+4. **Follow**: `.cursorrules` for development guidelines
+
 ## 🚀 Features
 
 ### Core Functionality
+
 - **Multi-tenant Architecture** - Support for multiple logistics clients (Delta, Cobra, etc.) under Digiwize
 - **Real-time Tracking** - Live vehicle and manifest updates via Socket.IO
 - **Fleet Management** - Comprehensive vehicle, driver, and client management
@@ -15,6 +42,7 @@ A comprehensive Progressive Web Application (PWA) for logistics operations manag
 - **Mobile-First Design** - Responsive design optimized for mobile devices
 
 ### Security & Privacy
+
 - **POPIA Compliance** - Comprehensive data protection for personal information
 - **Role-Based Access Control** - Admin/Manager/Operator/Viewer roles with granular permissions
 - **Data Masking** - Sensitive information automatically masked for unauthorized users
@@ -22,6 +50,7 @@ A comprehensive Progressive Web Application (PWA) for logistics operations manag
 - **Authentication** - NextAuth.js with JWT tokens and secure session management
 
 ### Advanced Features
+
 - **ANPR Integration** - Automatic Number Plate Recognition with YOLOv8 + PaddleOCR
 - **Biometric Verification** - Selfie/ID matching with InsightFace/DeepFace
 - **WhatsApp Integration** - Real-time communication and status updates
@@ -32,6 +61,7 @@ A comprehensive Progressive Web Application (PWA) for logistics operations manag
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Next.js 14** - React framework with App Router
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first CSS framework
@@ -40,6 +70,7 @@ A comprehensive Progressive Web Application (PWA) for logistics operations manag
 - **Lucide React** - Beautiful icons
 
 ### Backend
+
 - **NestJS** - Scalable Node.js framework
 - **tRPC** - End-to-end typesafe APIs
 - **Prisma ORM** - Database toolkit and ORM
@@ -48,12 +79,14 @@ A comprehensive Progressive Web Application (PWA) for logistics operations manag
 - **NextAuth.js** - Authentication framework
 
 ### Database & Storage
+
 - **MySQL 8.0+** - Primary database (PostgreSQL for production)
 - **Redis** - Caching and job queue
 - **S3/MinIO** - Object storage for media files
 - **Dexie** - Client-side database for offline support
 
 ### DevOps & Deployment
+
 - **Vercel** - Hosting and deployment platform
 - **Docker** - Containerization for local development
 - **GitHub Actions** - CI/CD pipeline
@@ -62,6 +95,7 @@ A comprehensive Progressive Web Application (PWA) for logistics operations manag
 ## 📦 Installation
 
 ### Prerequisites
+
 - Node.js 18.0.0 or higher
 - MySQL 8.0+ or PostgreSQL
 - Redis (optional, for background jobs)
@@ -69,37 +103,42 @@ A comprehensive Progressive Web Application (PWA) for logistics operations manag
 ### Local Development
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/digiwize/dmoc-web.git
    cd dmoc-web
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env.local
    # Edit .env.local with your configuration
    ```
 
 4. **Set up the database**
+
    ```bash
    # For development (SQLite)
    npm run db:dev
-   
+
    # For production (MySQL/PostgreSQL)
    npm run db:prod
    npm run db:push
    ```
 
 5. **Seed the database**
+
    ```bash
    # Development data
    npm run db:seed
-   
+
    # Production data
    npm run db:seed:prod
    ```
@@ -116,11 +155,13 @@ The application will be available at `http://localhost:3000`
 ### Vercel Deployment (Recommended)
 
 1. **Connect to Vercel**
+
    ```bash
    vercel --prod
    ```
 
 2. **Set environment variables** in Vercel dashboard:
+
    ```bash
    NEXTAUTH_URL=https://your-app.vercel.app
    NEXTAUTH_SECRET=your-super-secret-jwt-key-that-is-at-least-32-characters-long
@@ -142,6 +183,7 @@ The application will be available at `http://localhost:3000`
 ### Docker Deployment
 
 1. **Start services**
+
    ```bash
    docker-compose up -d
    ```
@@ -156,24 +198,24 @@ The application will be available at `http://localhost:3000`
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | Database connection string | `file:./dev.db` |
-| `NEXTAUTH_URL` | Application URL | `http://localhost:3000` |
-| `NEXTAUTH_SECRET` | JWT secret key | `your-super-secret-jwt-key...` |
-| `REDIS_URL` | Redis connection string | `redis://localhost:6379` |
-| `S3_ENDPOINT` | S3-compatible storage endpoint | `http://localhost:9000` |
-| `S3_REGION` | S3 region | `us-east-1` |
-| `S3_BUCKET` | S3 bucket name | `logistics-media` |
-| `S3_ACCESS_KEY_ID` | S3 access key | `minioadmin` |
-| `S3_SECRET_ACCESS_KEY` | S3 secret key | `minioadmin` |
+| Variable               | Description                    | Default                        |
+| ---------------------- | ------------------------------ | ------------------------------ |
+| `DATABASE_URL`         | Database connection string     | `file:./dev.db`                |
+| `NEXTAUTH_URL`         | Application URL                | `http://localhost:3000`        |
+| `NEXTAUTH_SECRET`      | JWT secret key                 | `your-super-secret-jwt-key...` |
+| `REDIS_URL`            | Redis connection string        | `redis://localhost:6379`       |
+| `S3_ENDPOINT`          | S3-compatible storage endpoint | `http://localhost:9000`        |
+| `S3_REGION`            | S3 region                      | `us-east-1`                    |
+| `S3_BUCKET`            | S3 bucket name                 | `logistics-media`              |
+| `S3_ACCESS_KEY_ID`     | S3 access key                  | `minioadmin`                   |
+| `S3_SECRET_ACCESS_KEY` | S3 secret key                  | `minioadmin`                   |
 
 ### Multi-tenant Configuration
 
 The application supports multiple tenants with different themes:
 
 - **Delta** - Blue theme
-- **Cobra** - Red theme  
+- **Cobra** - Red theme
 - **Digiwize** - Amber theme (admin)
 
 ## 📱 PWA Features
@@ -187,18 +229,21 @@ The application supports multiple tenants with different themes:
 ## 🔐 Security
 
 ### Authentication
+
 - JWT-based authentication with NextAuth.js
 - Role-based access control (Admin/Manager/Operator/Viewer)
 - Multi-factor authentication support
 - Session management with secure cookies
 
 ### Data Protection
+
 - POPIA compliance for personal data
 - Automatic data masking for sensitive information
 - Tenant isolation with strict data separation
 - Audit logging for compliance
 
 ### API Security
+
 - Rate limiting on webhook endpoints
 - Input validation with Zod schemas
 - CORS configuration
@@ -226,12 +271,14 @@ npm run format
 ## 📊 Monitoring
 
 ### Health Checks
+
 - `/api/health` - Application health status
 - Database connection monitoring
 - Redis connection status
 - S3 storage availability
 
 ### Logging
+
 - Structured logging with Winston
 - Error tracking and monitoring
 - Performance metrics

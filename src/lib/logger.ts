@@ -15,7 +15,11 @@ interface LogEntry {
 class Logger {
   private isDevelopment = process.env.NODE_ENV === 'development';
 
-  private formatMessage(level: LogLevel, message: string, metadata?: LogMetadata): LogEntry {
+  private formatMessage(
+    level: LogLevel,
+    message: string,
+    metadata?: LogMetadata
+  ): LogEntry {
     return {
       level,
       message,
@@ -26,9 +30,12 @@ class Logger {
 
   private log(level: LogLevel, message: string, metadata?: LogMetadata) {
     const entry = this.formatMessage(level, message, metadata);
-    
+
     if (this.isDevelopment) {
-      console.log(`[${entry.timestamp}] ${entry.level.toUpperCase()}: ${entry.message}`, entry.metadata);
+      console.log(
+        `[${entry.timestamp}] ${entry.level.toUpperCase()}: ${entry.message}`,
+        entry.metadata
+      );
     } else {
       // In production, you might want to send to a logging service
       console.log(JSON.stringify(entry));

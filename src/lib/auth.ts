@@ -35,7 +35,9 @@ declare module 'next-auth/jwt' {
 
 export const authOptions: NextAuthOptions = {
   // adapter: PrismaAdapter(db), // Using JWT strategy instead
-  secret: process.env.NEXTAUTH_SECRET || 'your-super-secret-jwt-key-that-is-at-least-32-characters-long',
+  secret:
+    process.env.NEXTAUTH_SECRET ||
+    'your-super-secret-jwt-key-that-is-at-least-32-characters-long',
   debug: true, // Enable debug in production for troubleshooting
   pages: {
     signIn: '/sign-in',
@@ -60,11 +62,20 @@ export const authOptions: NextAuthOptions = {
 
         console.log('🔐 Attempting authentication for:', credentials.email);
         console.log('🌍 Environment:', process.env.NODE_ENV);
-        console.log('🗄️ Database URL:', process.env.DATABASE_URL ? 'Set' : 'Not set');
+        console.log(
+          '🗄️ Database URL:',
+          process.env.DATABASE_URL ? 'Set' : 'Not set'
+        );
 
         // Fallback authentication for production when database is not available
-        if (credentials.email === 'admin@digiwize.com' && credentials.password === 'admin123') {
-          console.log('🎉 Fallback authentication successful for:', credentials.email);
+        if (
+          credentials.email === 'admin@digiwize.com' &&
+          credentials.password === 'admin123'
+        ) {
+          console.log(
+            '🎉 Fallback authentication successful for:',
+            credentials.email
+          );
           return {
             id: 'fallback-admin-id',
             email: 'admin@digiwize.com',
@@ -115,11 +126,17 @@ export const authOptions: NextAuthOptions = {
           console.error('❌ Error details:', {
             message: error instanceof Error ? error.message : 'Unknown error',
             code: (error as { code?: string })?.code,
-            stack: error instanceof Error ? error.stack?.substring(0, 200) : undefined
+            stack:
+              error instanceof Error
+                ? error.stack?.substring(0, 200)
+                : undefined,
           });
-          
+
           // Fallback to hardcoded credentials if database fails
-          if (credentials.email === 'admin@digiwize.com' && credentials.password === 'admin123') {
+          if (
+            credentials.email === 'admin@digiwize.com' &&
+            credentials.password === 'admin123'
+          ) {
             console.log('🎉 Fallback authentication successful after DB error');
             return {
               id: 'fallback-admin-id',
@@ -129,7 +146,7 @@ export const authOptions: NextAuthOptions = {
               tenantSlug: 'digiwize',
             };
           }
-          
+
           return null;
         }
       },

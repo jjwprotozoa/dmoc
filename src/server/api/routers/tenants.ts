@@ -3,27 +3,26 @@ import { z } from 'zod';
 import { adminProcedure, router } from '../trpc';
 
 export const tenantsRouter = router({
-  getAll: adminProcedure
-    .query(async ({ ctx }) => {
-      const tenants = await ctx.db.tenant.findMany({
-        include: {
-          organizations: {
-            include: {
-              companies: true,
-            },
-          },
-          _count: {
-            select: {
-              users: true,
-              devices: true,
-            },
+  getAll: adminProcedure.query(async ({ ctx }) => {
+    const tenants = await ctx.db.tenant.findMany({
+      include: {
+        organizations: {
+          include: {
+            companies: true,
           },
         },
-        orderBy: { createdAt: 'desc' },
-      });
+        _count: {
+          select: {
+            users: true,
+            devices: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
 
-      return tenants;
-    }),
+    return tenants;
+  }),
 
   getById: adminProcedure
     .input(z.object({ id: z.string() }))
@@ -57,11 +56,13 @@ export const tenantsRouter = router({
     }),
 
   create: adminProcedure
-    .input(z.object({
-      name: z.string(),
-      slug: z.string(),
-      settings: z.record(z.any()).optional(),
-    }))
+    .input(
+      z.object({
+        name: z.string(),
+        slug: z.string(),
+        settings: z.record(z.any()).optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const tenant = await ctx.db.tenant.create({
         data: {
@@ -75,22 +76,24 @@ export const tenantsRouter = router({
     }),
 
   update: adminProcedure
-    .input(z.object({
-      id: z.string(),
-      name: z.string().optional(),
-      slug: z.string().optional(),
-      settings: z.record(z.any()).optional(),
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string().optional(),
+        slug: z.string().optional(),
+        settings: z.record(z.any()).optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const { id, ...inputData } = input;
-      
+
       // Prepare data with proper type conversion
       const data: {
         name?: string;
         slug?: string;
         settings?: string;
       } = {};
-      
+
       if (inputData.name !== undefined) {
         data.name = inputData.name;
       }
@@ -100,7 +103,7 @@ export const tenantsRouter = router({
       if (inputData.settings !== undefined) {
         data.settings = JSON.stringify(inputData.settings);
       }
-      
+
       const tenant = await ctx.db.tenant.update({
         where: { id },
         data,

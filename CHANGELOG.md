@@ -7,7 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Comprehensive tRPC API Routers** - Complete CRUD operations for clients, drivers, and vehicles with tenant isolation
+- **Database Schema Migration** - Full MySQL production schema with SQLite development support
+- **Database Migration Documentation** - Complete setup guide for MySQL production deployment
+- **Enhanced Database Seeding** - Comprehensive seed data for clients, drivers, vehicles, and tenants
+- **Production Database Support** - Separate production and development database configurations
+- **Advanced Search and Filtering** - Multi-field search capabilities across all entity types
+- **Entity Statistics APIs** - Comprehensive statistics endpoints for clients, drivers, and vehicles
+- **Tenant-Based Data Isolation** - Proper multi-tenant data separation at the database level
+- **Grouped Sidebar Navigation** - Organized navigation items into logical groups (Manifests, Fleet Management, Operations, People & Contacts, Business, System)
+- **Collapsible Menu Groups** - Click to expand/collapse navigation groups with smooth animations
+- **Scrollable Sidebar** - Fixed sidebar height with proper overflow handling for long navigation lists
+- **Enhanced Menu Animations** - Smooth expand/collapse transitions with staggered item animations
+- **Chevron Indicators** - Visual indicators (ChevronDown/ChevronRight) showing group expansion state
+- **VehicleCombination Models** - Added VehicleCombination and VehicleCombinationTrailer models to Prisma schema for horse-trailer pairing functionality
+- **Vehicle Combinations Router** - Complete tRPC router for managing vehicle combinations with CRUD operations and tenant isolation
+- **Linear Integration Documentation** - Added comprehensive Linear workspace configuration to .cursorrules
+- **Project Configuration File** - Created LINEAR_CONFIG.md with detailed Linear integration settings
+- **MCP Configuration Guidelines** - Documented correct team identifiers and issue creation process
+- **Git Branch Naming Standards** - Established consistent branch naming format (jjwprotozoa/jus-{issue-number}-{title})
+- **Issue Tracking Workflow** - Defined process for creating and managing Linear issues
+
+- Added comprehensive MCP configuration files and updated documentation to ensure future AI chats can properly interact with Linear workspace
+### Changed
+
+- **API Architecture** - Migrated from mock data to comprehensive tRPC routers with database integration
+- **Database Configuration** - Updated to support both MySQL (production) and SQLite (development) databases
+- **Data Persistence** - Replaced temporary mock data with persistent database storage
+- **Router Structure** - Added dedicated routers for clients, drivers, and vehicles with full CRUD operations
+- **Database Schema** - Enhanced with proper relationships, indexes, and tenant isolation
+- **Seed Data Structure** - Comprehensive seeding with realistic data for all entity types
+- **Tailwind Configuration** - Added custom animations and enhanced styling capabilities
+- **Navigation Structure** - Reorganized 19 navigation items into 6 logical groups for better organization
+- **Color Scheme** - Improved contrast with dark gray background and white text/icons for better readability
+- **Menu Behavior** - Groups expand/collapse independently with persistent state management
+- **Visual Hierarchy** - Better visual separation between group headers and individual items
+- **Default Group States** - Manifests and Fleet Management groups open by default, others collapsed
+
 ### Fixed
+
+- **Database Connection Issues** - Resolved SQLite/MySQL configuration conflicts and connection errors
+- **TypeScript Router Errors** - Fixed all TypeScript errors in new tRPC routers including proper imports and context access
+- **Database Schema Validation** - Corrected Prisma schema relationships and field types for proper data integrity
+- **Tenant Isolation** - Ensured proper tenant-based data filtering across all database queries
+- **API Response Consistency** - Standardized API responses and error handling across all routers
+- **Database Migration Process** - Streamlined migration from mock data to persistent database storage
+- **Color Contrast Issues** - Resolved poor visibility of yellow/gold icons on light gradient backgrounds
+- **Menu Overflow** - Fixed static menu that couldn't scroll to show all navigation items
+- **Vehicle Router TypeScript Errors** - Fixed 14 TypeScript compilation errors in vehicles router related to VehicleWhereInput type recognition
+- **Prisma Type Generation Issues** - Resolved VehicleWhereInput type not recognizing Vehicle model fields (tenantId, registration, countryOfOrigin, entityTypeDescription, currentDriver, location, status)
+- **Navigation Organization** - Improved findability by grouping related functions together
+- **Visual Consistency** - Consistent color scheme throughout entire sidebar for better UX
 - **TypeScript Build Errors** - Resolved all unused variable errors in dashboard components
 - **ESLint Compliance** - Fixed unescaped entities and explicit any types throughout codebase
 - **Production Build** - Eliminated all compilation errors preventing production deployment
@@ -18,11 +70,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Index Parameter** - Fixed unused index parameter in vehicle combinations mapping
 - **Entity Escaping** - Fixed unescaped apostrophe in call dialog component
 - **Type Definitions** - Replaced explicit any types with proper Manifest interface in active manifests page
-
-### Changed
-- **Build Process** - Streamlined build process with proper error handling and validation
-- **Code Standards** - Enhanced code quality standards with stricter TypeScript and ESLint rules
-- **Production Readiness** - Improved production deployment readiness with comprehensive error fixes
 - **Vehicles Card View with Tabbed Interface** - Comprehensive fleet management with Horses, Trailers, and Combinations tabs
 - **Manual Fuel Monitoring System** - Realistic fuel entry logging with driver input for refuel tracking
 - **Horse-Trailer Combination Management** - Track active combinations with multiple trailers per horse
@@ -43,7 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Enhanced Phone Calling** - Click-to-call functionality with masked number display for privacy protection
 - **POPIA-Compliant Privacy Controls** - Comprehensive data protection system for sensitive driver information
 - **Role-Based Access Control** - Admin/Manager roles with full access, Operator/Viewer roles with masked data
-- **Data Masking System** - ID numbers and contact details masked for unauthorized users (e.g., TAE***089, 255***0307)
+- **Data Masking System** - ID numbers and contact details masked for unauthorized users (e.g., TAE**_089, 255_**0307)
 - **Authentication Dialog** - Password-protected access to sensitive driver details with audit trail
 - **Click-to-Dial Functionality** - Direct phone dialing for authorized users with proper privacy controls
 - **Driver Card View (A/B Test)** - Mobile-optimized card layout with progressive disclosure of information
@@ -58,7 +105,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Modern Top Navigation Bar** - Clean header with search, notifications, and user menu
 - **Navigation State Management** - Active state indicators and smooth transitions
 - **Sample Dashboard Pages** - Functional pages for Active Manifests, Vehicles, Routes, Trackers, Settings, and Clients
-- **Comprehensive TypeScript type definitions for Cloudflare Workers
+- \*\*Comprehensive TypeScript type definitions for Cloudflare Workers
 - Service Worker event type interfaces (PushEvent, NotificationEvent, PushMessageData)
 - Client and WindowClient interfaces for service worker client management
 - Proper ExecutionContext interface for Cloudflare Workers
@@ -69,6 +116,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time activity feed with Socket.IO connection status indicator
 
 ### Changed
+
 - **Vehicle Management Architecture** - Replaced single vehicle list with tabbed interface for better fleet organization
 - **Fuel Monitoring Approach** - Changed from automatic fuel level monitoring to manual refuel entry system
 - **Vehicle Data Structure** - Enhanced with combination tracking, fuel entries, and maintenance scheduling
@@ -96,6 +144,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Socket.IO client configuration with improved transport settings and timeout handling
 
 ### Fixed
+
+- **TypeScript Router Errors** - Fixed all 28 TypeScript errors in vehicles router including tRPC imports, context access, and Prisma schema issues
+- **tRPC Import Issues** - Corrected createTRPCRouter import to use router from trpc.ts across all router files
+- **Context User Access** - Fixed ctx.user references to use ctx.session.user for proper context structure
+- **Prisma Schema Validation** - Removed non-existent VehicleCombination and VehicleCombinationTrailer models causing relation errors
+- **Database Relations** - Added proper companyId relations between Company, Driver, and Vehicle models
+- **Type Safety** - Added type assertions for Prisma where clauses to resolve tenantId filtering issues
+- **Router Consistency** - Applied same fixes to clients.ts and drivers.ts routers for consistency
 - **Individual Card Authentication** - Fixed issue where authenticating one card would unlock all driver cards
 - **Phone Call Privacy** - Resolved phone number exposure in call dialogs for unauthorized users
 - **Lock Icon Behavior** - Corrected lock/unlock state management to be per-card instead of global
@@ -137,6 +193,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed Socket.IO client connection stability and error handling
 
 ### Security
+
+- **Enhanced Database Security** - Proper tenant isolation at the database level preventing cross-tenant data access
+- **API Authentication** - All new tRPC routers require proper authentication and tenant validation
+- **Data Validation** - Comprehensive input validation using Zod schemas for all API endpoints
+- **SQL Injection Prevention** - Prisma ORM provides protection against SQL injection attacks
 - **Enhanced Per-Card Privacy** - Individual authentication required for each driver card, preventing bulk data exposure
 - **Call Dialog Privacy Protection** - Phone numbers remain masked in call dialogs until individual authentication
 - **Granular Access Control** - Each driver's sensitive data requires separate authentication for maximum security
@@ -148,10 +209,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Privacy by Design** - Data masking applied by default with clear visual indicators
 - **Click-to-Dial Security** - Phone dialing functionality restricted to authorized users only
 
+### Technical Improvements
+
+- **Database Architecture** - Migrated from mock data to full database persistence with Prisma ORM
+- **Multi-Database Support** - SQLite for development, MySQL for production with seamless switching
+- **API Standardization** - Consistent tRPC patterns across all routers with proper error handling
+- **Type Safety** - Enhanced TypeScript integration with proper Prisma types and Zod validation
+- **Performance Optimization** - Database queries optimized with proper indexing and relationships
+- **Scalability Preparation** - Database architecture ready for multi-tenant production deployment
+- **Development Workflow** - Streamlined database setup with comprehensive seeding and migration scripts
+- **Code Organization** - Modular router structure with clear separation of concerns
+- **Error Handling** - Comprehensive error handling and validation across all API endpoints
+- **Documentation** - Complete database migration guide and setup instructions
+
 ### Deprecated
+
 - N/A
 
 ### Removed
+
 - N/A
 
 ---
@@ -159,18 +235,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.2] - 2025-01-15
 
 ### Added
+
 - React Leaflet integration for better React component lifecycle management
 - Error boundary component for map loading failures with retry functionality
 - Enhanced loading states with animated spinner for better UX
 - Automatic map bounds fitting component using React Leaflet hooks
 
 ### Changed
+
 - Migrated Map component from manual Leaflet to React Leaflet components
 - Replaced complex manual map lifecycle management with declarative React components
 - Simplified marker management using React's reconciliation algorithm
 - Improved TypeScript integration with proper Leaflet types
 
 ### Fixed
+
 - Resolved map container sizing and responsiveness issues (JUS-7)
 - Fixed Leaflet marker icon loading problems
 - Eliminated CSS z-index conflicts with map elements
@@ -178,6 +257,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reduced code complexity by ~50% (300+ lines → 145 lines)
 
 ### Removed
+
 - Manual Leaflet map initialization and cleanup logic
 - Complex ResizeObserver and window resize event handling
 - Manual CSS injection for Leaflet container styling
@@ -188,6 +268,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.1] - 2024-12-19
 
 ### Added
+
 - Enhanced Map component with improved Leaflet integration
 - Real-time location tracking with dynamic markers
 - Comprehensive popup information for vehicle locations
@@ -197,12 +278,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced error handling and loading states
 
 ### Changed
+
 - Map component now uses dynamic Leaflet imports for better performance
 - Improved map initialization with multiple resize attempts
 - Enhanced marker management with proper cleanup
 - Better container sizing and positioning for map elements
 
 ### Fixed
+
 - Fixed online status tracking and WebSocket connection issues
 - Resolved map container sizing problems in dashboard
 - Fixed Leaflet marker icon loading issues
@@ -210,6 +293,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed CSS z-index conflicts with map elements
 
 ### Security
+
 - Enhanced webhook rate limiting for WhatsApp integration
 - Improved input validation for location data
 - Better error handling for unauthorized access attempts
@@ -219,6 +303,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2024-01-15
 
 ### Added
+
 - Multi-tenant logistics operations PWA
 - Real-time vehicle tracking with Socket.IO
 - Manifest management system
@@ -237,6 +322,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Service worker for offline functionality
 
 ### Technical Stack
+
 - **Frontend**: Next.js 15 (App Router), TypeScript, Tailwind CSS
 - **Backend**: NestJS, tRPC, Prisma ORM
 - **Database**: MySQL 8.0+
@@ -249,6 +335,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **AI/ML**: YOLOv8 + PaddleOCR (ANPR), InsightFace/DeepFace (Biometrics)
 
 ### Security Features
+
 - Tenant isolation via tenant_id on all queries
 - Rate limiting on webhook endpoints
 - Input validation with Zod schemas
@@ -259,22 +346,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
-| Version | Date | Description |
-|---------|------|-------------|
-| 1.0.2 | 2025-01-15 | React Leaflet migration and map responsiveness fixes (JUS-7) |
-| 1.0.1 | 2024-12-19 | Map component enhancements and WebSocket fixes |
-| 0.1.0 | 2024-01-15 | Initial release with core PWA functionality |
+| Version | Date       | Description                                                  |
+| ------- | ---------- | ------------------------------------------------------------ |
+| 1.0.2   | 2025-01-15 | React Leaflet migration and map responsiveness fixes (JUS-7) |
+| 1.0.1   | 2024-12-19 | Map component enhancements and WebSocket fixes               |
+| 0.1.0   | 2024-01-15 | Initial release with core PWA functionality                  |
 
 ---
 
 ## Changelog Guidelines
 
 ### Version Numbering
+
 - **MAJOR** (X.0.0): Breaking changes, major feature additions
 - **MINOR** (0.X.0): New features, significant improvements
 - **PATCH** (0.0.X): Bug fixes, minor improvements, documentation updates
 
 ### Change Categories
+
 - **Added**: New features
 - **Changed**: Changes to existing functionality
 - **Fixed**: Bug fixes
@@ -283,28 +372,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Removed**: Removed features
 
 ### Entry Format
+
 ```markdown
 ### Added
+
 - Feature description with context
 - Another feature
 
 ### Changed
+
 - Change description with impact
 - Another change
 
 ### Fixed
+
 - Bug fix description
 - Another fix
 ```
 
 ### Automated Updates
+
 This changelog is automatically updated using:
+
 - `npm run changelog:add` - Add new changelog entry
 - `npm run changelog:version` - Bump version and create new section
 - Git hooks for automatic updates on commit/merge
 
 ### Manual Updates
+
 For manual updates, follow the format above and ensure:
+
 1. Entries are in reverse chronological order (newest first)
 2. Each entry includes a brief description
 3. Breaking changes are clearly marked
