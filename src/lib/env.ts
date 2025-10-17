@@ -27,6 +27,19 @@ const envSchema = z.object({
   TRACCAR_WEBHOOK_SECRET: z.string().optional().default('traccar-secret-key'),
   WHATSAPP_WEBHOOK_SECRET: z.string().optional().default('whatsapp-secret-key'),
 
+  // UltraMsg WhatsApp Integration
+  ULTRAMSG_INSTANCE_ID: z.string().optional(),
+  ULTRAMSG_TOKEN: z.string().optional(),
+  ULTRAMSG_SENDER_PHONE: z.string().optional(),
+
+  // Traccar GPS Tracking
+  TRACCAR_BASE_URL: z.string().optional(),
+  TRACCAR_TOKEN: z.string().optional(),
+
+  // Tive Logistics Tracking
+  TIVE_API_BASE_URL: z.string().optional().default('https://platform.tive.com/api'),
+  TIVE_API_KEY: z.string().optional(),
+
   // Node Environment
   NODE_ENV: z
     .enum(['development', 'production', 'test'])
@@ -54,6 +67,13 @@ try {
       S3_SECRET_ACCESS_KEY: 'minioadmin',
       TRACCAR_WEBHOOK_SECRET: 'traccar-secret-key',
       WHATSAPP_WEBHOOK_SECRET: 'whatsapp-secret-key',
+      ULTRAMSG_INSTANCE_ID: undefined,
+      ULTRAMSG_TOKEN: undefined,
+      ULTRAMSG_SENDER_PHONE: undefined,
+      TRACCAR_BASE_URL: undefined,
+      TRACCAR_TOKEN: undefined,
+      TIVE_API_BASE_URL: 'https://platform.tive.com/api',
+      TIVE_API_KEY: undefined,
       NODE_ENV: 'development',
     };
   } else {
@@ -63,3 +83,66 @@ try {
 
 export { env };
 export type Env = z.infer<typeof envSchema>;
+
+/**
+ * Checks if all required environment variables are configured
+ * @param keys - Array of environment variable keys to check
+ * @returns true if all keys are configured, false otherwise
+ */
+export function isConfigured(keys: string[]): boolean {
+  return keys.every(key => {
+    const value = process.env[key];
+    return value !== undefined && value !== '';
+  });
+}
+
+/**
+ * Requires specific environment variables to be configured
+ * @param keys - Array of environment variable keys to require
+ * @throws Error if any required key is missing
+ */
+export function requireEnv(keys: string[]): void {
+  const missing = keys.filter(key => {
+    const value = process.env[key];
+    return value === undefined || value === '';
+  });
+  
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+}
+
+/**
+ * Standardized environment guard for integrations
+ * Prevents live API calls when credentials are missing
+ * @param vars - Array of environment variable keys to check
+ * @throws Error if any required variable is missing
+ */
+export function ensureConfigured(vars: string[]): void {
+  const missing = vars.filter((k) => !process.env[k]);
+  if (missing.length) {
+    throw new Error(`Integration not configured: ${missing.join(", ")}`);
+  }
+}
+
+/**
+ * Integration status helper - checks if all required vars are configured
+ * @param vars - Array of environment variable keys to check
+ * @returns true if all variables are configured, false otherwise
+ */
+export function isIntegrationConfigured(vars: string[]): boolean {
+  return vars.every((k) => process.env[k]);
+}
+
+/**
+ * Get integration status for all services
+ * @returns Object with configuration status for each integration
+ */
+export function getIntegrationStatus() {
+  return {
+    ultraMsg: isIntegrationConfigured(['ULTRAMSG_INSTANCE_ID', 'ULTRAMSG_TOKEN']),
+    traccar: isIntegrationConfigured(['TRACCAR_BASE_URL', 'TRACCAR_TOKEN']),
+    tive: isIntegrationConfigured(['TIVE_API_KEY']),
+    db: isIntegrationConfigured(['DATABASE_URL']),
+  };
+}

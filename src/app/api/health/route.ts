@@ -1,10 +1,23 @@
 // src/app/api/health/route.ts
 // Health check endpoint for production debugging
+import { db } from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const health = {
+    const health: {
+      status: string;
+      timestamp: string;
+      environment: string;
+      nextAuthUrl: string | undefined;
+      nextAuthSecret: string;
+      databaseUrl: string;
+      vercelUrl: string | undefined;
+      vercelEnv: string | undefined;
+      dbConfigured?: boolean;
+      dbConnected?: boolean;
+      dbError?: string;
+    } = {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       environment: process.env.NODE_ENV,
@@ -14,6 +27,22 @@ export async function GET() {
       vercelUrl: process.env.VERCEL_URL,
       vercelEnv: process.env.VERCEL_ENV,
     };
+
+    // Only test database connectivity if DATABASE_URL is configured
+    if (process.env.DATABASE_URL) {
+      try {
+        await db.$queryRaw`SELECT 1`;
+        health.dbConfigured = true;
+        health.dbConnected = true;
+      } catch (dbError) {
+        health.dbConfigured = true;
+        health.dbConnected = false;
+        health.dbError = dbError instanceof Error ? dbError.message : 'Unknown error';
+      }
+    } else {
+      health.dbConfigured = false;
+      health.dbConnected = false;
+    }
 
     return NextResponse.json(health);
   } catch (error) {
