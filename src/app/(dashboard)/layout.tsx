@@ -26,7 +26,7 @@ export default async function DashboardLayout({
 
   return (
     <MainNav user={session.user as User}>
-      <div className="p-4 sm:p-6">{children}</div>
+      <div className="px-2 py-4 sm:px-4 sm:py-6 overflow-x-hidden max-w-full">{children}</div>
     </MainNav>
   );
 }

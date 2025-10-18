@@ -29,12 +29,12 @@ export default function DashboardPage() {
   const { data: latestPings } = trpc.tracking.getLatestPings.useQuery({});
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-2 sm:space-y-4 md:space-y-6 overflow-x-hidden max-w-full">
       <InstallPrompt />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6 overflow-x-hidden max-w-full">
         {/* Left Column - Manifests */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 overflow-x-hidden max-w-full">
           <ManifestsList
             manifests={manifests || []}
             selectedManifest={selectedManifest}
@@ -43,12 +43,12 @@ export default function DashboardPage() {
         </div>
 
         {/* Center Column - Map */}
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm border relative overflow-hidden h-[400px] sm:h-[500px] lg:h-[600px] flex flex-col">
-            <div className="p-3 sm:p-4 border-b flex-shrink-0">
-              <h2 className="text-base sm:text-lg font-semibold">Live Tracking</h2>
+        <div className="lg:col-span-1 overflow-x-hidden max-w-full">
+          <div className="bg-white rounded-lg shadow-sm border relative overflow-hidden h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] flex flex-col max-w-full">
+            <div className="p-2 sm:p-3 md:p-4 border-b flex-shrink-0">
+              <h2 className="text-sm sm:text-base md:text-lg font-semibold">Live Tracking</h2>
             </div>
-            <div className="flex-1 relative overflow-hidden">
+            <div className="flex-1 relative overflow-hidden max-w-full">
               <Map
                 pings={latestPings || []}
                 selectedManifest={selectedManifest}
@@ -58,7 +58,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Right Column - Activity Feed */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 overflow-x-hidden max-w-full">
           <ActivityFeed />
         </div>
       </div>

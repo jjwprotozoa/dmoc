@@ -168,7 +168,7 @@ export function BottomNav() {
     <>
       {/* Bottom Navigation */}
       <div className={`bottom-nav-fixed bg-gradient-to-t from-gray-900 via-gray-800 to-gray-900 border-t border-gray-700 shadow-2xl lg:hidden`} style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="flex items-center justify-around py-2">
+        <div className="flex items-center justify-between px-2 py-2">
           {primaryNavItems.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -179,7 +179,7 @@ export function BottomNav() {
                   key={item.id}
                   onClick={handleMoreClick}
                   className={`
-                    flex flex-col items-center p-2 rounded-lg transition-all duration-200
+                    flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200
                     ${
                       showMore
                         ? `bg-${theme.primary}-600 text-white`
@@ -188,7 +188,7 @@ export function BottomNav() {
                   `}
                 >
                   <Icon className="w-5 h-5" />
-                  <span className="text-xs mt-1 font-medium">{item.label}</span>
+                  <span className="text-xs font-medium">{item.label}</span>
                 </button>
               );
             }
@@ -198,7 +198,7 @@ export function BottomNav() {
                 key={item.id}
                 href={item.href}
                 className={`
-                  flex flex-col items-center p-2 rounded-lg transition-all duration-200
+                  flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 relative
                   ${
                     isActive
                       ? `bg-${theme.primary}-600 text-white`
@@ -207,9 +207,9 @@ export function BottomNav() {
                 `}
               >
                 <Icon className="w-5 h-5" />
-                <span className="text-xs mt-1 font-medium">{item.label}</span>
+                <span className="text-xs font-medium">{item.label}</span>
                 {isActive && (
-                  <div className="w-1 h-1 bg-white rounded-full mt-1" />
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full" />
                 )}
               </Link>
             );

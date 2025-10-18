@@ -75,6 +75,89 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Prevent horizontal overflow on all elements */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  /* Ensure all containers respect viewport width */
+  .container, main, .main-content-mobile {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  
+  /* Prevent any element from exceeding viewport width */
+  * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* Ensure grid layouts don't overflow */
+  .grid {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Ensure flex containers don't overflow */
+  .flex {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+/* Ultra-aggressive mobile constraints for small devices like Samsung Galaxy A51/71 */
+@media (max-width: 450px) {
+  /* Force containers to fit within viewport - exclude interactive elements */
+  div, section, article, main, .container, .main-content-mobile {
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Override any padding that might cause overflow */
+  .p-4, .p-6, .px-4, .px-6, .py-4, .py-6 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  /* Ensure all containers are constrained */
+  body, html, main, .main-content-mobile, .container {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  
+  /* Force grid layouts to be single column on very small screens */
+  .grid-cols-1 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Ensure buttons and interactive elements work properly */
+  button, input, select, textarea, a, [role="button"] {
+    max-width: 100% !important;
+    width: auto !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+  }
+  
+  /* Ensure bottom navigation works properly */
+  .bottom-nav-fixed {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Ensure navigation links work */
+  .bottom-nav-fixed a, .bottom-nav-fixed button {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
 }
 
 /* Leaflet map styles */
@@ -102,11 +185,36 @@ body {
     z-index: 9999 !important;
     transform: translateZ(0); /* Force hardware acceleration */
     -webkit-transform: translateZ(0);
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+  }
+  
+  /* Ensure navigation buttons are properly sized and clickable */
+  .bottom-nav-fixed button,
+  .bottom-nav-fixed a {
+    pointer-events: auto !important;
+    touch-action: manipulation !important;
+    min-height: 44px !important;
+    min-width: 44px !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Ensure horizontal layout for bottom navigation */
+  .bottom-nav-fixed .flex {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
   }
   
   /* Prevent content from being hidden behind BottomNav */
   .main-content-mobile {
     padding-bottom: calc(5rem + env(safe-area-inset-bottom)) !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
   }
 }
 
@@ -138,6 +246,41 @@ body {
   [data-radix-dialog-content] > div {
     max-height: 100%;
     overflow-y: auto;
+  }
+  
+  /* Aggressive mobile width constraints */
+  body, html {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Force all containers to respect mobile width */
+  .container, main, .main-content-mobile, div, section, article {
+    max-width: 100vw !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Ensure grid layouts don't overflow on mobile */
+  .grid {
+    max-width: 100vw !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Force flex containers to wrap */
+  .flex {
+    max-width: 100vw !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+    flex-wrap: wrap !important;
+  }
+  
+  /* Ensure padding doesn't cause overflow */
+  .p-4, .p-6, .px-4, .px-6 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
   }
 }
 

@@ -22,7 +22,7 @@ export function MainNav({ user, children }: MainNavProps) {
 
   return (
     <ThemeProvider initialTenantSlug={user.tenantSlug}>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 overflow-x-hidden max-w-full">
         {/* Desktop Sidebar - Hidden on mobile */}
         <div className="hidden lg:block">
           <SidebarNav 
@@ -33,7 +33,7 @@ export function MainNav({ user, children }: MainNavProps) {
         </div>
 
         {/* Main Content Area */}
-        <div className={`transition-all duration-300 ease-in-out ${
+        <div className={`transition-all duration-300 ease-in-out overflow-x-hidden max-w-full ${
           sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
         }`}>
           {/* Top Navigation */}
@@ -43,7 +43,7 @@ export function MainNav({ user, children }: MainNavProps) {
           />
 
           {/* Page Content */}
-          <main className="pb-20 lg:pb-0 main-content-mobile">{children}</main>
+          <main className="pb-20 lg:pb-0 main-content-mobile overflow-x-hidden max-w-full">{children}</main>
         </div>
 
         {/* Mobile Bottom Navigation */}
