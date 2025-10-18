@@ -5,11 +5,11 @@ import { Eye, EyeOff, Lock, Shield } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from './button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
 } from './dialog';
 import { Input } from './input';
 import { Label } from './label';
@@ -55,7 +55,7 @@ export function AuthDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Shield className="w-5 h-5 text-amber-600" />

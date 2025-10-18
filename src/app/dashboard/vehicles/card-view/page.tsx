@@ -777,7 +777,7 @@ export default function VehiclesCardViewPage() {
                       View Details
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-4xl">
+                  <DialogContent size="4xl">
                     <DialogHeader>
                       <DialogTitle className="flex items-center space-x-2">
                         <span className="text-2xl">{getCountryFlag(vehicle.countryOfOrigin)}</span>
@@ -979,7 +979,7 @@ export default function VehiclesCardViewPage() {
       {/* Vehicle Logbook Dialog */}
       {logbookVehicle && (
         <Dialog open={showLogbookDialog} onOpenChange={setShowLogbookDialog}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogContent size="4xl">
             <DialogHeader>
               <DialogTitle className="flex items-center space-x-2">
                 <BookOpen className="w-6 h-6 text-amber-600" />
@@ -1071,7 +1071,7 @@ export default function VehiclesCardViewPage() {
       {/* Fuel Entry Dialog */}
       {fuelEntryVehicle && (
         <Dialog open={showFuelEntryDialog} onOpenChange={setShowFuelEntryDialog}>
-          <DialogContent className="max-w-md">
+          <DialogContent size="md">
             <DialogHeader>
               <DialogTitle className="flex items-center space-x-2">
                 <Fuel className="w-6 h-6 text-amber-600" />

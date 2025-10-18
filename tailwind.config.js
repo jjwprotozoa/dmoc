@@ -16,6 +16,14 @@ module.exports = {
         '2xl': '1400px',
       },
     },
+    screens: {
+      'xs': '475px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       colors: {
         border: 'hsl(var(--border))',
@@ -100,6 +108,15 @@ module.exports = {
       scale: {
         102: '1.02',
         105: '1.05',
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+      },
+      maxHeight: {
+        '85vh': '85vh',
+        '90vh': '90vh',
+        '95vh': '95vh',
       },
     },
   },

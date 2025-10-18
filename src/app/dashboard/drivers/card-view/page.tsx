@@ -2,43 +2,43 @@
 'use client';
 
 import {
-  Camera,
-  CheckCircle,
-  Clock,
-  CreditCard,
-  Edit,
-  Eye,
-  FileText,
-  Lock,
-  MoreHorizontal,
-  Phone,
-  Plus,
-  RefreshCw,
-  Search,
-  Shield,
-  Unlock,
-  User,
-  XCircle,
+    Camera,
+    CheckCircle,
+    Clock,
+    CreditCard,
+    Edit,
+    Eye,
+    FileText,
+    Lock,
+    MoreHorizontal,
+    Phone,
+    Plus,
+    RefreshCw,
+    Search,
+    Shield,
+    Unlock,
+    User,
+    XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 import { AuthDialog } from '../../../../components/ui/auth-dialog';
 import { Button } from '../../../../components/ui/button';
 import { CallDialog } from '../../../../components/ui/call-dialog';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from '../../../../components/ui/dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '../../../../components/ui/dropdown-menu';
 
 interface Driver {
@@ -581,7 +581,7 @@ export default function DriversCardViewPage() {
                       View Details
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
+                  <DialogContent size="2xl">
                     <DialogHeader>
                       <DialogTitle className="flex items-center space-x-2">
                         <span className="text-2xl">

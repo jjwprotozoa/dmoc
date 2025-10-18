@@ -2,36 +2,36 @@
 'use client';
 
 import {
-  Building,
-  Calendar,
-  Download,
-  Edit,
-  Eye,
-  Filter,
-  MapPin,
-  MoreHorizontal,
-  Plus,
-  Search,
-  Users,
+    Building,
+    Calendar,
+    Download,
+    Edit,
+    Eye,
+    Filter,
+    MapPin,
+    MoreHorizontal,
+    Plus,
+    Search,
+    Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import { AuthDialog } from '../../../../components/ui/auth-dialog';
 import { Button } from '../../../../components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from '../../../../components/ui/dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '../../../../components/ui/dropdown-menu';
 import { PrivacyNotice } from '../../../../components/ui/privacy-notice';
 import { SensitiveDataField } from '../../../../components/ui/sensitive-data-field';
@@ -864,7 +864,7 @@ export default function ClientsCardViewPage() {
                       View Details
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
+                  <DialogContent size="2xl">
                     <DialogHeader>
                       <DialogTitle className="flex items-center space-x-2">
                         <Building className="w-6 h-6 text-amber-600" />

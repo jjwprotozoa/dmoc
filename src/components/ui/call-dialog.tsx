@@ -5,11 +5,11 @@ import { Phone, PhoneCall, PhoneOff, User } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from './button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
 } from './dialog';
 
 interface CallDialogProps {
@@ -62,7 +62,7 @@ export function CallDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Phone className="w-5 h-5 text-green-600" />
