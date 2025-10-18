@@ -1,6 +1,10 @@
 // src/lib/s3.ts
 // @ts-ignore
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { env } from './env';
 
 export const s3Client = new S3Client({
@@ -37,12 +41,12 @@ export async function getFile(key: string): Promise<Buffer> {
 
   const response = await s3Client.send(command);
   const chunks: Uint8Array[] = [];
-  
+
   if (response.Body) {
     for await (const chunk of response.Body as AsyncIterable<Uint8Array>) {
       chunks.push(chunk);
     }
   }
-  
+
   return Buffer.concat(chunks);
 }

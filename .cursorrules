@@ -1,4 +1,5 @@
 # .cursorrules
+
 project: "DMOC Web (PWA)"
 owner: "Digiwize"
 description: >
@@ -25,6 +26,41 @@ rules:
 - Never expose raw ID numbers across tenants.
 - When opening a PR, include the Linear issue ID in the branch name and PR title; summarize changes, risks, and test steps.
 
+## Linear Integration - CRITICAL FOR AI CHATS
+
+- **Workspace**: justwessels (https://linear.app/justwessels)
+- **Team**: Justwessels (team ID: 39290bde-f690-4d61-94e3-439faf1892d1)
+- **Project**: DMOC (dmoc-86db242489ad)
+- **Issue Prefix**: JUS- (e.g., JUS-16, JUS-17)
+- **Git Branch Format**: jjwprotozoa/jus-{issue-number}-{kebab-case-title}
+
+### MCP Configuration for AI Chats
+
+- **ALWAYS use team parameter**: `"justwessels"` (exactly this string, lowercase)
+- **NEVER use**: "Justin's projects", "Justwessels", or "justins-projects-f7a019bf"
+- **Team ID**: 39290bde-f690-4d61-94e3-439faf1892d1
+- **Project**: dmoc (optional for project-specific issues)
+
+### MCP Tool Usage Examples
+
+```typescript
+// ✅ CORRECT - List issues
+mcp_Linear_list_issues({ team: 'justwessels', limit: 50 });
+
+// ✅ CORRECT - Create issue
+mcp_Linear_create_issue({ title: 'Title', team: 'justwessels', priority: 2 });
+
+// ✅ CORRECT - Get team info
+mcp_Linear_get_team({ query: 'justwessels' });
+```
+
+### Issue Management
+
+- Always create Linear issues for significant changes, bug fixes, and new features
+- Include Linear issue IDs in commit messages and changelog entries
+- Use team "justwessels" (not "Justin's projects") when creating issues via MCP
+- Reference LINEAR_CONFIG.md for complete MCP configuration details
+
 ## Changelog Management
 
 - Maintain CHANGELOG.md using semantic versioning (MAJOR.MINOR.PATCH).
@@ -45,18 +81,22 @@ rules:
 
 ```markdown
 ### Added
+
 - Feature description with context and impact
 - Integration with external service X
 
 ### Changed
+
 - Modified behavior description with migration notes
 - Updated dependency X to version Y
 
 ### Fixed
+
 - Bug fix description with affected components
 - Performance improvement in component X
 
 ### Security
+
 - Security fix description with CVE if applicable
 - Updated authentication mechanism
 ```

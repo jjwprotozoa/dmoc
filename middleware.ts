@@ -14,6 +14,7 @@ const publicRoutes = [
   '/api/auth',
   '/api/webhook',
   '/api/alpr',
+  '/api/socketio',
   '/offline.html',
   '/site.webmanifest',
   '/robots.txt',
@@ -23,22 +24,13 @@ const publicRoutes = [
 ];
 
 // Define protected routes that require authentication
-const protectedRoutes = [
-  '/dashboard',
-  '/api/trpc',
-];
+const protectedRoutes = ['/dashboard', '/api/trpc'];
 
 // Define admin-only routes (Digiwize admins can access all tenants)
-const adminRoutes = [
-  '/admin',
-  '/api/admin',
-];
+const adminRoutes = ['/admin', '/api/admin'];
 
 // Define tenant-specific routes that require tenant validation
-const tenantRoutes = [
-  '/dashboard',
-  '/api/trpc',
-];
+const tenantRoutes = ['/dashboard', '/api/trpc'];
 
 // Role-based access control mapping
 type Permission = '*' | 'dashboard' | 'manifests' | 'tracking' | 'offenses';
@@ -59,7 +51,7 @@ const rolePermissions: RolePermissions = {
 
 // Helper function to check if a path matches any of the given patterns
 function isPublicRoute(pathname: string): boolean {
-  return publicRoutes.some(route => {
+  return publicRoutes.some((route) => {
     if (route === '/') {
       return pathname === '/';
     }
@@ -69,29 +61,29 @@ function isPublicRoute(pathname: string): boolean {
 
 // Helper function to check if a path is a protected route
 function isProtectedRoute(pathname: string): boolean {
-  return protectedRoutes.some(route => pathname.startsWith(route));
+  return protectedRoutes.some((route) => pathname.startsWith(route));
 }
 
 // Helper function to check if a path is an admin route
 function isAdminRoute(pathname: string): boolean {
-  return adminRoutes.some(route => pathname.startsWith(route));
+  return adminRoutes.some((route) => pathname.startsWith(route));
 }
 
 // Helper function to check if a path is a tenant route
 function isTenantRoute(pathname: string): boolean {
-  return tenantRoutes.some(route => pathname.startsWith(route));
+  return tenantRoutes.some((route) => pathname.startsWith(route));
 }
 
 // Helper function to check if user has permission for a route
 function hasPermission(userRole: string, pathname: string): boolean {
   const permissions = rolePermissions[userRole as keyof typeof rolePermissions];
   if (!permissions) return false;
-  
+
   // Admin has access to everything
   if (permissions.includes('*')) return true;
-  
+
   // Check if the route matches any allowed permission
-  return permissions.some(permission => {
+  return permissions.some((permission) => {
     if (permission === 'dashboard') {
       return pathname.startsWith('/dashboard');
     }
@@ -109,24 +101,28 @@ function hasPermission(userRole: string, pathname: string): boolean {
 }
 
 // Helper function to validate tenant access
-function validateTenantAccess(userTenantId: string, userRole: string, pathname: string): boolean {
+function validateTenantAccess(
+  userTenantId: string,
+  userRole: string,
+  pathname: string
+): boolean {
   // Digiwize admins can access all tenants
   if (userRole === 'ADMIN') return true;
-  
+
   // For tenant-specific routes, ensure user belongs to the tenant
   if (isTenantRoute(pathname)) {
     // Extract tenant from URL if present (e.g., /dashboard?tenant=delta)
     const url = new URL(pathname, 'http://localhost');
     const tenantParam = url.searchParams.get('tenant');
-    
+
     // If no tenant param, allow access (will be handled by the app)
     if (!tenantParam) return true;
-    
+
     // For now, we'll allow access and let the app handle tenant validation
     // In a more sophisticated setup, you might validate against a tenant registry
     return true;
   }
-  
+
   return true;
 }
 
@@ -142,7 +138,9 @@ export async function middleware(request: NextRequest) {
     // Get the JWT token from the request
     const token = await getToken({
       req: request,
-      secret: process.env.NEXTAUTH_SECRET || 'your-super-secret-jwt-key-that-is-at-least-32-characters-long',
+      secret:
+        process.env.NEXTAUTH_SECRET ||
+        'your-super-secret-jwt-key-that-is-at-least-32-characters-long',
     });
 
     // If no valid token, redirect to sign-in for protected routes
@@ -194,19 +192,18 @@ export async function middleware(request: NextRequest) {
     response.headers.set('x-user-role', userRole);
     response.headers.set('x-user-tenant-id', userTenantId || '');
     response.headers.set('x-user-tenant-slug', userTenantSlug || '');
-    
-    return response;
 
+    return response;
   } catch (error) {
     // If there's an error validating the token, redirect to sign-in for protected routes
     console.error('Middleware authentication error:', error);
-    
+
     if (isProtectedRoute(pathname) || isAdminRoute(pathname)) {
       const signInUrl = new URL('/sign-in', request.url);
       signInUrl.searchParams.set('callbackUrl', pathname);
       return NextResponse.redirect(signInUrl);
     }
-    
+
     // For non-protected routes, allow access even if there's an error
     return NextResponse.next();
   }
@@ -220,6 +217,7 @@ export const config = {
      * - api/auth (NextAuth.js routes)
      * - api/webhook (external webhooks)
      * - api/alpr (external ALPR service)
+     * - api/socketio (Socket.IO server)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
@@ -228,6 +226,6 @@ export const config = {
      * - icons (PWA icons)
      * - offline.html (PWA offline page)
      */
-    '/((?!api/auth|api/webhook|api/alpr|_next/static|_next/image|favicon.ico|site.webmanifest|robots.txt|icons|offline.html).*)',
+    '/((?!api/auth|api/webhook|api/alpr|api/socketio|_next/static|_next/image|favicon.ico|site.webmanifest|robots.txt|icons|offline.html).*)',
   ],
 };

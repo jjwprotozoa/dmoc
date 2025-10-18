@@ -58,11 +58,7 @@
       "purpose": "maskable any"
     }
   ],
-  "categories": [
-    "business",
-    "productivity",
-    "utilities"
-  ],
+  "categories": ["business", "productivity", "utilities"],
   "lang": "en",
   "dir": "ltr"
 }

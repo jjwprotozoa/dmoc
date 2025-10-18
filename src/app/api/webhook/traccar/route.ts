@@ -19,7 +19,8 @@ const traccarWebhookSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting
-    const clientIP = request.ip || request.headers.get('x-forwarded-for') || 'unknown';
+    const clientIP =
+      request.ip || request.headers.get('x-forwarded-for') || 'unknown';
     if (!webhookRateLimit.isAllowed(clientIP)) {
       return NextResponse.json(
         { error: 'Rate limit exceeded' },
@@ -30,10 +31,7 @@ export async function POST(request: NextRequest) {
     // Verify webhook secret
     const secret = request.headers.get('x-webhook-secret');
     if (secret !== env.TRACCAR_WEBHOOK_SECRET) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -46,13 +44,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!device) {
-      logger.warn('Device not found for Traccar webhook', { 
-        deviceId: validatedData.deviceId 
+      logger.warn('Device not found for Traccar webhook', {
+        deviceId: validatedData.deviceId,
       });
-      return NextResponse.json(
-        { error: 'Device not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Device not found' }, { status: 404 });
     }
 
     // Create location ping

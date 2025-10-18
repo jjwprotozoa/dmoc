@@ -2,7 +2,7 @@
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import React from 'react';
-import { DashboardNav } from '../../components/dashboard/DashboardNav';
+import { MainNav } from '../../components/navigation/MainNav';
 import { authOptions } from '../../lib/auth';
 
 interface User {
@@ -25,11 +25,8 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <DashboardNav user={session.user as User} />
-      <main className="p-6">
-        {children}
-      </main>
-    </div>
+    <MainNav user={session.user as User}>
+      <div className="p-6">{children}</div>
+    </MainNav>
   );
 }

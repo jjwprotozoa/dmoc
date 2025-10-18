@@ -4,11 +4,13 @@ import { protectedProcedure, router } from '../trpc';
 
 export const offensesRouter = router({
   getAll: protectedProcedure
-    .input(z.object({
-      driverId: z.string().optional(),
-      vehicleId: z.string().optional(),
-      severity: z.enum(['MINOR', 'MODERATE', 'MAJOR', 'CRITICAL']).optional(),
-    }))
+    .input(
+      z.object({
+        driverId: z.string().optional(),
+        vehicleId: z.string().optional(),
+        severity: z.enum(['MINOR', 'MODERATE', 'MAJOR', 'CRITICAL']).optional(),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const offenses = await ctx.db.offense.findMany({
         where: {
@@ -27,13 +29,21 @@ export const offensesRouter = router({
     }),
 
   create: protectedProcedure
-    .input(z.object({
-      driverId: z.string().optional(),
-      vehicleId: z.string().optional(),
-      kind: z.enum(['SPEEDING', 'PARKING_VIOLATION', 'TRAFFIC_VIOLATION', 'SAFETY_VIOLATION', 'OTHER']),
-      severity: z.enum(['MINOR', 'MODERATE', 'MAJOR', 'CRITICAL']),
-      notes: z.string().optional(),
-    }))
+    .input(
+      z.object({
+        driverId: z.string().optional(),
+        vehicleId: z.string().optional(),
+        kind: z.enum([
+          'SPEEDING',
+          'PARKING_VIOLATION',
+          'TRAFFIC_VIOLATION',
+          'SAFETY_VIOLATION',
+          'OTHER',
+        ]),
+        severity: z.enum(['MINOR', 'MODERATE', 'MAJOR', 'CRITICAL']),
+        notes: z.string().optional(),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const offense = await ctx.db.offense.create({
         data: {

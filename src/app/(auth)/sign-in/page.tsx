@@ -19,7 +19,7 @@ export default function SignInPage() {
     setPassword('admin123');
     setError(''); // Clear any existing errors
     setCredentialsFilled(true);
-    
+
     // Reset the visual feedback after 2 seconds
     setTimeout(() => setCredentialsFilled(false), 2000);
   };
@@ -62,14 +62,14 @@ export default function SignInPage() {
             Secure Transport & Manifest Management
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-md p-3">
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
-          
+
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -92,7 +92,7 @@ export default function SignInPage() {
                 />
               </div>
             </div>
-            
+
             <div>
               <label htmlFor="password" className="sr-only">
                 Password
@@ -127,9 +127,7 @@ export default function SignInPage() {
           </div>
 
           <div className="text-center">
-            <p className="text-sm text-gray-600 mb-3">
-              Demo credentials:
-            </p>
+            <p className="text-sm text-gray-600 mb-3">Demo credentials:</p>
             <button
               type="button"
               onClick={fillDemoCredentials}
@@ -139,16 +137,24 @@ export default function SignInPage() {
                   : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
               } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
             >
-              <Mail className={`h-4 w-4 mr-2 ${credentialsFilled ? 'text-green-500' : 'text-gray-400'}`} />
+              <Mail
+                className={`h-4 w-4 mr-2 ${credentialsFilled ? 'text-green-500' : 'text-gray-400'}`}
+              />
               admin@digiwize.com
               <span className="mx-2 text-gray-400">/</span>
-              <Lock className={`h-4 w-4 mr-2 ${credentialsFilled ? 'text-green-500' : 'text-gray-400'}`} />
+              <Lock
+                className={`h-4 w-4 mr-2 ${credentialsFilled ? 'text-green-500' : 'text-gray-400'}`}
+              />
               admin123
             </button>
-            <p className={`text-xs mt-2 transition-colors duration-200 ${
-              credentialsFilled ? 'text-green-600' : 'text-gray-500'
-            }`}>
-              {credentialsFilled ? '✓ Credentials filled!' : 'Click to auto-fill credentials'}
+            <p
+              className={`text-xs mt-2 transition-colors duration-200 ${
+                credentialsFilled ? 'text-green-600' : 'text-gray-500'
+              }`}
+            >
+              {credentialsFilled
+                ? '✓ Credentials filled!'
+                : 'Click to auto-fill credentials'}
             </p>
           </div>
         </form>

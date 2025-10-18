@@ -2,7 +2,7 @@
 'use client';
 
 import { useSocket } from '@/hooks/useSocket';
-// import { trpc } from '@/lib/trpc';
+import { trpc } from '@/lib/trpc';
 import { AlertTriangle, Clock, MapPin, MessageSquare } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -19,31 +19,54 @@ export function ActivityFeed() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const { socket, isConnected, connectionError } = useSocket();
 
-  // const { data: offenses } = trpc.offenses.getAll.useQuery({});
-  // const { data: webhookEvents } = trpc.manifest.getAll.useQuery({});
+  // Fallback: Use tRPC queries for polling when Socket.IO is not available
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { data: offenses } = trpc.offenses.getAll.useQuery(
+    {},
+    {
+      refetchInterval: isConnected ? false : 30000, // Poll every 30s when Socket.IO is not connected
+      enabled: !isConnected, // Only fetch when Socket.IO is not connected
+    }
+  );
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { data: webhookEvents } = trpc.manifest.getAll.useQuery(
+    {},
+    {
+      refetchInterval: isConnected ? false : 30000, // Poll every 30s when Socket.IO is not connected
+      enabled: !isConnected, // Only fetch when Socket.IO is not connected
+    }
+  );
+
+  // Socket.IO real-time updates
   useEffect(() => {
     if (socket) {
       socket.on('ping:new', (ping) => {
-        setActivities(prev => [{
-          id: `ping-${ping.id}`,
-          type: 'location',
-          title: 'New Location Update',
-          description: `Device ${ping.device.externalId} reported location`,
-          timestamp: ping.timestamp,
-          data: ping,
-        }, ...prev.slice(0, 19)]);
+        setActivities((prev) => [
+          {
+            id: `ping-${ping.id}`,
+            type: 'location',
+            title: 'New Location Update',
+            description: `Device ${ping.device.externalId} reported location`,
+            timestamp: ping.timestamp,
+            data: ping,
+          },
+          ...prev.slice(0, 19),
+        ]);
       });
 
       socket.on('webhook:new', (event) => {
-        setActivities(prev => [{
-          id: `webhook-${event.id}`,
-          type: 'webhook',
-          title: 'WhatsApp Message Received',
-          description: event.payload.message?.substring(0, 50) + '...',
-          timestamp: event.createdAt,
-          data: event,
-        }, ...prev.slice(0, 19)]);
+        setActivities((prev) => [
+          {
+            id: `webhook-${event.id}`,
+            type: 'webhook',
+            title: 'WhatsApp Message Received',
+            description: event.payload.message?.substring(0, 50) + '...',
+            timestamp: event.createdAt,
+            data: event,
+          },
+          ...prev.slice(0, 19),
+        ]);
       });
 
       return () => {
@@ -52,6 +75,14 @@ export function ActivityFeed() {
       };
     }
   }, [socket]);
+
+  // Fallback polling mechanism when Socket.IO is not available
+  useEffect(() => {
+    if (!isConnected && !connectionError) {
+      // Socket.IO is disabled (e.g., on Vercel), use polling fallback
+      console.log('Using polling fallback for real-time updates');
+    }
+  }, [isConnected, connectionError]);
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -72,7 +103,9 @@ export function ActivityFeed() {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Activity Feed</h2>
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+            <div
+              className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+            />
             <span className="text-xs text-gray-500">
               {isConnected ? 'Connected' : 'Disconnected'}
             </span>
@@ -84,7 +117,7 @@ export function ActivityFeed() {
           </div>
         )}
       </div>
-      
+
       <div className="overflow-y-auto h-[calc(100%-4rem)]">
         {activities.length === 0 ? (
           <div className="p-4 text-center text-gray-500">

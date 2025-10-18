@@ -4,10 +4,14 @@ import { protectedProcedure, router } from '../trpc';
 
 export const manifestRouter = router({
   getAll: protectedProcedure
-    .input(z.object({
-      companyId: z.string().optional(),
-      status: z.enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']).optional(),
-    }))
+    .input(
+      z.object({
+        companyId: z.string().optional(),
+        status: z
+          .enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
+          .optional(),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const manifests = await ctx.db.manifest.findMany({
         where: {
@@ -47,18 +51,22 @@ export const manifestRouter = router({
     }),
 
   create: protectedProcedure
-    .input(z.object({
-      companyId: z.string(),
-      title: z.string(),
-      scheduledAt: z.date(),
-      stops: z.array(z.object({
-        order: z.number(),
-        location: z.object({
-          lat: z.number(),
-          lng: z.number(),
-        }),
-      })),
-    }))
+    .input(
+      z.object({
+        companyId: z.string(),
+        title: z.string(),
+        scheduledAt: z.date(),
+        stops: z.array(
+          z.object({
+            order: z.number(),
+            location: z.object({
+              lat: z.number(),
+              lng: z.number(),
+            }),
+          })
+        ),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const manifest = await ctx.db.manifest.create({
         data: {
@@ -66,7 +74,7 @@ export const manifestRouter = router({
           title: input.title,
           scheduledAt: input.scheduledAt,
           stops: {
-            create: input.stops.map(stop => ({
+            create: input.stops.map((stop) => ({
               order: stop.order,
               location: JSON.stringify(stop.location),
             })),
@@ -81,10 +89,12 @@ export const manifestRouter = router({
     }),
 
   updateStatus: protectedProcedure
-    .input(z.object({
-      id: z.string(),
-      status: z.enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']),
-    }))
+    .input(
+      z.object({
+        id: z.string(),
+        status: z.enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const manifest = await ctx.db.manifest.update({
         where: { id: input.id },

@@ -1,9 +1,7 @@
 // workbox-config.js
 module.exports = {
   globDirectory: 'out/',
-  globPatterns: [
-    '**/*.{js,css,html,png,svg,ico,webp}',
-  ],
+  globPatterns: ['**/*.{js,css,html,png,svg,ico,webp}'],
   swDest: 'out/sw.js',
   runtimeCaching: [
     {

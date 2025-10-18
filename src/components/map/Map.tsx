@@ -26,11 +26,15 @@ interface MapProps {
 
 // Fix for default markers in React Leaflet
 // See: https://github.com/PaulLeCam/react-leaflet/issues/453#issuecomment-704170300
-delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
+delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)
+  ._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconRetinaUrl:
+    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl:
+    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl:
+    'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
 // Component to handle map bounds fitting
@@ -39,9 +43,7 @@ function MapBounds({ pings }: { pings: LocationPing[] }) {
 
   useEffect(() => {
     if (pings.length > 0) {
-      const bounds = L.latLngBounds(
-        pings.map(ping => [ping.lat, ping.lng])
-      );
+      const bounds = L.latLngBounds(pings.map((ping) => [ping.lat, ping.lng]));
       map.fitBounds(bounds, { padding: [20, 20] });
     }
   }, [map, pings]);
@@ -64,7 +66,7 @@ function MapErrorBoundary({ children }: { children: React.ReactNode }) {
       <div className="h-full w-full bg-gray-100 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-500 mb-2">Map failed to load</p>
-          <button 
+          <button
             onClick={() => setHasError(false)}
             className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
@@ -91,7 +93,7 @@ export function Map({ pings }: MapProps) {
 
   if (!isClient || isLoading) {
     return (
-      <div className="h-full w-full bg-gray-100 flex items-center justify-center">
+      <div className="h-full w-full relative z-0 bg-gray-100 flex items-center justify-center rounded-lg border border-gray-200 shadow-sm">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
           <p className="text-gray-500">Loading map...</p>
@@ -102,12 +104,17 @@ export function Map({ pings }: MapProps) {
 
   return (
     <MapErrorBoundary>
-      <div className="h-full w-full relative overflow-hidden">
+      <div className="h-full w-full relative z-0 overflow-hidden rounded-lg border border-gray-200 shadow-sm">
         <MapContainer
           center={[-26.2041, 28.0473]} // Johannesburg
           zoom={10}
           className="h-full w-full"
-          style={{ height: '100%', width: '100%' }}
+          style={{
+            height: '100%',
+            width: '100%',
+            position: 'relative',
+            zIndex: 0,
+          }}
           zoomControl={true}
           scrollWheelZoom={true}
           doubleClickZoom={true}
@@ -121,21 +128,33 @@ export function Map({ pings }: MapProps) {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-          
+
           {/* Render markers */}
           {pings.map((ping) => (
             <Marker key={ping.id} position={[ping.lat, ping.lng]}>
               <Popup>
                 <div className="text-sm">
-                  <p><strong>Device:</strong> {ping.device.externalId}</p>
-                  <p><strong>Speed:</strong> {ping.speed ? ping.speed.toFixed(1) : 'N/A'} km/h</p>
-                  <p><strong>Time:</strong> {new Date(ping.timestamp).toLocaleString()}</p>
-                  {ping.heading && <p><strong>Heading:</strong> {ping.heading.toFixed(0)}°</p>}
+                  <p>
+                    <strong>Device:</strong> {ping.device.externalId}
+                  </p>
+                  <p>
+                    <strong>Speed:</strong>{' '}
+                    {ping.speed ? ping.speed.toFixed(1) : 'N/A'} km/h
+                  </p>
+                  <p>
+                    <strong>Time:</strong>{' '}
+                    {new Date(ping.timestamp).toLocaleString()}
+                  </p>
+                  {ping.heading && (
+                    <p>
+                      <strong>Heading:</strong> {ping.heading.toFixed(0)}°
+                    </p>
+                  )}
                 </div>
               </Popup>
             </Marker>
           ))}
-          
+
           {/* Handle bounds fitting */}
           <MapBounds pings={pings} />
         </MapContainer>

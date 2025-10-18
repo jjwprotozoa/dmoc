@@ -73,7 +73,6 @@ export async function POST() {
         },
       },
     });
-
   } catch (error) {
     console.error('❌ Production seed failed:', error);
     return NextResponse.json(
@@ -100,14 +99,15 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       adminUserExists: !!adminUser,
-      adminUser: adminUser ? {
-        id: adminUser.id,
-        email: adminUser.email,
-        role: adminUser.role,
-        tenant: adminUser.tenant.slug,
-      } : null,
+      adminUser: adminUser
+        ? {
+            id: adminUser.id,
+            email: adminUser.email,
+            role: adminUser.role,
+            tenant: adminUser.tenant.slug,
+          }
+        : null,
     });
-
   } catch (error) {
     console.error('❌ Check failed:', error);
     return NextResponse.json(

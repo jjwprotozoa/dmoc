@@ -35,7 +35,7 @@ export function InstallPrompt() {
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <button
             onClick={handleInstall}

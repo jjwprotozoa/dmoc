@@ -30,16 +30,16 @@ export const initSocket = (server: HTTPServer) => {
 
         if (tenant) {
           socket.join(`tenant:${tenantSlug}`);
-          logger.info('Client joined tenant room', { 
-            socketId: socket.id, 
-            tenantSlug 
+          logger.info('Client joined tenant room', {
+            socketId: socket.id,
+            tenantSlug,
           });
         }
       } catch (error) {
-        logger.error('Failed to join tenant room', { 
-          socketId: socket.id, 
-          tenantSlug, 
-          error 
+        logger.error('Failed to join tenant room', {
+          socketId: socket.id,
+          tenantSlug,
+          error,
         });
       }
     });
@@ -47,18 +47,18 @@ export const initSocket = (server: HTTPServer) => {
     // Join company-specific room
     socket.on('join-company', (companyId: string) => {
       socket.join(`company:${companyId}`);
-      logger.info('Client joined company room', { 
-        socketId: socket.id, 
-        companyId 
+      logger.info('Client joined company room', {
+        socketId: socket.id,
+        companyId,
       });
     });
 
     // Join manifest-specific room
     socket.on('join-manifest', (manifestId: string) => {
       socket.join(`manifest:${manifestId}`);
-      logger.info('Client joined manifest room', { 
-        socketId: socket.id, 
-        manifestId 
+      logger.info('Client joined manifest room', {
+        socketId: socket.id,
+        manifestId,
       });
     });
 

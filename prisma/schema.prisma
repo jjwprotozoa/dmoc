@@ -1,11 +1,12 @@
-// prisma/schema.prisma
+// prisma/schema-dev.prisma
+// Development schema using SQLite
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Tenant {
@@ -19,6 +20,10 @@ model Tenant {
   organizations Organization[]
   users         User[]
   devices       Device[]
+  clients       Client[]
+  drivers       Driver[]
+  vehicles      Vehicle[]
+  vehicleCombinations VehicleCombination[]
 
   @@map("tenants")
 }
@@ -65,36 +70,125 @@ model User {
   @@map("users")
 }
 
-model Driver {
-  id        String   @id @default(cuid())
-  companyId String
-  name      String
-  licenseNo String
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Client {
+  id           String   @id @default(cuid())
+  tenantId     String
+  companyId    Int      @unique // Legacy ID from mock data
+  companyTypeId Int?
+  entityTypeDescription String
+  name         String
+  address      String?
+  displayValue String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("clients")
+}
+
+model Driver {
+  id              String   @id @default(cuid())
+  tenantId        String
+  companyId       String?
+  driverId        Int      @unique // Legacy ID from mock data
+  name            String
+  contactNr       String?
+  idNumber        String
+  pictureLoaded   Boolean  @default(false)
+  countryOfOrigin String
+  displayValue    String
+  info            String?
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant   Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  company  Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
   offenses Offense[]
 
   @@map("drivers")
 }
 
 model Vehicle {
-  id             String   @id @default(cuid())
-  companyId      String
-  plate          String
-  make           String
-  model          String
-  color          String
-  trackerDeviceId String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                    String   @id @default(cuid())
+  tenantId              String
+  companyId             String?
+  vehicleId             Int      @unique // Legacy ID from mock data
+  vehicleTypeId         Int?
+  entityTypeDescription String
+  registration          String
+  color                 String?
+  countryOfOrigin       String
+  displayValue          String
+  mileage               Int?
+  lastServiceDate       DateTime?
+  nextServiceDue        DateTime?
+  status                String   @default("Active") // Active, In Transit, Maintenance, Out of Service
+  currentDriver         String?
+  location              String?
+  lastSeen              String?
+  trackerDeviceId       String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
-  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  offenses Offense[]
+  tenant                Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  company               Company?                      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  fuelEntries           FuelEntry[]
+  offenses              Offense[]
+  horseCombinations     VehicleCombination[]          @relation("HorseCombinations")
+  trailerCombinations   VehicleCombinationTrailer[]   @relation("TrailerCombinations")
 
   @@map("vehicles")
+}
+
+model VehicleCombination {
+  id        String   @id @default(cuid())
+  tenantId  String
+  horseId   String
+  driver    String
+  status    String   @default("Active") // Active, In Transit, Loading, Unloading
+  startDate DateTime
+  cargo     String?
+  route     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant   Tenant                        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  horse    Vehicle                       @relation("HorseCombinations", fields: [horseId], references: [id], onDelete: Cascade)
+  trailers VehicleCombinationTrailer[]
+
+  @@map("vehicle_combinations")
+}
+
+model VehicleCombinationTrailer {
+  id            String   @id @default(cuid())
+  combinationId String
+  trailerId     String
+  createdAt     DateTime @default(now())
+
+  combination VehicleCombination @relation(fields: [combinationId], references: [id], onDelete: Cascade)
+  trailer     Vehicle            @relation("TrailerCombinations", fields: [trailerId], references: [id], onDelete: Cascade)
+
+  @@unique([combinationId, trailerId])
+  @@map("vehicle_combination_trailers")
+}
+
+model FuelEntry {
+  id              String   @id @default(cuid())
+  vehicleId       String
+  date            DateTime
+  amount          Float
+  cost            Float
+  driver          String
+  odometerReading Int
+  location        String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  vehicle Vehicle @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+
+  @@map("fuel_entries")
 }
 
 model Manifest {
