@@ -7,6 +7,12 @@ import { Server as SocketIOServer } from 'socket.io';
 let io: SocketIOServer | null = null;
 
 export const initSocket = (server: HTTPServer) => {
+  // Disable Socket.IO on Vercel deployments
+  if (process.env.VERCEL) {
+    console.log('Socket.IO disabled for Vercel deployment');
+    return null;
+  }
+
   io = new SocketIOServer(server, {
     cors: {
       origin: process.env.NEXTAUTH_URL || 'http://localhost:3000',
@@ -72,7 +78,8 @@ export const initSocket = (server: HTTPServer) => {
 
 export const getSocketIO = () => {
   if (!io) {
-    throw new Error('Socket.IO not initialized');
+    console.log('Socket.IO not available (disabled for Vercel or not initialized)');
+    return null;
   }
   return io;
 };
@@ -107,15 +114,27 @@ interface WebhookEvent {
 // Socket event emitters
 export const emitLocationPing = (tenantSlug: string, ping: LocationPing) => {
   const socketIO = getSocketIO();
+  if (!socketIO) {
+    console.log('Socket.IO not available, skipping location ping emit');
+    return;
+  }
   socketIO.to(`tenant:${tenantSlug}`).emit('ping:new', ping);
 };
 
 export const emitManifestUpdate = (companyId: string, manifest: Manifest) => {
   const socketIO = getSocketIO();
+  if (!socketIO) {
+    console.log('Socket.IO not available, skipping manifest update emit');
+    return;
+  }
   socketIO.to(`company:${companyId}`).emit('manifest:update', manifest);
 };
 
 export const emitWebhookEvent = (tenantSlug: string, event: WebhookEvent) => {
   const socketIO = getSocketIO();
+  if (!socketIO) {
+    console.log('Socket.IO not available, skipping webhook event emit');
+    return;
+  }
   socketIO.to(`tenant:${tenantSlug}`).emit('webhook:new', event);
 };

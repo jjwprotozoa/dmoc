@@ -4,55 +4,74 @@ import { adminProcedure, router } from '../trpc';
 
 export const tenantsRouter = router({
   getAll: adminProcedure.query(async ({ ctx }) => {
-    const tenants = await ctx.db.tenant.findMany({
-      include: {
-        organizations: {
-          include: {
-            companies: true,
-          },
-        },
-        _count: {
-          select: {
-            users: true,
-            devices: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    try {
+      if (!ctx.db) {
+        console.warn('Database not available, returning empty array');
+        return [];
+      }
 
-    return tenants;
+      const tenants = await ctx.db.tenant.findMany({
+        include: {
+          organizations: {
+            include: {
+              companies: true,
+            },
+          },
+          _count: {
+            select: {
+              users: true,
+              devices: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      return tenants;
+    } catch (error) {
+      console.error('Error fetching tenants:', error);
+      return [];
+    }
   }),
 
   getById: adminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const tenant = await ctx.db.tenant.findUnique({
-        where: { id: input.id },
-        include: {
-          organizations: {
-            include: {
-              companies: {
-                include: {
-                  _count: {
-                    select: {
-                      drivers: true,
-                      vehicles: true,
-                      manifests: true,
+      try {
+        if (!ctx.db) {
+          throw new Error('Database not available');
+        }
+
+        const tenant = await ctx.db.tenant.findUnique({
+          where: { id: input.id },
+          include: {
+            organizations: {
+              include: {
+                companies: {
+                  include: {
+                    _count: {
+                      select: {
+                        drivers: true,
+                        vehicles: true,
+                        manifests: true,
+                      },
                     },
                   },
                 },
               },
             },
           },
-        },
-      });
+        });
 
-      if (!tenant) {
-        throw new Error('Tenant not found');
+        if (!tenant) {
+          throw new Error('Tenant not found');
+        }
+
+        return tenant;
+      } catch (error) {
+        console.error('Error fetching tenant:', error);
+        throw error;
       }
-
-      return tenant;
     }),
 
   create: adminProcedure
@@ -64,15 +83,24 @@ export const tenantsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const tenant = await ctx.db.tenant.create({
-        data: {
-          name: input.name,
-          slug: input.slug,
-          settings: JSON.stringify(input.settings || {}),
-        },
-      });
+      try {
+        if (!ctx.db) {
+          throw new Error('Database not available');
+        }
 
-      return tenant;
+        const tenant = await ctx.db.tenant.create({
+          data: {
+            name: input.name,
+            slug: input.slug,
+            settings: JSON.stringify(input.settings || {}),
+          },
+        });
+
+        return tenant;
+      } catch (error) {
+        console.error('Error creating tenant:', error);
+        throw error;
+      }
     }),
 
   update: adminProcedure
@@ -85,30 +113,39 @@ export const tenantsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, ...inputData } = input;
+      try {
+        if (!ctx.db) {
+          throw new Error('Database not available');
+        }
 
-      // Prepare data with proper type conversion
-      const data: {
-        name?: string;
-        slug?: string;
-        settings?: string;
-      } = {};
+        const { id, ...inputData } = input;
 
-      if (inputData.name !== undefined) {
-        data.name = inputData.name;
+        // Prepare data with proper type conversion
+        const data: {
+          name?: string;
+          slug?: string;
+          settings?: string;
+        } = {};
+
+        if (inputData.name !== undefined) {
+          data.name = inputData.name;
+        }
+        if (inputData.slug !== undefined) {
+          data.slug = inputData.slug;
+        }
+        if (inputData.settings !== undefined) {
+          data.settings = JSON.stringify(inputData.settings);
+        }
+
+        const tenant = await ctx.db.tenant.update({
+          where: { id },
+          data,
+        });
+
+        return tenant;
+      } catch (error) {
+        console.error('Error updating tenant:', error);
+        throw error;
       }
-      if (inputData.slug !== undefined) {
-        data.slug = inputData.slug;
-      }
-      if (inputData.settings !== undefined) {
-        data.settings = JSON.stringify(inputData.settings);
-      }
-
-      const tenant = await ctx.db.tenant.update({
-        where: { id },
-        data,
-      });
-
-      return tenant;
     }),
 });

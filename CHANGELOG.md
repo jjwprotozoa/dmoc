@@ -69,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Sidebar Dashboard Link** - Prominent Dashboard link at top of desktop sidebar with "Overview & Summary" description
 
 - Fixed
+- Fixed
 ### Changed
 
 - **Default Page Layouts** - Vehicles, Drivers, and Clients pages now default to card view instead of table view for better mobile experience

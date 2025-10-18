@@ -2,13 +2,13 @@
 'use client';
 
 import {
-    AlertTriangle,
-    Battery,
-    CheckCircle,
-    Clock,
-    MapPin,
-    Radar,
-    Signal,
+  AlertTriangle,
+  Battery,
+  CheckCircle,
+  Clock,
+  MapPin,
+  Radar,
+  Signal,
 } from 'lucide-react';
 
 export default function TrackersPage() {
