@@ -43,7 +43,7 @@ export function MainNav({ user, children }: MainNavProps) {
           />
 
           {/* Page Content */}
-          <main className="pb-20 lg:pb-0">{children}</main>
+          <main className="pb-20 lg:pb-0 main-content-mobile">{children}</main>
         </div>
 
         {/* Mobile Bottom Navigation */}

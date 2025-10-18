@@ -167,7 +167,7 @@ export function BottomNav() {
   return (
     <>
       {/* Bottom Navigation */}
-      <div className={`fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-gray-900 via-gray-800 to-gray-900 border-t border-gray-700 shadow-2xl lg:hidden`}>
+      <div className={`bottom-nav-fixed bg-gradient-to-t from-gray-900 via-gray-800 to-gray-900 border-t border-gray-700 shadow-2xl lg:hidden`} style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="flex items-center justify-around py-2">
           {primaryNavItems.map((item) => {
             const isActive = pathname === item.href;
@@ -219,7 +219,7 @@ export function BottomNav() {
 
       {/* Expanded More Menu */}
       {showMore && (
-        <div className="fixed bottom-16 left-0 right-0 z-40 bg-gray-800 border-t border-gray-700 shadow-2xl lg:hidden">
+        <div className="fixed left-0 right-0 z-40 bg-gray-800 border-t border-gray-700 shadow-2xl lg:hidden" style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom))' }}>
           <div className="p-4">
             <div className="grid grid-cols-3 gap-3">
               {secondaryNavItems.map((item) => {
