@@ -36,11 +36,34 @@ export const MOBILE_HEIGHTS = {
 } as const;
 
 /**
- * Check if current viewport is mobile
+ * Mobile viewport height utilities for better mobile support
  */
+export const MOBILE_VH_UTILITIES = {
+  'safe-area-inset-top': 'env(safe-area-inset-top)',
+  'safe-area-inset-bottom': 'env(safe-area-inset-bottom)',
+  'mobile-vh': 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+} as const;
+
+/**
+ * Check if current viewport is mobile
+ * Uses cached values to avoid repeated DOM queries
+ */
+let cachedViewportWidth: number | null = null;
+let lastViewportCheck = 0;
+const VIEWPORT_CACHE_DURATION = 100; // ms
+
+const getViewportWidth = (): number => {
+  const now = Date.now();
+  if (cachedViewportWidth === null || now - lastViewportCheck > VIEWPORT_CACHE_DURATION) {
+    cachedViewportWidth = window.innerWidth;
+    lastViewportCheck = now;
+  }
+  return cachedViewportWidth;
+};
+
 export const isMobile = (): boolean => {
   if (typeof window === 'undefined') return false;
-  return window.innerWidth < parseInt(MOBILE_BREAKPOINTS.sm);
+  return getViewportWidth() < parseInt(MOBILE_BREAKPOINTS.sm);
 };
 
 /**
@@ -48,7 +71,7 @@ export const isMobile = (): boolean => {
  */
 export const isTablet = (): boolean => {
   if (typeof window === 'undefined') return false;
-  const width = window.innerWidth;
+  const width = getViewportWidth();
   return width >= parseInt(MOBILE_BREAKPOINTS.sm) && width < parseInt(MOBILE_BREAKPOINTS.lg);
 };
 
@@ -57,7 +80,7 @@ export const isTablet = (): boolean => {
  */
 export const isDesktop = (): boolean => {
   if (typeof window === 'undefined') return false;
-  return window.innerWidth >= parseInt(MOBILE_BREAKPOINTS.lg);
+  return getViewportWidth() >= parseInt(MOBILE_BREAKPOINTS.lg);
 };
 
 /**
@@ -65,13 +88,13 @@ export const isDesktop = (): boolean => {
  */
 export const getMobileModalClasses = (size: keyof typeof MODAL_SIZES = 'md') => {
   return [
-    // Mobile-first positioning
+    // Mobile-first positioning - full width with safe margins
     'fixed inset-x-4 top-[50%] z-50 grid w-auto max-h-[85vh] translate-y-[-50%]',
-    // Small screens
-    'xs:max-h-[90vh]',
-    // Tablet and up
+    // Small screens - allow more height
+    'max-h-[90vh]',
+    // Tablet and up - center positioning with max-width constraints
     'sm:left-[50%] sm:top-[50%] sm:w-full sm:translate-x-[-50%] sm:translate-y-[-50%] sm:p-6 sm:rounded-lg',
-    // Size-specific max-width
+    // Size-specific max-width on larger screens
     `sm:${MODAL_SIZES[size]}`,
     // Common styles
     'gap-4 border bg-background p-4 shadow-lg duration-200 overflow-y-auto',

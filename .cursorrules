@@ -7,13 +7,41 @@ Multi-tenant logistics operations app converted from Windows to web.
 Each logistics client (Delta, Cobra, etc.) runs under Digiwize.
 Uses MySQL, Prisma, Next.js, NestJS, Socket.IO, BullMQ, and MinIO.
 
+## DEPLOYMENT STRATEGY - CRITICAL
+
+**HYBRID APPROACH**: Vercel for development/testing, VPS for production delivery
+
+- **Development**: Use Vercel for rapid iteration and testing
+- **Production**: Deploy to VPS for full control and performance
+- **Code**: Write VPS-compatible code that works on both platforms
+- **Goal**: One-click VPS deployment when ready for production
+
+### VPS-First Development Rules
+
+- **Database**: Always use MySQL (not PostgreSQL) - VPS uses local MySQL
+- **Storage**: Use S3/MinIO compatible APIs - VPS uses local MinIO
+- **Background Jobs**: Design for BullMQ + Redis - VPS has persistent Redis
+- **Real-time**: Use Socket.IO with persistent connections - VPS supports WebSockets
+- **File Uploads**: Use multipart/form-data compatible with both platforms
+- **Environment**: Support both Vercel env vars and VPS .env files
+- **Timeouts**: Avoid long-running operations that exceed Vercel's 30s limit
+- **Dependencies**: Choose libraries compatible with both serverless and VPS
+
+### Platform Compatibility Checklist
+
+Before implementing any feature, ensure it works on:
+
+- ✅ **Vercel** (development/testing)
+- ✅ **VPS** (production delivery)
+- ✅ **Docker** (containerized deployment)
+
 rules:
 
 - Always comment the top of every code file with its relative path and purpose.
 - Use modular folder structure under /apps/web and /apps/api.
 - Enforce tenant isolation via tenant_id on every query.
 - Global offender_registry visible only through backend logic, not client-to-client.
-- Use Prisma ORM for all DB access (MySQL).
+- Use Prisma ORM for all DB access (MySQL) - VPS uses local MySQL.
 - Use Socket.IO for real-time manifest updates and WhatsApp/GPS feed.
 - Use next-pwa and Dexie for offline PWA support.
 - UI: Tailwind + shadcn + lucide-react; must respect tenant theme.

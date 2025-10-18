@@ -2,18 +2,19 @@
 'use client';
 
 import {
-  Radar,
-  MapPin,
-  Signal,
-  Battery,
-  Clock,
   AlertTriangle,
+  Battery,
   CheckCircle,
+  Clock,
+  MapPin,
+  Radar,
+  Signal,
 } from 'lucide-react';
+import { useMemo } from 'react';
 
 export default function TrackersPage() {
   // Mock data - replace with actual data from your API
-  const trackers = [
+  const trackers = useMemo(() => [
     {
       id: '1',
       deviceId: 'TRK-001',
@@ -53,7 +54,14 @@ export default function TrackersPage() {
       heading: 'Unknown',
       temperature: 0,
     },
-  ];
+  ], []);
+
+  // Memoize tracker statistics to prevent unnecessary recalculations
+  const trackerStats = useMemo(() => ({
+    online: trackers.filter((t) => t.status === 'Online').length,
+    offline: trackers.filter((t) => t.status === 'Offline').length,
+    lowBattery: trackers.filter((t) => t.battery < 20).length,
+  }), [trackers]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -83,19 +91,19 @@ export default function TrackersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">GPS Tracking</h1>
-          <p className="text-gray-600">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">GPS Tracking</h1>
+          <p className="text-sm sm:text-base text-gray-600">
             Monitor vehicle locations and tracking devices
           </p>
         </div>
-        <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Refresh All
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
+            <span>Refresh All</span>
           </button>
-          <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
-            Add Tracker
+          <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center space-x-2">
+            <span>Add Tracker</span>
           </button>
         </div>
       </div>
@@ -122,7 +130,7 @@ export default function TrackersPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Online</p>
               <p className="text-2xl font-bold text-gray-900">
-                {trackers.filter((t) => t.status === 'Online').length}
+                {trackerStats.online}
               </p>
             </div>
           </div>
@@ -134,7 +142,7 @@ export default function TrackersPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Offline</p>
               <p className="text-2xl font-bold text-gray-900">
-                {trackers.filter((t) => t.status === 'Offline').length}
+                {trackerStats.offline}
               </p>
             </div>
           </div>
@@ -146,7 +154,7 @@ export default function TrackersPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Low Battery</p>
               <p className="text-2xl font-bold text-gray-900">
-                {trackers.filter((t) => t.battery < 20).length}
+                {trackerStats.lowBattery}
               </p>
             </div>
           </div>

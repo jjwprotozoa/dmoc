@@ -1,4 +1,5 @@
 // src/server/api/routers/vehicles.ts
+import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { db } from '../../../lib/db';
 import { protectedProcedure, router } from '../trpc';
@@ -16,7 +17,7 @@ export const vehiclesRouter = router({
     .query(async ({ ctx, input }) => {
       const { search, type, status } = input;
 
-      const where: any = {
+      const where: Record<string, unknown> = {
         tenantId: ctx.session.user.tenantId,
       };
 
@@ -54,7 +55,7 @@ export const vehiclesRouter = router({
         where: {
           id: input.id,
           tenantId: ctx.session.user.tenantId,
-        } as any,
+        } as Record<string, unknown>,
       });
 
       if (!vehicle) {
@@ -74,31 +75,31 @@ export const vehiclesRouter = router({
       maintenanceVehicles,
     ] = await Promise.all([
       db.vehicle.count({
-        where: { tenantId: ctx.session.user.tenantId } as any,
+        where: { tenantId: ctx.session.user.tenantId } as Prisma.VehicleWhereInput,
       }),
       db.vehicle.count({
         where: {
           tenantId: ctx.session.user.tenantId,
           status: 'Active',
-        } as any,
+        } as Record<string, unknown>,
       }),
       db.vehicle.count({
         where: {
           tenantId: ctx.session.user.tenantId,
           entityTypeDescription: 'HORSE',
-        } as any,
+        } as Record<string, unknown>,
       }),
       db.vehicle.count({
         where: {
           tenantId: ctx.session.user.tenantId,
           entityTypeDescription: 'TRAILER',
-        } as any,
+        } as Record<string, unknown>,
       }),
       db.vehicle.count({
         where: {
           tenantId: ctx.session.user.tenantId,
           status: 'Maintenance',
-        } as any,
+        } as Record<string, unknown>,
       }),
     ]);
 

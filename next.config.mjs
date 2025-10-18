@@ -13,7 +13,14 @@ const nextConfig = {
   },
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client'],
+    optimizeCss: true,
   },
+  // Optimize font loading
+  optimizeFonts: true,
+  // Enable standalone output for Docker deployment
+  output: 'standalone',
+  // Disable x-powered-by header for security
+  poweredByHeader: false,
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals.push('@prisma/client');

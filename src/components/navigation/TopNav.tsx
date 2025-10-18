@@ -1,8 +1,9 @@
 // src/components/navigation/TopNav.tsx
 'use client';
 
-import { Bell, LogOut, Settings, Search, User } from 'lucide-react';
+import { Bell, LogOut, Search, Settings, Truck, User } from 'lucide-react';
 import { signOut } from 'next-auth/react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 interface TopNavProps {
@@ -50,6 +51,20 @@ export function TopNav({
                 </svg>
               </button>
             )}
+
+            {/* Logo/Brand - Clickable to Dashboard */}
+            <Link
+              href="/dashboard"
+              className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
+            >
+              <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center">
+                <Truck className="w-5 h-5 text-white" />
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-lg font-bold">DMOC</h1>
+                <p className="text-xs text-gray-500">{user.tenantSlug}</p>
+              </div>
+            </Link>
 
             {/* Search */}
             <div className="relative hidden md:block">

@@ -2,17 +2,18 @@
 'use client';
 
 import {
-  Clock,
-  CloudLightning,
-  MapPin,
-  Navigation,
-  Route,
-  Truck,
+    Clock,
+    CloudLightning,
+    MapPin,
+    Navigation,
+    Route,
+    Truck,
 } from 'lucide-react';
+import { useMemo } from 'react';
 
 export default function RoutesPage() {
   // Mock data - replace with actual data from your API
-  const routes = [
+  const routes = useMemo(() => [
     {
       id: '1',
       name: 'JHB to CPT Express',
@@ -49,7 +50,14 @@ export default function RoutesPage() {
       efficiency: 95,
       lastOptimized: '1 day ago',
     },
-  ];
+  ], []);
+
+  // Memoize route statistics to prevent unnecessary recalculations
+  const routeStats = useMemo(() => ({
+    active: routes.filter((r) => r.status === 'Active').length,
+    totalVehicles: routes.reduce((sum, r) => sum + r.vehicles, 0),
+    averageEfficiency: routes.reduce((sum, r) => sum + r.efficiency, 0) / routes.length,
+  }), [routes]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -73,19 +81,19 @@ export default function RoutesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Route Management</h1>
-          <p className="text-gray-600">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Route Management</h1>
+          <p className="text-sm sm:text-base text-gray-600">
             Plan, optimize, and monitor delivery routes
           </p>
         </div>
-        <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Optimize All Routes
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
+            <span>Optimize All Routes</span>
           </button>
-          <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
-            Create Route
+          <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center space-x-2">
+            <span>Create Route</span>
           </button>
         </div>
       </div>
@@ -110,7 +118,7 @@ export default function RoutesPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Active Routes</p>
               <p className="text-2xl font-bold text-gray-900">
-                {routes.filter((r) => r.status === 'Active').length}
+                {routeStats.active}
               </p>
             </div>
           </div>
@@ -124,7 +132,7 @@ export default function RoutesPage() {
                 Total Vehicles
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                {routes.reduce((sum, r) => sum + r.vehicles, 0)}
+                {routeStats.totalVehicles}
               </p>
             </div>
           </div>
@@ -138,11 +146,7 @@ export default function RoutesPage() {
                 Avg Efficiency
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                {Math.round(
-                  routes.reduce((sum, r) => sum + r.efficiency, 0) /
-                    routes.length
-                )}
-                %
+                {Math.round(routeStats.averageEfficiency)}%
               </p>
             </div>
           </div>

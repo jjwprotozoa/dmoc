@@ -152,7 +152,19 @@ The application will be available at `http://localhost:3000`
 
 ## 🚀 Deployment
 
-### Vercel Deployment (Recommended)
+### Hybrid Deployment Strategy
+
+**Development**: Vercel for rapid iteration and testing  
+**Production**: VPS for full control and performance
+
+This hybrid approach allows us to:
+
+- ✅ Develop quickly on Vercel with instant deployments
+- ✅ Test features with clients on Vercel previews
+- ✅ Deploy to VPS with one-click when ready for production
+- ✅ Maintain VPS-compatible code throughout development
+
+### Vercel Deployment (Development/Testing)
 
 1. **Connect to Vercel**
 
@@ -180,19 +192,59 @@ The application will be available at `http://localhost:3000`
    npx tsx prisma/seed-production.ts
    ```
 
-### Docker Deployment
+### VPS Deployment (Production)
 
-1. **Start services**
+**One-click deployment to VPS:**
 
-   ```bash
-   docker-compose up -d
-   ```
+```bash
+# Automated VPS deployment
+./deploy-vps.sh
+```
 
-2. **Build and run the application**
-   ```bash
-   npm run build
-   npm start
-   ```
+**Manual VPS deployment:**
+
+```bash
+# Set up environment
+cp .env.example .env
+# Edit .env with your VPS configuration
+
+# Deploy with Docker Compose
+docker-compose up -d --build
+
+# Run database setup
+docker-compose exec app npx prisma db push
+docker-compose exec app npx tsx prisma/seed-production.ts
+```
+
+**VPS includes:**
+
+- 🐳 **Docker Compose** - Complete infrastructure
+- 🗄️ **MySQL** - Local database with persistent storage
+- 🔴 **Redis** - Background jobs and caching
+- 📁 **MinIO** - S3-compatible file storage
+- 🌐 **Nginx** - Reverse proxy with SSL termination
+- 🔒 **SSL** - Let's Encrypt certificates
+
+### Platform Comparison
+
+| Feature             | Vercel (Dev) | VPS (Prod)   |
+| ------------------- | ------------ | ------------ |
+| **Deployment**      | Instant      | One-click    |
+| **Socket.IO**       | Limited      | Persistent   |
+| **Background Jobs** | Timeout      | Continuous   |
+| **Database**        | External     | Local MySQL  |
+| **Storage**         | External S3  | Local MinIO  |
+| **Cost**            | $50-70/month | $30-45/month |
+| **Control**         | Limited      | Full control |
+
+### Migration Path
+
+1. **Develop** on Vercel for rapid iteration
+2. **Test** features thoroughly on Vercel previews
+3. **Deploy** to VPS when ready for production
+4. **Monitor** both platforms during transition
+
+See [HYBRID_DEPLOYMENT_STRATEGY.md](HYBRID_DEPLOYMENT_STRATEGY.md) for detailed migration guide.
 
 ## 🔧 Configuration
 

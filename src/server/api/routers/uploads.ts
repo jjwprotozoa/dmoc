@@ -15,25 +15,34 @@ export const uploadsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const buffer = Buffer.from(input.data, 'base64');
-      const key = `${input.entityType}/${input.entityId}/${Date.now()}-${input.fileName}`;
+      try {
+        if (!ctx.db) {
+          throw new Error('Database not available');
+        }
 
-      const url = await uploadFile(key, buffer, input.mimeType);
+        const buffer = Buffer.from(input.data, 'base64');
+        const key = `${input.entityType}/${input.entityId}/${Date.now()}-${input.fileName}`;
 
-      const attachment = await ctx.db.attachment.create({
-        data: {
-          entityType: input.entityType,
-          entityId: input.entityId,
-          url,
-          mime: input.mimeType,
-          meta: JSON.stringify({
-            fileName: input.fileName,
-            size: buffer.length,
-          }),
-        },
-      });
+        const url = await uploadFile(key, buffer, input.mimeType);
 
-      return attachment;
+        const attachment = await ctx.db.attachment.create({
+          data: {
+            entityType: input.entityType,
+            entityId: input.entityId,
+            url,
+            mime: input.mimeType,
+            meta: JSON.stringify({
+              fileName: input.fileName,
+              size: buffer.length,
+            }),
+          },
+        });
+
+        return attachment;
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        throw error;
+      }
     }),
 
   getAttachments: protectedProcedure
@@ -44,14 +53,24 @@ export const uploadsRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const attachments = await ctx.db.attachment.findMany({
-        where: {
-          entityType: input.entityType,
-          entityId: input.entityId,
-        },
-        orderBy: { createdAt: 'desc' },
-      });
+      try {
+        if (!ctx.db) {
+          console.warn('Database not available, returning empty array');
+          return [];
+        }
 
-      return attachments;
+        const attachments = await ctx.db.attachment.findMany({
+          where: {
+            entityType: input.entityType,
+            entityId: input.entityId,
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        return attachments;
+      } catch (error) {
+        console.error('Error fetching attachments:', error);
+        return [];
+      }
     }),
 });

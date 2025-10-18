@@ -12,5 +12,13 @@
     "src/app/api/**/*.ts": {
       "maxDuration": 30
     }
+  },
+  "regions": [
+    "iad1"
+  ],
+  "build": {
+    "env": {
+      "VERCEL": "1"
+    }
   }
 }

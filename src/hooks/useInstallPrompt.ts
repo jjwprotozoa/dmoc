@@ -14,9 +14,11 @@ export const useInstallPrompt = () => {
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
+      // Only prevent default if we're going to show our custom prompt
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setIsInstallable(true);
+      console.log('PWA install prompt available');
     };
 
     const handleAppInstalled = () => {

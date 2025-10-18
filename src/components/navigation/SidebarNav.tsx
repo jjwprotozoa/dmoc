@@ -2,30 +2,31 @@
 'use client';
 
 import {
-    Archive,
-    Building2,
-    Car,
-    CarFront,
-    ChevronDown,
-    ChevronRight,
-    ClipboardList,
-    FileText,
-    Globe,
-    Heart,
-    MapPin,
-    Menu,
-    Monitor,
-    Navigation,
-    Phone,
-    Radar,
-    Receipt,
-    Route,
-    Settings,
-    Shield,
-    Truck,
-    User,
-    Users,
-    X,
+  Archive,
+  Building2,
+  Car,
+  CarFront,
+  ChevronDown,
+  ChevronRight,
+  ClipboardList,
+  FileText,
+  Globe,
+  Heart,
+  Home,
+  MapPin,
+  Menu,
+  Monitor,
+  Navigation,
+  Phone,
+  Radar,
+  Receipt,
+  Route,
+  Settings,
+  Shield,
+  Truck,
+  User,
+  Users,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -225,10 +226,12 @@ interface SidebarNavProps {
     role: string;
     tenantSlug: string;
   };
+  isCollapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
-export function SidebarNav({ user }: SidebarNavProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+export function SidebarNav({ user, isCollapsed: externalCollapsed, onToggleCollapse }: SidebarNavProps) {
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
     new Set(
@@ -240,7 +243,16 @@ export function SidebarNav({ user }: SidebarNavProps) {
   const pathname = usePathname();
   const { theme } = useTheme();
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  // Use external collapse state if provided, otherwise use internal state
+  const isCollapsed = externalCollapsed !== undefined ? externalCollapsed : internalCollapsed;
+  
+  const toggleSidebar = () => {
+    if (onToggleCollapse) {
+      onToggleCollapse();
+    } else {
+      setInternalCollapsed(!internalCollapsed);
+    }
+  };
   const toggleMobile = () => setIsMobileOpen(!isMobileOpen);
 
   const toggleGroup = (groupId: string) => {
@@ -309,6 +321,47 @@ export function SidebarNav({ user }: SidebarNavProps) {
         {/* Navigation Items */}
         <nav className="flex-1 overflow-y-auto py-4">
           <div className="px-2 space-y-2">
+            {/* Dashboard Home Link */}
+            <Link
+              href="/dashboard"
+              className={`
+                group flex items-center px-3 py-2 text-sm font-medium rounded-lg
+                transition-all duration-200 ease-in-out transform
+                ${
+                  pathname === '/dashboard'
+                    ? `bg-${theme.primary}-600 text-white shadow-lg`
+                    : `text-gray-200 hover:bg-gray-700 hover:text-white`
+                }
+                ${isCollapsed ? 'justify-center' : 'justify-start'}
+              `}
+              title={isCollapsed ? 'Dashboard' : undefined}
+            >
+              <Home
+                className={`
+                flex-shrink-0 w-5 h-5 transition-all duration-200
+                ${pathname === '/dashboard' ? `text-white` : `text-gray-300 group-hover:text-white`}
+              `}
+              />
+              {!isCollapsed && (
+                <div className="ml-3 flex-1">
+                  <div className="text-sm font-medium">Dashboard</div>
+                  <div className="text-xs text-gray-400 mt-0.5 transition-opacity duration-200">
+                    Overview & Summary
+                  </div>
+                </div>
+              )}
+              {pathname === '/dashboard' && !isCollapsed && (
+                <div className="ml-auto w-2 h-2 bg-white rounded-full" />
+              )}
+            </Link>
+
+            {/* Separator */}
+            {!isCollapsed && (
+              <div className="px-3 py-2">
+                <div className="h-px bg-gray-600"></div>
+              </div>
+            )}
+
             {navigationGroups.map((group) => {
               const GroupIcon = group.icon;
               const isExpanded = isGroupExpanded(group.id);

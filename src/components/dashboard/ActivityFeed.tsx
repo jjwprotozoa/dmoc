@@ -4,7 +4,7 @@
 import { useSocket } from '@/hooks/useSocket';
 import { trpc } from '@/lib/trpc';
 import { AlertTriangle, Clock, MapPin, MessageSquare } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface Activity {
   id: string;
@@ -38,43 +38,47 @@ export function ActivityFeed() {
     }
   );
 
+  // Memoized socket event handlers to prevent unnecessary re-renders
+  const handlePingNew = useCallback((ping: any) => {
+    setActivities((prev) => [
+      {
+        id: `ping-${ping.id}`,
+        type: 'location',
+        title: 'New Location Update',
+        description: `Device ${ping.device.externalId} reported location`,
+        timestamp: ping.timestamp,
+        data: ping,
+      },
+      ...prev.slice(0, 19),
+    ]);
+  }, []);
+
+  const handleWebhookNew = useCallback((event: any) => {
+    setActivities((prev) => [
+      {
+        id: `webhook-${event.id}`,
+        type: 'webhook',
+        title: 'WhatsApp Message Received',
+        description: event.payload.message?.substring(0, 50) + '...',
+        timestamp: event.createdAt,
+        data: event,
+      },
+      ...prev.slice(0, 19),
+    ]);
+  }, []);
+
   // Socket.IO real-time updates
   useEffect(() => {
     if (socket) {
-      socket.on('ping:new', (ping) => {
-        setActivities((prev) => [
-          {
-            id: `ping-${ping.id}`,
-            type: 'location',
-            title: 'New Location Update',
-            description: `Device ${ping.device.externalId} reported location`,
-            timestamp: ping.timestamp,
-            data: ping,
-          },
-          ...prev.slice(0, 19),
-        ]);
-      });
-
-      socket.on('webhook:new', (event) => {
-        setActivities((prev) => [
-          {
-            id: `webhook-${event.id}`,
-            type: 'webhook',
-            title: 'WhatsApp Message Received',
-            description: event.payload.message?.substring(0, 50) + '...',
-            timestamp: event.createdAt,
-            data: event,
-          },
-          ...prev.slice(0, 19),
-        ]);
-      });
+      socket.on('ping:new', handlePingNew);
+      socket.on('webhook:new', handleWebhookNew);
 
       return () => {
-        socket.off('ping:new');
-        socket.off('webhook:new');
+        socket.off('ping:new', handlePingNew);
+        socket.off('webhook:new', handleWebhookNew);
       };
     }
-  }, [socket]);
+  }, [socket, handlePingNew, handleWebhookNew]);
 
   // Fallback polling mechanism when Socket.IO is not available
   useEffect(() => {

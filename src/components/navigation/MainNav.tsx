@@ -2,10 +2,10 @@
 'use client';
 
 import { useState } from 'react';
+import { ThemeProvider } from '../../contexts/ThemeContext';
+import { BottomNav } from './BottomNav';
 import { SidebarNav } from './SidebarNav';
 import { TopNav } from './TopNav';
-import { BottomNav } from './BottomNav';
-import { ThemeProvider } from '../../contexts/ThemeContext';
 
 interface MainNavProps {
   user: {
@@ -18,28 +18,37 @@ interface MainNavProps {
 }
 
 export function MainNav({ user, children }: MainNavProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <ThemeProvider initialTenantSlug={user.tenantSlug}>
       <div className="min-h-screen bg-gray-50">
-        {/* Desktop Sidebar */}
-        <SidebarNav user={user} />
-
-        {/* Mobile Bottom Navigation */}
-        <BottomNav />
+        {/* Desktop Sidebar - Hidden on mobile */}
+        <div className="hidden lg:block">
+          <SidebarNav 
+            user={user} 
+            isCollapsed={sidebarCollapsed}
+            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          />
+        </div>
 
         {/* Main Content Area */}
-        <div className="lg:ml-64">
+        <div className={`transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'
+        }`}>
           {/* Top Navigation */}
           <TopNav
             user={user}
-            onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-            showMenuButton={true}
+            showMenuButton={false}
           />
 
           {/* Page Content */}
-          <main className="pb-16 lg:pb-0">{children}</main>
+          <main className="pb-20 lg:pb-0 main-content-mobile">{children}</main>
+        </div>
+
+        {/* Mobile Bottom Navigation */}
+        <div className="lg:hidden">
+          <BottomNav />
         </div>
       </div>
     </ThemeProvider>
