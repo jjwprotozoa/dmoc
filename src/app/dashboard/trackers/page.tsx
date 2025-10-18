@@ -2,13 +2,13 @@
 'use client';
 
 import {
-  Radar,
-  MapPin,
-  Signal,
-  Battery,
-  Clock,
-  AlertTriangle,
-  CheckCircle,
+    AlertTriangle,
+    Battery,
+    CheckCircle,
+    Clock,
+    MapPin,
+    Radar,
+    Signal,
 } from 'lucide-react';
 
 export default function TrackersPage() {
@@ -83,19 +83,19 @@ export default function TrackersPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">GPS Tracking</h1>
-          <p className="text-gray-600">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">GPS Tracking</h1>
+          <p className="text-sm sm:text-base text-gray-600">
             Monitor vehicle locations and tracking devices
           </p>
         </div>
-        <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Refresh All
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
+            <span>Refresh All</span>
           </button>
-          <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
-            Add Tracker
+          <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center space-x-2">
+            <span>Add Tracker</span>
           </button>
         </div>
       </div>

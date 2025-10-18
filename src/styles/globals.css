@@ -71,3 +71,85 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* Mobile modal improvements */
+@media (max-width: 640px) {
+  /* Ensure modals don't exceed viewport height */
+  [data-radix-dialog-content] {
+    max-height: 80vh !important;
+    height: auto !important;
+    /* Use transform3d for hardware acceleration */
+    transform: translate3d(0, -50%, 0) !important;
+    will-change: transform, opacity;
+  }
+  
+  /* Improve touch targets */
+  [data-radix-dialog-close] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better scrolling on mobile */
+  [data-radix-dialog-content] {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Ensure modal content is properly contained */
+  [data-radix-dialog-content] > div {
+    max-height: 100%;
+    overflow-y: auto;
+  }
+}
+
+/* Small screens */
+@media (min-width: 640px) and (max-width: 1024px) {
+  [data-radix-dialog-content] {
+    max-height: 85vh !important;
+    height: auto !important;
+    transform: translate3d(-50%, -50%, 0) !important;
+    will-change: transform, opacity;
+  }
+}
+
+/* Large screens */
+@media (min-width: 1024px) {
+  [data-radix-dialog-content] {
+    max-height: 90vh !important;
+    height: auto !important;
+    transform: translate3d(-50%, -50%, 0) !important;
+    will-change: transform, opacity;
+  }
+}
+
+/* Optimize animations to reduce reflows */
+[data-radix-dialog-content] {
+  /* Use GPU acceleration for animations */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Reduce animation complexity */
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -50%, 0) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, -50%, 0) scale(1);
+  }
+}
+
+@keyframes dialog-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, -50%, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -50%, 0) scale(0.95);
+  }
+}

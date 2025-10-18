@@ -304,22 +304,26 @@ export default function DriversCardViewPage() {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <div className="flex items-center space-x-3 mb-2">
-          <User className="w-8 h-8 text-amber-600" />
-          <h1 className="text-3xl font-bold text-gray-900">
-            Drivers (Card View)
-          </h1>
-          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-            A/B Test
-          </span>
-          <a
-            href="/dashboard/drivers"
-            className="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors"
-          >
-            Back to Table View
-          </a>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
+          <div className="flex items-center space-x-3">
+            <User className="w-6 h-6 sm:w-8 sm:h-8 text-amber-600" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Drivers (Card View)
+            </h1>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full whitespace-nowrap">
+              A/B Test
+            </span>
+            <a
+              href="/dashboard/drivers"
+              className="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors whitespace-nowrap"
+            >
+              Back to Table View
+            </a>
+          </div>
         </div>
-        <p className="text-gray-600">
+        <p className="text-sm sm:text-base text-gray-600">
           Mobile-optimized card layout with detailed modal view
         </p>
 
@@ -350,32 +354,32 @@ export default function DriversCardViewPage() {
       </div>
 
       {/* Search and Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 flex-1">
+            <div className="relative flex-1 sm:flex-initial">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search drivers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent w-64"
+                className="w-full sm:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               />
             </div>
-            <button className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <button className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap">
               Clear
             </button>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2">
             <button
               onClick={() => handleDriverAction('add', {} as Driver)}
-              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-2"
+              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center space-x-2"
             >
               <Plus className="w-4 h-4" />
               <span>Add Driver</span>
             </button>
-            <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2">
+            <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-center space-x-2">
               <RefreshCw className="w-4 h-4" />
               <span>Refresh</span>
             </button>
@@ -581,7 +585,7 @@ export default function DriversCardViewPage() {
                       View Details
                     </Button>
                   </DialogTrigger>
-                  <DialogContent size="2xl">
+                  <DialogContent size="lg">
                     <DialogHeader>
                       <DialogTitle className="flex items-center space-x-2">
                         <span className="text-2xl">
@@ -594,193 +598,198 @@ export default function DriversCardViewPage() {
                       </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                      {/* Driver Photo Section */}
-                      <div className="space-y-4">
-                        <h3 className="font-semibold text-gray-900">
-                          Driver Photo
-                        </h3>
-                        <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-                          {driver.pictureLoaded ? (
-                            <div className="text-center">
-                              <User className="w-16 h-16 text-gray-400 mx-auto mb-2" />
-                              <p className="text-sm text-gray-600">
-                                Photo Available
-                              </p>
-                            </div>
-                          ) : (
-                            <div className="text-center">
-                              <User className="w-16 h-16 text-gray-400 mx-auto mb-2" />
-                              <p className="text-sm text-gray-600">No Photo</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Driver Details */}
-                      <div className="space-y-4">
-                        <h3 className="font-semibold text-gray-900">
-                          Driver Information
-                        </h3>
-                        <div className="space-y-3">
-                          <div>
-                            <label className="text-sm font-medium text-gray-500">
-                              Full Name
-                            </label>
-                            <p className="text-gray-900">{driver.name}</p>
+                    <div className="space-y-6 overflow-y-auto flex-1">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* Driver Photo Section */}
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900">
+                            Driver Photo
+                          </h3>
+                          <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                            {driver.pictureLoaded ? (
+                              <div className="text-center">
+                                <User className="w-16 h-16 text-gray-400 mx-auto mb-2" />
+                                <p className="text-sm text-gray-600">
+                                  Photo Available
+                                </p>
+                              </div>
+                            ) : (
+                              <div className="text-center">
+                                <User className="w-16 h-16 text-gray-400 mx-auto mb-2" />
+                                <p className="text-sm text-gray-600">No Photo</p>
+                              </div>
+                            )}
                           </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-500">
-                              Contact Number
-                            </label>
-                            <div className="flex items-center space-x-2">
-                              {(() => {
-                                const contactInfo = formatContactNumber(
-                                  driver.contactNr,
-                                  currentUserRole,
-                                  driver.id
-                                );
-                                const isUnlocked = unlockedDrivers.has(
-                                  driver.id
-                                );
-                                return (
-                                  <>
-                                    <p
-                                      className={`text-gray-900 font-mono ${contactInfo.masked ? 'text-gray-600' : ''}`}
-                                    >
-                                      {contactInfo.display}
-                                    </p>
-                                    {driver.contactNr &&
-                                      driver.contactNr.length > 0 && (
+                        </div>
+
+                        {/* Driver Details */}
+                        <div className="space-y-4">
+                          <h3 className="font-semibold text-gray-900">
+                            Driver Information
+                          </h3>
+                          <div className="space-y-3">
+                            <div>
+                              <label className="text-sm font-medium text-gray-500">
+                                Full Name
+                              </label>
+                              <p className="text-gray-900">{driver.name}</p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-gray-500">
+                                Contact Number
+                              </label>
+                              <div className="flex items-center space-x-2">
+                                {(() => {
+                                  const contactInfo = formatContactNumber(
+                                    driver.contactNr,
+                                    currentUserRole,
+                                    driver.id
+                                  );
+                                  const isUnlocked = unlockedDrivers.has(
+                                    driver.id
+                                  );
+                                  return (
+                                    <>
+                                      <p
+                                        className={`text-gray-900 font-mono ${contactInfo.masked ? 'text-gray-600' : ''}`}
+                                      >
+                                        {contactInfo.display}
+                                      </p>
+                                      {driver.contactNr &&
+                                        driver.contactNr.length > 0 && (
+                                          <button
+                                            onClick={() =>
+                                              handleCallDriver(driver)
+                                            }
+                                            className="text-amber-600 hover:text-amber-700"
+                                            title="Call driver"
+                                          >
+                                            <Phone className="w-4 h-4" />
+                                          </button>
+                                        )}
+                                      {contactInfo.masked && (
                                         <button
                                           onClick={() =>
-                                            handleCallDriver(driver)
+                                            handleUnlockDriver(driver.id)
                                           }
-                                          className="text-amber-600 hover:text-amber-700"
-                                          title="Call driver"
+                                          className="text-gray-400 hover:text-gray-600"
+                                          title={
+                                            isUnlocked
+                                              ? 'Lock information'
+                                              : 'Unlock information'
+                                          }
                                         >
-                                          <Phone className="w-4 h-4" />
+                                          {isUnlocked ? (
+                                            <Unlock className="w-4 h-4" />
+                                          ) : (
+                                            <Lock className="w-4 h-4" />
+                                          )}
                                         </button>
                                       )}
-                                    {contactInfo.masked && (
-                                      <button
-                                        onClick={() =>
-                                          handleUnlockDriver(driver.id)
-                                        }
-                                        className="text-gray-400 hover:text-gray-600"
-                                        title={
-                                          isUnlocked
-                                            ? 'Lock information'
-                                            : 'Unlock information'
-                                        }
-                                      >
-                                        {isUnlocked ? (
-                                          <Unlock className="w-4 h-4" />
-                                        ) : (
-                                          <Lock className="w-4 h-4" />
-                                        )}
-                                      </button>
-                                    )}
-                                  </>
-                                );
-                              })()}
+                                    </>
+                                  );
+                                })()}
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-500">
-                              ID Number
-                            </label>
-                            <div className="flex items-center space-x-2">
-                              <p
-                                className={`text-gray-900 font-mono ${!canViewSensitive && !unlockedDrivers.has(driver.id) ? 'text-gray-600' : ''}`}
-                              >
-                                {maskIdNumber(
-                                  driver.idNumber,
-                                  currentUserRole,
-                                  driver.id
-                                )}
-                              </p>
-                              {!canViewSensitive && (
-                                <button
-                                  onClick={() => handleUnlockDriver(driver.id)}
-                                  className="text-gray-400 hover:text-gray-600"
-                                  title={
-                                    unlockedDrivers.has(driver.id)
-                                      ? 'Lock information'
-                                      : 'Unlock information'
-                                  }
+                            <div>
+                              <label className="text-sm font-medium text-gray-500">
+                                ID Number
+                              </label>
+                              <div className="flex items-center space-x-2">
+                                <p
+                                  className={`text-gray-900 font-mono ${!canViewSensitive && !unlockedDrivers.has(driver.id) ? 'text-gray-600' : ''}`}
                                 >
-                                  {unlockedDrivers.has(driver.id) ? (
-                                    <Unlock className="w-4 h-4" />
-                                  ) : (
-                                    <Lock className="w-4 h-4" />
+                                  {maskIdNumber(
+                                    driver.idNumber,
+                                    currentUserRole,
+                                    driver.id
                                   )}
-                                </button>
-                              )}
+                                </p>
+                                {!canViewSensitive && (
+                                  <button
+                                    onClick={() => handleUnlockDriver(driver.id)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                    title={
+                                      unlockedDrivers.has(driver.id)
+                                        ? 'Lock information'
+                                        : 'Unlock information'
+                                    }
+                                  >
+                                    {unlockedDrivers.has(driver.id) ? (
+                                      <Unlock className="w-4 h-4" />
+                                    ) : (
+                                      <Lock className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-500">
-                              Country of Origin
-                            </label>
-                            <p className="text-gray-900">
-                              {driver.countryOfOrigin}
-                            </p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-500">
-                              Display Value
-                            </label>
-                            <p className="text-gray-900">
-                              {driver.displayValue}
-                            </p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-500">
-                              Date Added
-                            </label>
-                            <p className="text-gray-900">
-                              {formatDate(driver.dateTimeAdded)}
-                            </p>
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium text-gray-500">
-                              Driver ID
-                            </label>
-                            <p className="text-gray-900 font-mono text-sm">
-                              {driver.id}
-                            </p>
+                            <div>
+                              <label className="text-sm font-medium text-gray-500">
+                                Country of Origin
+                              </label>
+                              <p className="text-gray-900">
+                                {driver.countryOfOrigin}
+                              </p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-gray-500">
+                                Display Value
+                              </label>
+                              <p className="text-gray-900">
+                                {driver.displayValue}
+                              </p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-gray-500">
+                                Date Added
+                              </label>
+                              <p className="text-gray-900">
+                                {formatDate(driver.dateTimeAdded)}
+                              </p>
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-gray-500">
+                                Driver ID
+                              </label>
+                              <p className="text-gray-900 font-mono text-sm">
+                                {driver.id}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex justify-end space-x-2 mt-6 pt-6 border-t border-gray-200">
-                      <Button
-                        variant="outline"
-                        onClick={() => handleDriverAction('edit', driver)}
-                      >
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit Driver
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() =>
-                          handleDriverAction('capture-incident', driver)
-                        }
-                      >
-                        <Camera className="w-4 h-4 mr-2" />
-                        Capture Incident
-                      </Button>
-                      <Button
-                        onClick={() =>
-                          handleDriverAction('generate-report', driver)
-                        }
-                      >
-                        <FileText className="w-4 h-4 mr-2" />
-                        Generate Report
-                      </Button>
+                      {/* Action Buttons */}
+                      <div className="flex flex-col sm:flex-row justify-end gap-2 pt-6 border-t border-gray-200">
+                        <Button
+                          variant="outline"
+                          onClick={() => handleDriverAction('edit', driver)}
+                          className="flex-1 sm:flex-initial"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit Driver
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            handleDriverAction('capture-incident', driver)
+                          }
+                          className="flex-1 sm:flex-initial"
+                        >
+                          <Camera className="w-4 h-4 mr-2" />
+                          Capture Incident
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            handleDriverAction('generate-report', driver)
+                          }
+                          className="flex-1 sm:flex-initial"
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          Generate Report
+                        </Button>
+                      </div>
                     </div>
                   </DialogContent>
                 </Dialog>

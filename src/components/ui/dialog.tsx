@@ -5,7 +5,6 @@ import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import * as React from 'react';
 
-import { getMobileModalClasses } from '../../lib/mobile-utils';
 import { cn } from '../../lib/utils';
 
 const Dialog = DialogPrimitive.Root;
@@ -41,11 +40,38 @@ const DialogContent = React.forwardRef<
     <DialogOverlay />
     <DialogPrimitive.Content
       ref={ref}
-      className={cn(getMobileModalClasses(size), className)}
+      className={cn(
+        // Mobile-first: Full width with safe margins, constrained height
+        'fixed inset-x-4 top-[50%] z-50 grid w-auto max-h-[80vh] translate-y-[-50%] gap-4 border bg-background p-4 shadow-lg',
+        // Small screens: Allow slightly more height but still constrained
+        'max-h-[85vh]',
+        // Tablet and up: Center positioning with max-width constraints
+        'sm:left-[50%] sm:top-[50%] sm:w-full sm:translate-x-[-50%] sm:translate-y-[-50%] sm:p-6 sm:rounded-lg sm:max-h-[90vh]',
+        // Apply size-specific max-width on larger screens
+        size === 'sm' && 'sm:max-w-sm',
+        size === 'md' && 'sm:max-w-md',
+        size === 'lg' && 'sm:max-w-lg',
+        size === 'xl' && 'sm:max-w-xl',
+        size === '2xl' && 'sm:max-w-2xl',
+        size === '4xl' && 'sm:max-w-4xl',
+        size === 'full' && 'sm:max-w-full',
+        // Simplified animation states to reduce reflows
+        'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
+        // Ensure content is scrollable and properly contained
+        'overflow-y-auto overflow-x-hidden',
+        className
+      )}
+      style={{
+        // Use transform3d to enable hardware acceleration and reduce reflows
+        transform: 'translate3d(0, -50%, 0)',
+        willChange: 'transform, opacity',
+      }}
       {...props}
     >
-      {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+      <div className="flex flex-col h-full">
+        {children}
+      </div>
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground z-10">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -60,7 +86,7 @@ const DialogHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      'flex flex-col space-y-1.5 text-center sm:text-left',
+      'flex flex-col space-y-1.5 text-center sm:text-left flex-shrink-0',
       className
     )}
     {...props}
@@ -74,7 +100,7 @@ const DialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      'flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:space-x-2',
+      'flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:space-x-2 flex-shrink-0',
       className
     )}
     {...props}

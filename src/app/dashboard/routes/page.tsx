@@ -2,12 +2,12 @@
 'use client';
 
 import {
-  Clock,
-  CloudLightning,
-  MapPin,
-  Navigation,
-  Route,
-  Truck,
+    Clock,
+    CloudLightning,
+    MapPin,
+    Navigation,
+    Route,
+    Truck,
 } from 'lucide-react';
 
 export default function RoutesPage() {
@@ -73,19 +73,19 @@ export default function RoutesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Route Management</h1>
-          <p className="text-gray-600">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Route Management</h1>
+          <p className="text-sm sm:text-base text-gray-600">
             Plan, optimize, and monitor delivery routes
           </p>
         </div>
-        <div className="flex space-x-3">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Optimize All Routes
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
+            <span>Optimize All Routes</span>
           </button>
-          <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
-            Create Route
+          <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center justify-center space-x-2">
+            <span>Create Route</span>
           </button>
         </div>
       </div>

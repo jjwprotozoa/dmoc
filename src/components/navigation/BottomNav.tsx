@@ -2,26 +2,28 @@
 'use client';
 
 import {
-  FileText,
-  Archive,
-  Receipt,
-  Users,
-  Truck,
-  User,
-  Shield,
-  Car,
-  Route,
-  MapPin,
-  Radar,
-  Phone,
-  Settings,
-  Globe,
-  Heart,
-  MoreHorizontal,
+    Archive,
+    Car,
+    FileText,
+    Globe,
+    Heart,
+    Home,
+    MapPin,
+    MoreHorizontal,
+    Phone,
+    Radar,
+    Receipt,
+    Route,
+    Settings,
+    Shield,
+    Truck,
+    User,
+    Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface NavItem {
   id: string;
@@ -32,6 +34,12 @@ interface NavItem {
 
 // Primary navigation items for mobile (most important ones)
 const primaryNavItems: NavItem[] = [
+  {
+    id: 'dashboard',
+    label: 'Home',
+    href: '/dashboard',
+    icon: Home,
+  },
   {
     id: 'active-manifests',
     label: 'Active',
@@ -149,6 +157,7 @@ const secondaryNavItems: NavItem[] = [
 export function BottomNav() {
   const [showMore, setShowMore] = useState(false);
   const pathname = usePathname();
+  const { theme } = useTheme();
 
   const handleMoreClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -158,7 +167,7 @@ export function BottomNav() {
   return (
     <>
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-amber-900 to-amber-800 border-t border-amber-700 shadow-2xl lg:hidden">
+      <div className={`fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-gray-900 via-gray-800 to-gray-900 border-t border-gray-700 shadow-2xl lg:hidden`}>
         <div className="flex items-center justify-around py-2">
           {primaryNavItems.map((item) => {
             const isActive = pathname === item.href;
@@ -173,8 +182,8 @@ export function BottomNav() {
                     flex flex-col items-center p-2 rounded-lg transition-all duration-200
                     ${
                       showMore
-                        ? 'bg-amber-600 text-amber-100'
-                        : 'text-amber-300 hover:text-amber-100 hover:bg-amber-700'
+                        ? `bg-${theme.primary}-600 text-white`
+                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
                     }
                   `}
                 >
@@ -192,15 +201,15 @@ export function BottomNav() {
                   flex flex-col items-center p-2 rounded-lg transition-all duration-200
                   ${
                     isActive
-                      ? 'bg-amber-600 text-amber-100'
-                      : 'text-amber-300 hover:text-amber-100 hover:bg-amber-700'
+                      ? `bg-${theme.primary}-600 text-white`
+                      : 'text-gray-300 hover:text-white hover:bg-gray-700'
                   }
                 `}
               >
                 <Icon className="w-5 h-5" />
                 <span className="text-xs mt-1 font-medium">{item.label}</span>
                 {isActive && (
-                  <div className="w-1 h-1 bg-amber-200 rounded-full mt-1" />
+                  <div className="w-1 h-1 bg-white rounded-full mt-1" />
                 )}
               </Link>
             );
@@ -210,7 +219,7 @@ export function BottomNav() {
 
       {/* Expanded More Menu */}
       {showMore && (
-        <div className="fixed bottom-16 left-0 right-0 z-40 bg-amber-800 border-t border-amber-700 shadow-2xl lg:hidden">
+        <div className="fixed bottom-16 left-0 right-0 z-40 bg-gray-800 border-t border-gray-700 shadow-2xl lg:hidden">
           <div className="p-4">
             <div className="grid grid-cols-3 gap-3">
               {secondaryNavItems.map((item) => {
@@ -226,8 +235,8 @@ export function BottomNav() {
                       flex flex-col items-center p-3 rounded-lg transition-all duration-200
                       ${
                         isActive
-                          ? 'bg-amber-600 text-amber-100'
-                          : 'text-amber-300 hover:text-amber-100 hover:bg-amber-700'
+                          ? `bg-${theme.primary}-600 text-white`
+                          : 'text-gray-300 hover:text-white hover:bg-gray-700'
                       }
                     `}
                   >
@@ -236,7 +245,7 @@ export function BottomNav() {
                       {item.label}
                     </span>
                     {isActive && (
-                      <div className="w-1 h-1 bg-amber-200 rounded-full mt-1" />
+                      <div className="w-1 h-1 bg-white rounded-full mt-1" />
                     )}
                   </Link>
                 );

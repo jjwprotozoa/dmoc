@@ -117,6 +117,10 @@ module.exports = {
         '85vh': '85vh',
         '90vh': '90vh',
         '95vh': '95vh',
+        'mobile-vh': 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+      },
+      height: {
+        'mobile-vh': 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
       },
     },
   },

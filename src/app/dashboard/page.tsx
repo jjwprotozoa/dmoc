@@ -2,7 +2,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ActivityFeed } from '../../components/dashboard/ActivityFeed';
 import { ManifestsList } from '../../components/dashboard/ManifestsList';
 import { InstallPrompt } from '../../components/install/InstallPrompt';
@@ -29,10 +29,10 @@ export default function DashboardPage() {
   const { data: latestPings } = trpc.tracking.getLatestPings.useQuery({});
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <InstallPrompt />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Left Column - Manifests */}
         <div className="lg:col-span-1">
           <ManifestsList
@@ -44,9 +44,9 @@ export default function DashboardPage() {
 
         {/* Center Column - Map */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow-sm border relative overflow-hidden h-[600px] flex flex-col">
-            <div className="p-4 border-b flex-shrink-0">
-              <h2 className="text-lg font-semibold">Live Tracking</h2>
+          <div className="bg-white rounded-lg shadow-sm border relative overflow-hidden h-[400px] sm:h-[500px] lg:h-[600px] flex flex-col">
+            <div className="p-3 sm:p-4 border-b flex-shrink-0">
+              <h2 className="text-base sm:text-lg font-semibold">Live Tracking</h2>
             </div>
             <div className="flex-1 relative overflow-hidden">
               <Map
