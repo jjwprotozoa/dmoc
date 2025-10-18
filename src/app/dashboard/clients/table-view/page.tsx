@@ -13,7 +13,8 @@ import {
     Search,
     Users,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { debounce } from '../../../../lib/performance';
 
 interface Client {
   companyId: number;
@@ -28,11 +29,24 @@ interface Client {
 
 export default function ClientsTablePage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedClients, setSelectedClients] = useState<number[]>([]);
+
+  // Debounce search input to prevent excessive filtering
+  const debouncedSetSearch = useCallback(
+    debounce((value: string) => {
+      setDebouncedSearchQuery(value);
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedSetSearch(searchQuery);
+  }, [searchQuery, debouncedSetSearch]);
   const [showFilters, setShowFilters] = useState(false);
 
   // Mock data based on the desktop application screenshot
-  const clients: Client[] = [
+  const clients: Client[] = useMemo(() => [
     {
       companyId: 3103,
       companyTypeId: 1,
@@ -423,30 +437,36 @@ export default function ClientsTablePage() {
       id: 3759,
       displayValue: 'ZALAWI ZAMBIA',
     },
-  ];
+  ], []);
 
-  const filteredClients = clients.filter(
-    (client) =>
-      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.displayValue.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Memoize filtered clients to prevent unnecessary recalculations
+  const filteredClients = useMemo(() => {
+    if (!debouncedSearchQuery) return clients;
+    
+    const searchLower = debouncedSearchQuery.toLowerCase();
+    return clients.filter(
+      (client) =>
+        client.name.toLowerCase().includes(searchLower) ||
+        client.address.toLowerCase().includes(searchLower) ||
+        client.displayValue.toLowerCase().includes(searchLower)
+    );
+  }, [clients, debouncedSearchQuery]);
 
-  const handleSelectAll = () => {
+  const handleSelectAll = useCallback(() => {
     if (selectedClients.length === filteredClients.length) {
       setSelectedClients([]);
     } else {
       setSelectedClients(filteredClients.map((client) => client.id));
     }
-  };
+  }, [selectedClients.length, filteredClients]);
 
-  const handleSelectClient = (clientId: number) => {
+  const handleSelectClient = useCallback((clientId: number) => {
     setSelectedClients((prev) =>
       prev.includes(clientId)
         ? prev.filter((id) => id !== clientId)
         : [...prev, clientId]
     );
-  };
+  }, []);
 
   return (
     <div className="p-6 space-y-6">

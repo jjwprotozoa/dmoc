@@ -13,7 +13,9 @@
       "maxDuration": 30
     }
   },
-  "regions": ["iad1"],
+  "regions": [
+    "iad1"
+  ],
   "build": {
     "env": {
       "VERCEL": "1"

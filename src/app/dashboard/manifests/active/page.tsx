@@ -2,6 +2,7 @@
 'use client';
 
 import { Clock, FileText, MapPin, Truck } from 'lucide-react';
+import { useMemo } from 'react';
 import { trpc } from '../../../../lib/trpc';
 
 interface Manifest {
@@ -29,10 +30,12 @@ interface Manifest {
 export default function ActiveManifestsPage() {
   const { data: manifests, isLoading } = trpc.manifest.getAll.useQuery({});
 
-  const activeManifests =
-    manifests?.filter(
+  // Memoize active manifests filtering to prevent unnecessary recalculations
+  const activeManifests = useMemo(() => {
+    return manifests?.filter(
       (manifest: Manifest) => manifest.status === 'IN_PROGRESS'
     ) || [];
+  }, [manifests]);
 
   return (
     <div className="space-y-4 sm:space-y-6">

@@ -21,7 +21,7 @@ import {
     Unlink,
     Wrench
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '../../../../components/ui/button';
 import {
     Dialog,
@@ -39,6 +39,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '../../../../components/ui/dropdown-menu';
+import { debounce } from '../../../../lib/performance';
 
 interface Vehicle {
   vehicleId: number;
@@ -309,6 +310,7 @@ const mockCombinations: VehicleCombination[] = [
 
 export default function VehiclesCardViewPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedVehicles, setSelectedVehicles] = useState<number[]>([]);
   const [vehicles] = useState<Vehicle[]>(mockVehicles);
   const [combinations] = useState<VehicleCombination[]>(mockCombinations);
@@ -318,36 +320,63 @@ export default function VehiclesCardViewPage() {
   const [showFuelEntryDialog, setShowFuelEntryDialog] = useState(false);
   const [fuelEntryVehicle, setFuelEntryVehicle] = useState<Vehicle | null>(null);
 
-  const filteredVehicles = vehicles.filter(vehicle => {
-    const matchesSearch = vehicle.registration.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vehicle.countryOfOrigin.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vehicle.entityTypeDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vehicle.currentDriver?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vehicle.location?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    // Filter by tab
-    if (activeTab === 'horses') return matchesSearch && vehicle.entityTypeDescription === 'HORSE';
-    if (activeTab === 'trailers') return matchesSearch && vehicle.entityTypeDescription === 'TRAILER';
-    return matchesSearch;
-  });
+  // Debounce search input to prevent excessive filtering
+  const debouncedSetSearch = useCallback(
+    debounce((value: string) => {
+      setDebouncedSearchQuery(value);
+    }, 300),
+    []
+  );
 
-  const filteredCombinations = combinations.filter(combo => {
-    const matchesSearch = combo.horse.registration.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      combo.driver.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      combo.cargo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      combo.route?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      combo.trailers.some(trailer => trailer.registration.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    return activeTab === 'combinations' && matchesSearch;
-  });
+  useEffect(() => {
+    debouncedSetSearch(searchQuery);
+  }, [searchQuery, debouncedSetSearch]);
 
-  const handleSelectVehicle = (vehicleId: number) => {
+  // Memoize filtered data to prevent unnecessary recalculations
+  const filteredVehicles = useMemo(() => {
+    if (!debouncedSearchQuery && activeTab === 'horses') {
+      return vehicles.filter(v => v.entityTypeDescription === 'HORSE');
+    }
+    if (!debouncedSearchQuery && activeTab === 'trailers') {
+      return vehicles.filter(v => v.entityTypeDescription === 'TRAILER');
+    }
+    
+    const searchLower = debouncedSearchQuery.toLowerCase();
+    return vehicles.filter(vehicle => {
+      const matchesSearch = vehicle.registration.toLowerCase().includes(searchLower) ||
+        vehicle.countryOfOrigin.toLowerCase().includes(searchLower) ||
+        vehicle.entityTypeDescription.toLowerCase().includes(searchLower) ||
+        vehicle.currentDriver?.toLowerCase().includes(searchLower) ||
+        vehicle.location?.toLowerCase().includes(searchLower);
+      
+      // Filter by tab
+      if (activeTab === 'horses') return matchesSearch && vehicle.entityTypeDescription === 'HORSE';
+      if (activeTab === 'trailers') return matchesSearch && vehicle.entityTypeDescription === 'TRAILER';
+      return matchesSearch;
+    });
+  }, [vehicles, debouncedSearchQuery, activeTab]);
+
+  const filteredCombinations = useMemo(() => {
+    if (activeTab !== 'combinations') return [];
+    if (!debouncedSearchQuery) return combinations;
+    
+    const searchLower = debouncedSearchQuery.toLowerCase();
+    return combinations.filter(combo => {
+      return combo.horse.registration.toLowerCase().includes(searchLower) ||
+        combo.driver.toLowerCase().includes(searchLower) ||
+        combo.cargo?.toLowerCase().includes(searchLower) ||
+        combo.route?.toLowerCase().includes(searchLower) ||
+        combo.trailers.some(trailer => trailer.registration.toLowerCase().includes(searchLower));
+    });
+  }, [combinations, debouncedSearchQuery, activeTab]);
+
+  const handleSelectVehicle = useCallback((vehicleId: number) => {
     setSelectedVehicles(prev =>
       prev.includes(vehicleId)
         ? prev.filter(id => id !== vehicleId)
         : [...prev, vehicleId]
     );
-  };
+  }, []);
 
 
   const handleVehicleAction = (action: string, vehicle: Vehicle) => {

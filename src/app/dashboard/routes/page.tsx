@@ -9,10 +9,11 @@ import {
     Route,
     Truck,
 } from 'lucide-react';
+import { useMemo } from 'react';
 
 export default function RoutesPage() {
   // Mock data - replace with actual data from your API
-  const routes = [
+  const routes = useMemo(() => [
     {
       id: '1',
       name: 'JHB to CPT Express',
@@ -49,7 +50,14 @@ export default function RoutesPage() {
       efficiency: 95,
       lastOptimized: '1 day ago',
     },
-  ];
+  ], []);
+
+  // Memoize route statistics to prevent unnecessary recalculations
+  const routeStats = useMemo(() => ({
+    active: routes.filter((r) => r.status === 'Active').length,
+    totalVehicles: routes.reduce((sum, r) => sum + r.vehicles, 0),
+    averageEfficiency: routes.reduce((sum, r) => sum + r.efficiency, 0) / routes.length,
+  }), [routes]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -110,7 +118,7 @@ export default function RoutesPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Active Routes</p>
               <p className="text-2xl font-bold text-gray-900">
-                {routes.filter((r) => r.status === 'Active').length}
+                {routeStats.active}
               </p>
             </div>
           </div>
@@ -124,7 +132,7 @@ export default function RoutesPage() {
                 Total Vehicles
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                {routes.reduce((sum, r) => sum + r.vehicles, 0)}
+                {routeStats.totalVehicles}
               </p>
             </div>
           </div>
@@ -138,11 +146,7 @@ export default function RoutesPage() {
                 Avg Efficiency
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                {Math.round(
-                  routes.reduce((sum, r) => sum + r.efficiency, 0) /
-                    routes.length
-                )}
-                %
+                {Math.round(routeStats.averageEfficiency)}%
               </p>
             </div>
           </div>

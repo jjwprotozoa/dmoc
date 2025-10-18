@@ -14,7 +14,7 @@ import {
     Search,
     Users,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AuthDialog } from '../../../../components/ui/auth-dialog';
 import { Button } from '../../../../components/ui/button';
 import {
@@ -35,6 +35,7 @@ import {
 } from '../../../../components/ui/dropdown-menu';
 import { PrivacyNotice } from '../../../../components/ui/privacy-notice';
 import { SensitiveDataField } from '../../../../components/ui/sensitive-data-field';
+import { debounce } from '../../../../lib/performance';
 import { PrivacyConfig } from '../../../../lib/privacy';
 
 interface Client {
@@ -461,6 +462,7 @@ const mockClients: Client[] = [
 
 export default function ClientsCardViewPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedClients, setSelectedClients] = useState<number[]>([]);
   const [clients] = useState<Client[]>(mockClients);
   const [showFilters, setShowFilters] = useState(false);
@@ -469,6 +471,18 @@ export default function ClientsCardViewPage() {
   const [unlockedClients, setUnlockedClients] = useState<Set<number>>(
     new Set()
   );
+
+  // Debounce search input to prevent excessive filtering
+  const debouncedSetSearch = useCallback(
+    debounce((value: string) => {
+      setDebouncedSearchQuery(value);
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedSetSearch(searchQuery);
+  }, [searchQuery, debouncedSetSearch]);
 
   // Privacy controls - in real app this would come from auth system
   const currentUserRole = 'operator'; // Mock role for demo
@@ -480,20 +494,26 @@ export default function ClientsCardViewPage() {
     unlockedItems: unlockedClients,
   };
 
-  const filteredClients = clients.filter(
-    (client) =>
-      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.displayValue.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Memoize filtered clients to prevent unnecessary recalculations
+  const filteredClients = useMemo(() => {
+    if (!debouncedSearchQuery) return clients;
+    
+    const searchLower = debouncedSearchQuery.toLowerCase();
+    return clients.filter(
+      (client) =>
+        client.name.toLowerCase().includes(searchLower) ||
+        client.address.toLowerCase().includes(searchLower) ||
+        client.displayValue.toLowerCase().includes(searchLower)
+    );
+  }, [clients, debouncedSearchQuery]);
 
-  const handleSelectClient = (clientId: number) => {
+  const handleSelectClient = useCallback((clientId: number) => {
     setSelectedClients((prev) =>
       prev.includes(clientId)
         ? prev.filter((id) => id !== clientId)
         : [...prev, clientId]
     );
-  };
+  }, []);
 
   const handleAuthenticated = () => {
     if (pendingAction) {

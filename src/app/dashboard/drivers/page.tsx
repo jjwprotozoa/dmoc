@@ -20,7 +20,7 @@ import {
   User,
   XCircle,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AuthDialog } from '../../../components/ui/auth-dialog';
 import { Button } from '../../../components/ui/button';
 import { CallDialog } from '../../../components/ui/call-dialog';
@@ -40,6 +40,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../../../components/ui/dropdown-menu';
+import { debounce } from '../../../lib/performance';
 
 interface Driver {
   id: number;
@@ -139,6 +140,7 @@ const mockDrivers: Driver[] = [
 
 export default function DriversPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [selectedDrivers, setSelectedDrivers] = useState<number[]>([]);
   const [drivers] = useState<Driver[]>(mockDrivers);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
@@ -152,6 +154,18 @@ export default function DriversPage() {
     phone: string;
     maskedPhone?: string;
   } | null>(null);
+
+  // Debounce search input to prevent excessive filtering
+  const debouncedSetSearch = useCallback(
+    debounce((value: string) => {
+      setDebouncedSearchQuery(value);
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedSetSearch(searchQuery);
+  }, [searchQuery, debouncedSetSearch]);
 
   // Privacy controls - in real app this would come from auth system
   const currentUserRole = 'operator'; // Mock role for demo
@@ -202,21 +216,27 @@ export default function DriversPage() {
     return { display, link, masked };
   };
 
-  const filteredDrivers = drivers.filter(
-    (driver) =>
-      driver.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      driver.contactNr.includes(searchQuery) ||
-      driver.idNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      driver.countryOfOrigin.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Memoize filtered drivers to prevent unnecessary recalculations
+  const filteredDrivers = useMemo(() => {
+    if (!debouncedSearchQuery) return drivers;
+    
+    const searchLower = debouncedSearchQuery.toLowerCase();
+    return drivers.filter(
+      (driver) =>
+        driver.name.toLowerCase().includes(searchLower) ||
+        driver.contactNr.includes(debouncedSearchQuery) ||
+        driver.idNumber.toLowerCase().includes(searchLower) ||
+        driver.countryOfOrigin.toLowerCase().includes(searchLower)
+    );
+  }, [drivers, debouncedSearchQuery]);
 
-  const handleSelectDriver = (driverId: number) => {
+  const handleSelectDriver = useCallback((driverId: number) => {
     setSelectedDrivers((prev) =>
       prev.includes(driverId)
         ? prev.filter((id) => id !== driverId)
         : [...prev, driverId]
     );
-  };
+  }, []);
 
   const handleDriverAction = (action: string, driver: Driver) => {
     console.log(`${action} action for driver:`, driver.name);

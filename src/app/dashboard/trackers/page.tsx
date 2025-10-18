@@ -10,10 +10,11 @@ import {
   Radar,
   Signal,
 } from 'lucide-react';
+import { useMemo } from 'react';
 
 export default function TrackersPage() {
   // Mock data - replace with actual data from your API
-  const trackers = [
+  const trackers = useMemo(() => [
     {
       id: '1',
       deviceId: 'TRK-001',
@@ -53,7 +54,14 @@ export default function TrackersPage() {
       heading: 'Unknown',
       temperature: 0,
     },
-  ];
+  ], []);
+
+  // Memoize tracker statistics to prevent unnecessary recalculations
+  const trackerStats = useMemo(() => ({
+    online: trackers.filter((t) => t.status === 'Online').length,
+    offline: trackers.filter((t) => t.status === 'Offline').length,
+    lowBattery: trackers.filter((t) => t.battery < 20).length,
+  }), [trackers]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -122,7 +130,7 @@ export default function TrackersPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Online</p>
               <p className="text-2xl font-bold text-gray-900">
-                {trackers.filter((t) => t.status === 'Online').length}
+                {trackerStats.online}
               </p>
             </div>
           </div>
@@ -134,7 +142,7 @@ export default function TrackersPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Offline</p>
               <p className="text-2xl font-bold text-gray-900">
-                {trackers.filter((t) => t.status === 'Offline').length}
+                {trackerStats.offline}
               </p>
             </div>
           </div>
@@ -146,7 +154,7 @@ export default function TrackersPage() {
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Low Battery</p>
               <p className="text-2xl font-bold text-gray-900">
-                {trackers.filter((t) => t.battery < 20).length}
+                {trackerStats.lowBattery}
               </p>
             </div>
           </div>

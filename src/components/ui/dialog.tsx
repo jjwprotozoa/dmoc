@@ -65,6 +65,8 @@ const DialogContent = React.forwardRef<
         // Use transform3d to enable hardware acceleration and reduce reflows
         transform: 'translate3d(0, -50%, 0)',
         willChange: 'transform, opacity',
+        // Prevent layout shifts during animations
+        contain: 'layout style paint',
       }}
       {...props}
     >
