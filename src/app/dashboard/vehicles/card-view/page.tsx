@@ -4,6 +4,7 @@
 import {
     Activity,
     AlertTriangle,
+    ArrowLeft,
     BookOpen,
     Calendar,
     Car,
@@ -22,6 +23,7 @@ import {
     Wrench
 } from 'lucide-react';
 import { useState } from 'react';
+import { BackToTop } from '../../../../components/ui/back-to-top';
 import { Button } from '../../../../components/ui/button';
 import {
     Dialog,
@@ -39,6 +41,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '../../../../components/ui/dropdown-menu';
+import { Pagination } from '../../../../components/ui/pagination';
 
 interface Vehicle {
   vehicleId: number;
@@ -313,6 +316,8 @@ export default function VehiclesCardViewPage() {
   const [vehicles] = useState<Vehicle[]>(mockVehicles);
   const [combinations] = useState<VehicleCombination[]>(mockCombinations);
   const [activeTab, setActiveTab] = useState<'horses' | 'trailers' | 'combinations'>('horses');
+  const [page, setPage] = useState(1);
+  const pageSize = 8;
   const [showLogbookDialog, setShowLogbookDialog] = useState(false);
   const [logbookVehicle, setLogbookVehicle] = useState<Vehicle | null>(null);
   const [showFuelEntryDialog, setShowFuelEntryDialog] = useState(false);
@@ -437,19 +442,26 @@ export default function VehiclesCardViewPage() {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <div className="flex items-center space-x-3 mb-2">
-          <Car className="w-8 h-8 text-amber-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Vehicles (Card View)</h1>
-          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Enhanced</span>
-          <a 
-            href="/dashboard/vehicles" 
-            className="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors"
-          >
-            Back to Table View
-          </a>
+        <div className="page-header">
+          <div className="page-header-title">
+            <Car className="w-8 h-8 text-amber-600" />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Vehicles</h1>
+              <p className="text-gray-600">Card view • Fleet management and logbook</p>
+            </div>
+          </div>
+          <div className="page-header-actions">
+            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Card view</span>
+            <a 
+              href="/dashboard/vehicles" 
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Table
+            </a>
+          </div>
         </div>
-        <p className="text-gray-600">Fleet management with fuel monitoring and vehicle logbook</p>
-        
+
         {/* Tab Navigation */}
         <div className="mt-6 border-b border-gray-200">
           <nav className="-mb-px flex space-x-8">
@@ -497,9 +509,9 @@ export default function VehiclesCardViewPage() {
       </div>
 
       {/* Search and Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-4">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+        <div className="search-container mb-2 sm:mb-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0 order-1 sm:order-none w-full">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -507,22 +519,22 @@ export default function VehiclesCardViewPage() {
                 placeholder="Search vehicles..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent w-64"
+                className="search-input pl-10 pr-4 h-11 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               />
             </div>
-            <button className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <button className="px-3 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors w-full sm:w-auto">
               Clear
             </button>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2 ml-auto order-2 sm:order-none w-full sm:w-auto">
             <button 
               onClick={() => handleVehicleAction('add', {} as Vehicle)}
-              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-2"
+              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-2 w-full sm:w-auto"
             >
               <Plus className="w-4 h-4" />
               <span>Add Vehicle</span>
             </button>
-            <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2">
+            <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2 w-full sm:w-auto">
               <RefreshCw className="w-4 h-4" />
               <span>Refresh</span>
             </button>
@@ -630,9 +642,10 @@ export default function VehiclesCardViewPage() {
           ))}
         </div>
       ) : (
-        /* Vehicles Cards Grid */
+        <>
+        {/* Vehicles Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-8">
-          {filteredVehicles.map((vehicle) => (
+          {filteredVehicles.slice((page - 1) * pageSize, page * pageSize).map((vehicle) => (
           <div 
             key={vehicle.id}
             className={`bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow ${
@@ -923,6 +936,8 @@ export default function VehiclesCardViewPage() {
           </div>
         ))}
         </div>
+        <Pagination page={page} pageSize={pageSize} total={filteredVehicles.length} onPageChange={setPage} />
+        </>
       )}
 
       {/* Empty State */}
@@ -1154,6 +1169,7 @@ export default function VehiclesCardViewPage() {
           </DialogContent>
         </Dialog>
       )}
+      <BackToTop />
     </div>
   );
 }

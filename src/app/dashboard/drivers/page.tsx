@@ -2,30 +2,32 @@
 'use client';
 
 import {
-  Camera,
-  CheckCircle,
-  Clock,
-  CreditCard,
-  Edit,
-  FileText,
-  MoreHorizontal,
-  Plus,
-  RefreshCw,
-  Search,
-  Shield,
-  User,
-  XCircle,
+    Camera,
+    CheckCircle,
+    Clock,
+    CreditCard,
+    Edit,
+    FileText,
+    MoreHorizontal,
+    Plus,
+    RefreshCw,
+    Search,
+    Shield,
+    User,
+    XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
+import { BackToTop } from '../../../components/ui/back-to-top';
 import { Button } from '../../../components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '../../../components/ui/dropdown-menu';
+import { Pagination } from '../../../components/ui/pagination';
 
 interface Driver {
   id: number;
@@ -124,9 +126,14 @@ const mockDrivers: Driver[] = [
 ];
 
 export default function DriversPage() {
+  if (typeof window !== 'undefined' && window.location.pathname === '/dashboard/drivers') {
+    window.location.replace('/dashboard/drivers/card-view');
+  }
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDrivers, setSelectedDrivers] = useState<number[]>([]);
   const [drivers] = useState<Driver[]>(mockDrivers);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const filteredDrivers = drivers.filter(
     (driver) =>
@@ -135,6 +142,8 @@ export default function DriversPage() {
       driver.idNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
       driver.countryOfOrigin.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const pagedDrivers = filteredDrivers.slice((page - 1) * pageSize, page * pageSize);
 
   const handleSelectDriver = (driverId: number) => {
     setSelectedDrivers((prev) =>
@@ -200,9 +209,9 @@ export default function DriversPage() {
       </div>
 
       {/* Search and Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-4">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+        <div className="search-container mb-2 sm:mb-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0 order-1 sm:order-none">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
@@ -210,14 +219,14 @@ export default function DriversPage() {
                 placeholder="Search drivers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent w-64"
+                className="search-input pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               />
             </div>
-            <button className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <button className="px-3 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
               Clear
             </button>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2 ml-auto order-2 sm:order-none">
             <button
               onClick={() => handleDriverAction('add', {} as Driver)}
               className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-2"
@@ -290,7 +299,7 @@ export default function DriversPage() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredDrivers.map((driver) => (
+              {pagedDrivers.map((driver) => (
                 <tr
                   key={driver.id}
                   className={`hover:bg-gray-50 ${
@@ -390,6 +399,10 @@ export default function DriversPage() {
           </div>
         )}
       </div>
+
+      <Pagination page={page} pageSize={pageSize} total={filteredDrivers.length} onPageChange={setPage} />
+
+      <BackToTop />
 
       {/* Feature Cards */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">

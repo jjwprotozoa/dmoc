@@ -4,6 +4,12 @@
 import { Car, Clock, Fuel, MapPin, Wrench } from 'lucide-react';
 
 export default function VehiclesPage() {
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname;
+    if (path === '/dashboard/vehicles') {
+      window.location.replace('/dashboard/vehicles/card-view');
+    }
+  }
   // Mock data - replace with actual data from your API
   const vehicles = [
     {
@@ -57,8 +63,8 @@ export default function VehiclesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+      <div className="page-header page-header-compact">
+        <div className="page-header-title">
           <Car className="w-8 h-8 text-amber-600" />
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Fleet Management</h1>
@@ -66,14 +72,16 @@ export default function VehiclesPage() {
           </div>
           <a 
             href="/dashboard/vehicles/card-view" 
-            className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200 transition-colors"
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors ml-1"
           >
-            Try Card View
+            Card view
           </a>
         </div>
-        <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
-          Add Vehicle
-        </button>
+        <div className="page-header-actions">
+          <button className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors">
+            Add Vehicle
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}

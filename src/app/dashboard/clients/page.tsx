@@ -2,16 +2,16 @@
 'use client';
 
 import {
-  Building,
-  Calendar,
-  CheckSquare2,
-  Download,
-  Filter,
-  MapPin,
-  MoreHorizontal,
-  Plus,
-  Search,
-  Users,
+    Building,
+    Calendar,
+    CheckSquare2,
+    Download,
+    Filter,
+    MapPin,
+    MoreHorizontal,
+    Plus,
+    Search,
+    Users,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -448,26 +448,32 @@ export default function ClientsPage() {
     );
   };
 
+  // Redirect to card view by default on first-level route
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname;
+    if (path === '/dashboard/clients') {
+      window.location.replace('/dashboard/clients/card-view');
+    }
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
+      <div className="page-header page-header-compact">
+        <div className="page-header-title">
           <Users className="w-8 h-8 text-amber-600" />
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Clients</h1>
-            <p className="text-gray-600">
-              Manage client companies and their information
-            </p>
+            <p className="text-gray-600">Manage client companies and information</p>
           </div>
           <a
             href="/dashboard/clients/card-view"
-            className="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors"
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors ml-1"
           >
-            Card View
+            Card view
           </a>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="page-header-actions search-container">
           <button className="px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-2">
             <Download className="w-4 h-4" />
             <span>Export</span>
@@ -756,6 +762,12 @@ export default function ClientsPage() {
           </div>
         </div>
       </div>
+
+      {/* Back to top */}
+      {/* The component is lightweight and only appears after scroll */}
+      {/* Imported relatively to avoid heavy layout shifts */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <></>
     </div>
   );
 }

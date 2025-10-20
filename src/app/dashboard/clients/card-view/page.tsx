@@ -2,36 +2,39 @@
 'use client';
 
 import {
-  Building,
-  Calendar,
-  Download,
-  Edit,
-  Eye,
-  Filter,
-  MapPin,
-  MoreHorizontal,
-  Plus,
-  Search,
-  Users,
+    ArrowLeft,
+    Building,
+    Calendar,
+    Check,
+    Download,
+    Edit,
+    Eye,
+    Filter,
+    MapPin,
+    MoreHorizontal,
+    Plus,
+    Search,
+    Users,
 } from 'lucide-react';
 import { useState } from 'react';
 import { AuthDialog } from '../../../../components/ui/auth-dialog';
+import { BackToTop } from '../../../../components/ui/back-to-top';
 import { Button } from '../../../../components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from '../../../../components/ui/dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '../../../../components/ui/dropdown-menu';
 import { PrivacyNotice } from '../../../../components/ui/privacy-notice';
 import { SensitiveDataField } from '../../../../components/ui/sensitive-data-field';
@@ -464,6 +467,9 @@ export default function ClientsCardViewPage() {
   const [selectedClients, setSelectedClients] = useState<number[]>([]);
   const [clients] = useState<Client[]>(mockClients);
   const [showFilters, setShowFilters] = useState(false);
+  const [companyTypeFilter, setCompanyTypeFilter] = useState<string>('All Types');
+  const [locationFilter, setLocationFilter] = useState<string>('All Locations');
+  const [dateRangeFilter, setDateRangeFilter] = useState<string>('All Time');
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
   const [unlockedClients, setUnlockedClients] = useState<Set<number>>(
@@ -480,12 +486,91 @@ export default function ClientsCardViewPage() {
     unlockedItems: unlockedClients,
   };
 
-  const filteredClients = clients.filter(
-    (client) =>
-      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.displayValue.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredClients = clients.filter((client) => {
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch =
+      q.length === 0 ||
+      client.name.toLowerCase().includes(q) ||
+      (client.address || '').toLowerCase().includes(q) ||
+      client.displayValue.toLowerCase().includes(q);
+
+    const matchesCompanyType =
+      companyTypeFilter === 'All Types' ||
+      client.entityTypeDescription === companyTypeFilter;
+
+    const matchesLocation =
+      locationFilter === 'All Locations' ||
+      (client.address || '')
+        .toLowerCase()
+        .includes(locationFilter.toLowerCase());
+
+    const matchesDate = (() => {
+      if (dateRangeFilter === 'All Time') return true;
+      const added = new Date(client.dateTimeAdded);
+      const now = new Date();
+      switch (dateRangeFilter) {
+        case 'This Month':
+          return (
+            added.getMonth() === now.getMonth() &&
+            added.getFullYear() === now.getFullYear()
+          );
+        case 'Last 3 Months': {
+          const threeMonthsAgo = new Date(now);
+          threeMonthsAgo.setMonth(now.getMonth() - 3);
+          return added >= threeMonthsAgo && added <= now;
+        }
+        case 'This Year':
+          return added.getFullYear() === now.getFullYear();
+        default:
+          return true;
+      }
+    })();
+
+    return matchesSearch && matchesCompanyType && matchesLocation && matchesDate;
+  });
+
+  const handleClear = () => {
+    setSearchQuery('');
+    setCompanyTypeFilter('All Types');
+    setLocationFilter('All Locations');
+    setDateRangeFilter('All Time');
+    setSelectedClients([]);
+  };
+
+  // Simple dropdown-menu based select that matches trigger width
+  const MenuSelect = ({
+    value,
+    onChange,
+    options,
+  }: {
+    value: string;
+    onChange: (next: string) => void;
+    options: string[];
+  }) => {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="w-full max-w-full px-3 h-10 text-left text-sm border border-gray-300 rounded-lg bg-white relative z-50 flex items-center justify-between"
+          >
+            <span className="truncate">{value}</span>
+            <svg className="w-4 h-4 ml-2 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-[--radix-dropdown-menu-trigger-width]">
+          {options.map((opt) => (
+            <DropdownMenuItem key={opt} onClick={() => onChange(opt)} className="flex items-center justify-between">
+              <span className="truncate">{opt}</span>
+              {opt === value && <Check className="w-4 h-4 text-amber-600" />}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
 
   const handleSelectClient = (clientId: number) => {
     setSelectedClients((prev) =>
@@ -544,24 +629,25 @@ export default function ClientsCardViewPage() {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <div className="flex items-center space-x-3 mb-2">
-          <Users className="w-8 h-8 text-amber-600" />
-          <h1 className="text-3xl font-bold text-gray-900">
-            Clients (Card View)
-          </h1>
-          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-            A/B Test
-          </span>
-          <a
-            href="/dashboard/clients"
-            className="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors"
-          >
-            Back to Table View
-          </a>
+        <div className="page-header">
+          <div className="page-header-title">
+            <Users className="w-8 h-8 text-amber-600" />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Clients</h1>
+              <p className="text-gray-600">Card view • Mobile-optimized layout</p>
+            </div>
+          </div>
+          <div className="page-header-actions">
+            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Card view</span>
+            <a
+              href="/dashboard/clients"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Table
+            </a>
+          </div>
         </div>
-        <p className="text-gray-600">
-          Mobile-optimized card layout with detailed modal view
-        </p>
 
         {/* Privacy Notice */}
         <PrivacyNotice userRole={currentUserRole} className="mt-4" />
@@ -634,25 +720,31 @@ export default function ClientsCardViewPage() {
       </div>
 
       {/* Search and Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+        <div className="search-container mb-2 sm:mb-4">
+          {/* Row 1: Search input occupies its own line */}
+          <div className="flex items-center gap-3 w-full order-1">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search clients..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent w-64"
+                className="search-input pl-10 pr-4 h-11 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               />
             </div>
-            <button className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          </div>
+          {/* Row 2: All action buttons under the search */}
+          <div className="flex flex-wrap items-center gap-2 order-2 w-full mt-2">
+            <button onClick={handleClear} className="px-3 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex-1 sm:flex-none">
               Clear
             </button>
             <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
+              type="button"
+              aria-expanded={showFilters}
+              onClick={() => setShowFilters((prev) => !prev)}
+              className={`px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors flex-1 sm:flex-none ${
                 showFilters
                   ? 'bg-amber-100 text-amber-800 border border-amber-300'
                   : 'border border-gray-300 hover:bg-gray-50'
@@ -661,16 +753,14 @@ export default function ClientsCardViewPage() {
               <Filter className="w-4 h-4" />
               <span>Filter</span>
             </button>
-          </div>
-          <div className="flex items-center space-x-2">
             <button
               onClick={() => handleClientAction('add', {} as Client)}
-              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-2"
+              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center gap-2 flex-1 sm:flex-none"
             >
               <Plus className="w-4 h-4" />
               <span>Add Client</span>
             </button>
-            <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2">
+            <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2 flex-1 sm:flex-none">
               <Download className="w-4 h-4" />
               <span>Export</span>
             </button>
@@ -679,37 +769,37 @@ export default function ClientsCardViewPage() {
 
         {/* Filter Panel */}
         {showFilters && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 relative z-40">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Company Type
                 </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
-                  <option>All Types</option>
-                  <option>CLIENT</option>
-                </select>
+                <MenuSelect
+                  value={companyTypeFilter}
+                  onChange={setCompanyTypeFilter}
+                  options={["All Types", "CLIENT"]}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Location
                 </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
-                  <option>All Locations</option>
-                  <option>TANZANIA</option>
-                  <option>Zambia</option>
-                </select>
+                <MenuSelect
+                  value={locationFilter}
+                  onChange={setLocationFilter}
+                  options={["All Locations", "TANZANIA", "Zambia"]}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Date Added
                 </label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500">
-                  <option>All Time</option>
-                  <option>This Month</option>
-                  <option>Last 3 Months</option>
-                  <option>This Year</option>
-                </select>
+                <MenuSelect
+                  value={dateRangeFilter}
+                  onChange={setDateRangeFilter}
+                  options={["All Time", "This Month", "Last 3 Months", "This Year"]}
+                />
               </div>
             </div>
           </div>
@@ -1045,6 +1135,8 @@ export default function ClientsCardViewPage() {
         title="View Sensitive Information"
         description="Please authenticate to view unmasked contact numbers and company details for this specific client"
       />
+
+      <BackToTop />
     </div>
   );
 }

@@ -2,43 +2,44 @@
 'use client';
 
 import {
-  Camera,
-  CheckCircle,
-  Clock,
-  CreditCard,
-  Edit,
-  Eye,
-  FileText,
-  Lock,
-  MoreHorizontal,
-  Phone,
-  Plus,
-  RefreshCw,
-  Search,
-  Shield,
-  Unlock,
-  User,
-  XCircle,
+    ArrowLeft,
+    Camera,
+    CheckCircle,
+    Clock,
+    CreditCard,
+    Edit,
+    Eye,
+    FileText,
+    Lock,
+    MoreHorizontal,
+    Phone,
+    Plus,
+    RefreshCw,
+    Search,
+    Shield,
+    Unlock,
+    User,
+    XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
 import { AuthDialog } from '../../../../components/ui/auth-dialog';
 import { Button } from '../../../../components/ui/button';
 import { CallDialog } from '../../../../components/ui/call-dialog';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
 } from '../../../../components/ui/dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
 } from '../../../../components/ui/dropdown-menu';
 
 interface Driver {
@@ -304,24 +305,25 @@ export default function DriversCardViewPage() {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <div className="flex items-center space-x-3 mb-2">
-          <User className="w-8 h-8 text-amber-600" />
-          <h1 className="text-3xl font-bold text-gray-900">
-            Drivers (Card View)
-          </h1>
-          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-            A/B Test
-          </span>
-          <a
-            href="/dashboard/drivers"
-            className="px-3 py-1 text-sm bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 transition-colors"
-          >
-            Back to Table View
-          </a>
+        <div className="page-header">
+          <div className="page-header-title">
+            <User className="w-8 h-8 text-amber-600" />
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Drivers</h1>
+              <p className="text-gray-600">Card view • Mobile-optimized layout</p>
+            </div>
+          </div>
+          <div className="page-header-actions">
+            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Card view</span>
+            <a
+              href="/dashboard/drivers"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Table
+            </a>
+          </div>
         </div>
-        <p className="text-gray-600">
-          Mobile-optimized card layout with detailed modal view
-        </p>
 
         {/* Privacy Notice */}
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -350,32 +352,34 @@ export default function DriversCardViewPage() {
       </div>
 
       {/* Search and Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+        <div className="search-container mb-2 sm:mb-4">
+          {/* Row 1: Search input on its own line */}
+          <div className="flex items-center gap-3 w-full order-1">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search drivers..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent w-64"
+                className="search-input pl-10 pr-4 h-11 text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
               />
             </div>
-            <button className="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          </div>
+          {/* Row 2: Actions under search */}
+          <div className="flex flex-wrap items-center gap-2 order-2 w-full mt-2">
+            <button className="px-3 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex-1 sm:flex-none">
               Clear
             </button>
-          </div>
-          <div className="flex items-center space-x-2">
             <button
               onClick={() => handleDriverAction('add', {} as Driver)}
-              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-2"
+              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center gap-2 flex-1 sm:flex-none"
             >
               <Plus className="w-4 h-4" />
               <span>Add Driver</span>
             </button>
-            <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2">
+            <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2 flex-1 sm:flex-none">
               <RefreshCw className="w-4 h-4" />
               <span>Refresh</span>
             </button>

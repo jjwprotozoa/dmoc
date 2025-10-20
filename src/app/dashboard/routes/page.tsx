@@ -2,12 +2,12 @@
 'use client';
 
 import {
-  Clock,
-  CloudLightning,
-  MapPin,
-  Navigation,
-  Route,
-  Truck,
+    Clock,
+    CloudLightning,
+    MapPin,
+    Navigation,
+    Route,
+    Truck,
 } from 'lucide-react';
 
 export default function RoutesPage() {
@@ -73,14 +73,12 @@ export default function RoutesPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Route Management</h1>
-          <p className="text-gray-600">
-            Plan, optimize, and monitor delivery routes
-          </p>
+      <div className="page-header page-header-compact">
+        <div className="page-header-title">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Routes</h1>
+          <p className="text-gray-600">Plan, optimize, and monitor delivery routes</p>
         </div>
-        <div className="flex space-x-3">
+        <div className="page-header-actions">
           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
             Optimize All Routes
           </button>

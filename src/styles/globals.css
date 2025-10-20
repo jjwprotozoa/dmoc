@@ -49,6 +49,34 @@
   }
 }
 
+@layer components {
+  /* Responsive page header used across dashboard pages */
+  .page-header {
+    @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3;
+  }
+  .page-header-title {
+    @apply flex items-start gap-3 min-w-0;
+  }
+  .page-header-title h1 {
+    @apply text-2xl sm:text-3xl;
+  }
+  .page-header-actions {
+    @apply flex items-center gap-2 flex-wrap w-full sm:w-auto justify-start sm:justify-end;
+  }
+  /* Compact controls on small screens */
+  .page-header-compact .page-header-actions :where(button,a) {
+    @apply px-3 py-1.5 text-sm;
+  }
+
+  /* Reusable responsive search container */
+  .search-container {
+    @apply w-full flex flex-col sm:flex-row items-stretch sm:items-center gap-3;
+  }
+  .search-input {
+    @apply flex-1 min-w-0 w-full sm:w-auto;
+  }
+}
+
 @layer base {
   * {
     @apply border-border;
