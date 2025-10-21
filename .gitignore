@@ -101,6 +101,9 @@ Thumbs.db
 # Prisma
 prisma/migrations/
 
+# TypeScript
+tsconfig.tsbuildinfo
+
 # PWA
 public/sw.js
 public/workbox-*.js
