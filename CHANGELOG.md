@@ -45,9 +45,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Menu Behavior** - Groups expand/collapse independently with persistent state management
 - **Visual Hierarchy** - Better visual separation between group headers and individual items
 - **Default Group States** - Manifests and Fleet Management groups open by default, others collapsed
+- **Page Redirect Behavior** - Updated vehicles, drivers, and clients pages to automatically redirect to card view for consistent UX
 
 ### Fixed
 
+- **Card View Default Redirect** - Fixed inconsistent redirect behavior for vehicles, drivers, and clients pages to always show card view by default
+- **Redirect Flash Issue** - Eliminated visual flash when redirecting from table view to card view using proper Next.js router
+- **Bundle Size Optimization** - Reduced redirect page bundle sizes from ~2-5kB to 513B by removing unused table code
 - **Database Connection Issues** - Resolved SQLite/MySQL configuration conflicts and connection errors
 - **TypeScript Router Errors** - Fixed all TypeScript errors in new tRPC routers including proper imports and context access
 - **Database Schema Validation** - Corrected Prisma schema relationships and field types for proper data integrity
