@@ -3,6 +3,63 @@ import { z } from 'zod';
 import { protectedProcedure, router } from '../trpc';
 
 export const manifestRouter = router({
+  list: protectedProcedure
+    .input(
+      z.object({
+        q: z.string().optional(),
+        status: z.array(z.string()).optional(),
+        take: z.number().min(1).max(200).default(50),
+        skip: z.number().min(0).default(0),
+      }).optional()
+    )
+    .query(async ({ ctx, input }) => {
+      const tenantId = ctx.session.user.tenantId;
+      
+      // Build where clause with tenant isolation
+      const where: any = {
+        company: {
+          organization: {
+            tenantId: tenantId
+          }
+        }
+      };
+
+      if (input?.q) {
+        where.OR = [
+          { title: { contains: input.q, mode: "insensitive" } },
+        ];
+      }
+      if (input?.status && input.status.length) {
+        where.status = { in: input.status };
+      }
+
+      const [items, total] = await Promise.all([
+        ctx.db.manifest.findMany({
+          where,
+          take: input?.take ?? 50,
+          skip: input?.skip ?? 0,
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            scheduledAt: true,
+            createdAt: true,
+            companyId: true,
+            company: {
+              select: {
+                id: true,
+                name: true,
+              }
+            }
+          },
+        }),
+        ctx.db.manifest.count({ where }),
+      ]);
+
+      return { items, total };
+    }),
+
   getAll: protectedProcedure
     .input(
       z.object({
