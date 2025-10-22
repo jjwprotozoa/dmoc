@@ -1,6 +1,7 @@
 // src/app/dashboard/manifests/page.tsx
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -242,7 +243,12 @@ export default function ManifestsPage() {
                           {data?.items?.map((manifest) => (
                             <tr key={manifest.id} className="border-b hover:bg-muted/50 transition-colors">
                               <td className="p-4">
-                                <div className="font-medium">{manifest.title}</div>
+                                <Link 
+                                  href={`/dashboard/manifests/${manifest.id}`}
+                                  className="text-primary underline underline-offset-2 hover:opacity-80"
+                                >
+                                  <div className="font-medium">{manifest.title}</div>
+                                </Link>
                                 <div className="text-sm text-muted-foreground">ID: {manifest.id.slice(0, 8)}...</div>
                               </td>
                               <td className="p-4">
@@ -279,9 +285,11 @@ export default function ManifestsPage() {
                                     </Button>
                                   </DropdownMenuTrigger>
                                   <DropdownMenuContent align="end">
-                                    <DropdownMenuItem>
-                                      <Eye className="h-4 w-4 mr-2" />
-                                      View Details
+                                    <DropdownMenuItem asChild>
+                                      <Link href={`/dashboard/manifests/${manifest.id}`}>
+                                        <Eye className="h-4 w-4 mr-2" />
+                                        View Details
+                                      </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem>
                                       <Edit className="h-4 w-4 mr-2" />
@@ -308,7 +316,12 @@ export default function ManifestsPage() {
                         <CardContent className="pt-6">
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
-                              <h3 className="font-semibold text-lg">{manifest.title}</h3>
+                              <Link 
+                                href={`/dashboard/manifests/${manifest.id}`}
+                                className="text-primary underline underline-offset-2 hover:opacity-80"
+                              >
+                                <h3 className="font-semibold text-lg">{manifest.title}</h3>
+                              </Link>
                               <p className="text-sm text-muted-foreground">ID: {manifest.id.slice(0, 8)}...</p>
                             </div>
                             <Badge 
@@ -347,9 +360,11 @@ export default function ManifestsPage() {
                           </div>
                           
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm" className="flex-1">
-                              <Eye className="h-4 w-4 mr-2" />
-                              View
+                            <Button asChild variant="outline" size="sm" className="flex-1">
+                              <Link href={`/dashboard/manifests/${manifest.id}`}>
+                                <Eye className="h-4 w-4 mr-2" />
+                                View
+                              </Link>
                             </Button>
                             <Button variant="outline" size="sm" className="flex-1">
                               <Edit className="h-4 w-4 mr-2" />

@@ -1,6 +1,7 @@
 // src/server/api/routers/manifest.ts
 import { z } from 'zod';
 import { protectedProcedure, router } from '../trpc';
+import { TRPCError } from '@trpc/server';
 
 export const manifestRouter = router({
   list: protectedProcedure
@@ -88,12 +89,27 @@ export const manifestRouter = router({
     }),
 
   getById: protectedProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
-      const manifest = await ctx.db.manifest.findUnique({
-        where: { id: input.id },
+      const { id } = input;
+      const tenantId = ctx.session.user.tenantId;
+
+      // Tenant isolation: only fetch within the signed-in user's tenant
+      const manifest = await ctx.db.manifest.findFirst({
+        where: {
+          id,
+          company: {
+            organization: {
+              tenantId: tenantId
+            }
+          }
+        },
         include: {
-          company: true,
+          company: {
+            include: {
+              organization: true
+            }
+          },
           stops: {
             orderBy: { order: 'asc' },
           },
@@ -101,7 +117,12 @@ export const manifestRouter = router({
       });
 
       if (!manifest) {
-        throw new Error('Manifest not found');
+        throw new TRPCError({ code: "NOT_FOUND", message: "Manifest not found" });
+      }
+
+      // Double-check (defensive) tenant boundary
+      if (manifest.company.organization.tenantId !== tenantId) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Access denied" });
       }
 
       return manifest;
