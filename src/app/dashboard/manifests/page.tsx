@@ -1,11 +1,15 @@
 // src/app/dashboard/manifests/page.tsx
 "use client";
-import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import { useState } from "react";
 
 export default function ManifestsPage() {
   // Feature flag check
-  if (process.env.NEXT_PUBLIC_DMOC_MIGRATION !== "1") return null;
+  console.log("DMOC Migration flag:", process.env.NEXT_PUBLIC_DMOC_MIGRATION);
+  if (process.env.NEXT_PUBLIC_DMOC_MIGRATION !== "1") {
+    console.log("Migration flag not set, returning null");
+    return <div>Migration flag not enabled. Set NEXT_PUBLIC_DMOC_MIGRATION=1</div>;
+  }
 
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<string[]>([]);
@@ -15,6 +19,8 @@ export default function ManifestsPage() {
     take: 50, 
     skip: 0 
   });
+
+  console.log("Manifest data:", { data, isLoading, error });
 
   return (
     <div className="p-6 space-y-4">
