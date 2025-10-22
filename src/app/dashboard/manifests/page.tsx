@@ -1,7 +1,7 @@
 // src/app/dashboard/manifests/page.tsx
 "use client";
 import { useState } from "react";
-import { api } from "@/lib/trpc";
+import { trpc } from "@/lib/trpc";
 
 export default function ManifestsPage() {
   // Feature flag check
@@ -9,7 +9,7 @@ export default function ManifestsPage() {
 
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<string[]>([]);
-  const { data, isLoading, error } = api.manifest.list.useQuery({ 
+  const { data, isLoading, error } = trpc.manifest.list.useQuery({ 
     q, 
     status, 
     take: 50, 
