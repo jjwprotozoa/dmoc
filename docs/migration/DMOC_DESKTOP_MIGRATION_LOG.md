@@ -28,11 +28,13 @@ This document tracks the incremental migration from the Windows DMOC desktop app
 
 ## Migration Entries
 
-### 2025-10-22 Add manifest.list (read-only) and list page (flagged)
+### 2025-10-22 Add manifest.list (read-only) and list page (flagged) ✅
+
 - **Why:** First safe parity step from legacy `frmMain` manifests grid; low risk, read-only.
 - **Added:**
-  - packages/api/src/server/api/routers/manifest.ts (`list`)
-  - apps/web/app/manifests/page.tsx (flagged)
-- **tRPC:** `manifest.list(q?, status[], take, skip)`; tenant-scoped
-- **Routes:** `/manifests` (hidden unless `NEXT_PUBLIC_DMOC_MIGRATION=1`)
+  - src/server/api/routers/manifest.ts (`list` procedure)
+  - src/app/dashboard/manifests/page.tsx (flagged)
+- **tRPC:** `manifest.list(q?, status[], take, skip)`; tenant-scoped via organization relationship
+- **Routes:** `/dashboard/manifests` (hidden unless `NEXT_PUBLIC_DMOC_MIGRATION=1`)
 - **Notes/compat:** additive-only; no changes to existing routers or models.
+- **Status:** ✅ Implemented and tested successfully
