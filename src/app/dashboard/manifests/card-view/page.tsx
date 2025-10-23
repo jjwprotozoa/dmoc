@@ -169,12 +169,7 @@ export default function ManifestsCardViewPage() {
     }
   };
 
-  // Removed unused handleCallContact function
-
-  const handleCall = (phoneNumber: string) => {
-    console.log('Calling:', phoneNumber);
-    // In a real app, this would integrate with telephony service
-  };
+  // Removed unused handleCallContact and handleCall functions
 
   const formatDate = (dateString: string | null): string => {
     if (!dateString) return 'N/A';

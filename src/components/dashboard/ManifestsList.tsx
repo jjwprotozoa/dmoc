@@ -5,20 +5,20 @@ import { AlertCircle, CheckCircle, Clock, MapPin, XCircle } from 'lucide-react';
 
 interface Manifest {
   id: string;
-  title: string;
+  title: string | null;
   status: string;
-  scheduledAt: string | Date;
-  trackingId?: string;
-  jobNumber?: string;
-  rmn?: string;
+  scheduledAt: string | Date | null;
+  trackingId?: string | null;
+  jobNumber?: string | null;
+  rmn?: string | null;
   company?: {
     id: string;
     name: string;
-  };
+  } | null;
   route?: {
     id: string;
     name: string;
-  };
+  } | null;
   locations?: Array<{
     id: string;
     latitude: number;
@@ -77,11 +77,13 @@ export function ManifestsList({
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900">
-                        {manifest.title}
+                        {manifest.title || 'Untitled'}
                       </h3>
                       <p className="text-sm text-gray-500 mt-1">
-                        {new Date(manifest.scheduledAt).toLocaleDateString()} at{' '}
-                        {new Date(manifest.scheduledAt).toLocaleTimeString()}
+                        {manifest.scheduledAt 
+                          ? `${new Date(manifest.scheduledAt).toLocaleDateString()} at ${new Date(manifest.scheduledAt).toLocaleTimeString()}`
+                          : 'No scheduled time'
+                        }
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
                         {manifest.locations?.length || 0} locations

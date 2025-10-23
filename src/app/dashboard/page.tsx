@@ -25,8 +25,8 @@ const Map = dynamic(
 export default function DashboardPage() {
   const [selectedManifest, setSelectedManifest] = useState<string | null>(null);
 
-  const { data: manifests } = trpc.manifest.getAll.useQuery({});
-  const { data: latestPings } = trpc.tracking.getLatestPings.useQuery({});
+  const { data: manifests } = trpc.manifest.getAll.useQuery();
+  const { data: latestPings } = trpc.tracking.getLatestPings.useQuery({ deviceIds: [] });
 
   return (
     <div className="space-y-6">

@@ -31,6 +31,9 @@ interface ManifestItem {
   rmn?: string | null;
 }
 
+// Type for API response manifest items (without optional fields)
+type ApiManifestItem = Omit<ManifestItem, 'jobNumber' | 'rmn'>;
+
 interface DashboardStats {
   total: number;
   active: number;
@@ -49,8 +52,8 @@ export default function ManifestDisplayDashboard() {
   const [cacheRefreshInterval, setCacheRefreshInterval] = useState(15); // Minutes - how often to fetch from DB
   const [isFullscreen, setIsFullscreen] = useState(false);
 interface DashboardData {
-  criticalManifests: ManifestItem[];
-  highPriorityManifests: ManifestItem[];
+  criticalManifests: ApiManifestItem[];
+  highPriorityManifests: ApiManifestItem[];
   stats: DashboardStats;
   lastUpdated: string;
   filters: {
@@ -166,8 +169,8 @@ interface DashboardData {
 
   // Use cached data if available, fallback to fresh data
   const currentData = cachedData || dashboardData;
-  const manifests = (currentData?.highPriorityManifests || []) as any[];
-  const criticalManifests = (currentData?.criticalManifests || []) as any[];
+  const manifests = (currentData?.highPriorityManifests || []) as ManifestItem[];
+  const criticalManifests = (currentData?.criticalManifests || []) as ManifestItem[];
   const stats: DashboardStats = currentData?.stats || {
     total: 0,
     active: 0,
@@ -219,8 +222,8 @@ interface DashboardData {
 
   return (
     <DisplayDashboard
-      manifests={manifests as any}
-      criticalManifests={criticalManifests as any}
+      manifests={manifests}
+      criticalManifests={criticalManifests}
       stats={stats}
       isLoading={isLoadingDashboard}
       isConnected={isConnected}

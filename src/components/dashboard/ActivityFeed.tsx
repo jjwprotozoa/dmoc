@@ -31,7 +31,7 @@ export function ActivityFeed() {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: webhookEvents } = trpc.manifest.getAll.useQuery(
-    {},
+    undefined,
     {
       refetchInterval: isConnected ? false : 30000, // Poll every 30s when Socket.IO is not connected
       enabled: !isConnected, // Only fetch when Socket.IO is not connected
