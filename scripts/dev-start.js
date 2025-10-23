@@ -4,11 +4,27 @@
 const { exec, spawn } = require('child_process');
 const path = require('path');
 
-function killProcessOnPort(port) {
+function isNodeProcess(pid) {
   return new Promise((resolve) => {
+    exec(`wmic process where "ProcessId=${pid}" get Name /format:list`, (error, stdout) => {
+      if (error) {
+        resolve(false);
+        return;
+      }
+      
+      const isNode = stdout.toLowerCase().includes('node.exe') || 
+                    stdout.toLowerCase().includes('npm.exe') || 
+                    stdout.toLowerCase().includes('next.exe');
+      resolve(isNode);
+    });
+  });
+}
+
+function killProcessOnPort(port) {
+  return new Promise(async (resolve) => {
     console.log(`🔍 Checking for processes on port ${port}...`);
     
-    exec(`netstat -ano | findstr :${port}`, (error, stdout) => {
+    exec(`netstat -ano | findstr :${port}`, async (error, stdout) => {
       if (error || !stdout.trim()) {
         console.log(`✅ Port ${port} is free`);
         resolve();
@@ -35,17 +51,43 @@ function killProcessOnPort(port) {
         return;
       }
 
-      console.log(`🔪 Killing processes on port ${port}: ${Array.from(pids).join(', ')}`);
+      // Filter to only Node.js related processes
+      const nodePids = [];
+      for (const pid of pids) {
+        const isNode = await isNodeProcess(pid);
+        if (isNode) {
+          nodePids.push(pid);
+        } else {
+          console.log(`⚠️  Skipping non-Node process ${pid} on port ${port}`);
+        }
+      }
+
+      if (nodePids.length === 0) {
+        console.log(`✅ No Node.js processes found on port ${port}`);
+        resolve();
+        return;
+      }
+
+      console.log(`🔪 Killing Node.js processes on port ${port}: ${nodePids.join(', ')}`);
       
-      const killPromises = Array.from(pids).map(pid => {
+      const killPromises = nodePids.map(pid => {
         return new Promise((resolveKill) => {
-          exec(`taskkill /PID ${pid} /F`, (killError) => {
+          // First try graceful termination, then force if needed
+          exec(`taskkill /PID ${pid}`, (killError) => {
             if (killError) {
-              console.log(`⚠️  Could not kill process ${pid}: ${killError.message}`);
+              // If graceful kill fails, try force kill
+              exec(`taskkill /PID ${pid} /F`, (forceKillError) => {
+                if (forceKillError) {
+                  console.log(`⚠️  Could not kill process ${pid}: ${forceKillError.message}`);
+                } else {
+                  console.log(`✅ Force killed process ${pid}`);
+                }
+                resolveKill();
+              });
             } else {
-              console.log(`✅ Killed process ${pid}`);
+              console.log(`✅ Gracefully killed process ${pid}`);
+              resolveKill();
             }
-            resolveKill();
           });
         });
       });

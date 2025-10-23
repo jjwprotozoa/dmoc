@@ -2,22 +2,28 @@
 'use client';
 
 import { AlertCircle, CheckCircle, Clock, MapPin, XCircle } from 'lucide-react';
-import React from 'react';
 
 interface Manifest {
   id: string;
   title: string;
   status: string;
-  scheduledAt: string;
-  stops: Array<{
+  scheduledAt: string | Date;
+  trackingId?: string;
+  jobNumber?: string;
+  rmn?: string;
+  company?: {
     id: string;
-    order: number;
-    location: string; // JSON string: {lat: number, lng: number}
-    arrivedAt: string | null;
-    departedAt: string | null;
-    createdAt: string;
-    updatedAt: string;
-    manifestId: string;
+    name: string;
+  };
+  route?: {
+    id: string;
+    name: string;
+  };
+  locations?: Array<{
+    id: string;
+    latitude: number;
+    longitude: number;
+    recordedAt: string | Date;
   }>;
 }
 
@@ -78,7 +84,7 @@ export function ManifestsList({
                         {new Date(manifest.scheduledAt).toLocaleTimeString()}
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
-                        {manifest.stops.length} stops
+                        {manifest.locations?.length || 0} locations
                       </p>
                     </div>
 

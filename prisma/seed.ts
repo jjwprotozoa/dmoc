@@ -731,7 +731,7 @@ async function main() {
       tenantId: tenant.id,
       email: 'admin@digiwize.com',
       passwordHash:
-        '$2a$10$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdWoXehVzJapJSRc6GwE6Q8K8Q2', // 'password'
+        '$2b$10$e/YMqCHUJXoCqEeN.Ei6N.1G8vBm/KTX/6g9A89J0y6rimfh1fRRG', // 'admin123'
       role: 'ADMIN',
     },
   });
@@ -826,6 +826,9 @@ async function main() {
   const manifest1 = await prisma.manifest.create({
     data: {
       tenantId: tenant.id,
+      title: "Cape Town to Johannesburg Route",
+      status: "IN_PROGRESS",
+      scheduledAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
       trackingId: "TRK-001",
       routeId: route1.id,
       locationId: location1.id,
@@ -838,6 +841,9 @@ async function main() {
   const manifest2 = await prisma.manifest.create({
     data: {
       tenantId: tenant.id,
+      title: "Durban to Pretoria Route",
+      status: "SCHEDULED",
+      scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
       trackingId: "TRK-002",
       routeId: route2.id,
       locationId: location3.id,

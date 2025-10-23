@@ -9,7 +9,11 @@ echo 🔍 Checking for processes on port 3000...
 for /f "tokens=5" %%a in ('netstat -ano ^| findstr :3000') do (
     if not "%%a"=="0" (
         echo 🔪 Killing process %%a on port 3000...
-        taskkill /PID %%a /F >nul 2>&1
+        taskkill /PID %%a >nul 2>&1
+        if errorlevel 1 (
+            echo 🔪 Force killing process %%a on port 3000...
+            taskkill /PID %%a /F >nul 2>&1
+        )
     )
 )
 
@@ -18,7 +22,11 @@ echo 🔍 Checking for processes on port 3001...
 for /f "tokens=5" %%a in ('netstat -ano ^| findstr :3001') do (
     if not "%%a"=="0" (
         echo 🔪 Killing process %%a on port 3001...
-        taskkill /PID %%a /F >nul 2>&1
+        taskkill /PID %%a >nul 2>&1
+        if errorlevel 1 (
+            echo 🔪 Force killing process %%a on port 3001...
+            taskkill /PID %%a /F >nul 2>&1
+        )
     )
 )
 

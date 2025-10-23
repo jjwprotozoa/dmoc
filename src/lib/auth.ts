@@ -88,7 +88,7 @@ export const authOptions: NextAuthOptions = {
         try {
           // Test database connection first
           await db.$connect();
-          console.log('✅ Database connection successful');
+          console.log('✅ [Auth] Database connection successful');
 
           const user = await db.user.findUnique({
             where: { email: credentials.email },
@@ -96,23 +96,33 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (!user) {
-            console.log('❌ User not found:', credentials.email);
+            console.log('❌ [Auth] User not found:', credentials.email);
             return null;
           }
 
-          console.log('✅ User found:', user.email, 'Role:', user.role);
+          console.log('✅ [Auth] User found:', {
+            email: user.email,
+            role: user.role,
+            tenantId: user.tenantId,
+            tenantSlug: user.tenant.slug
+          });
 
+          console.log('🔍 [Auth] Testing password...');
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
             user.passwordHash
           );
 
+          console.log('🔍 [Auth] Password validation result:', isPasswordValid);
+          console.log('🔍 [Auth] Stored hash:', user.passwordHash);
+          console.log('🔍 [Auth] Provided password:', credentials.password);
+
           if (!isPasswordValid) {
-            console.log('❌ Invalid password for:', credentials.email);
+            console.log('❌ [Auth] Invalid password for:', credentials.email);
             return null;
           }
 
-          console.log('🎉 Authentication successful for:', credentials.email);
+          console.log('🎉 [Auth] Authentication successful for:', credentials.email);
 
           return {
             id: user.id,
@@ -122,8 +132,8 @@ export const authOptions: NextAuthOptions = {
             tenantSlug: user.tenant.slug,
           };
         } catch (error) {
-          console.error('❌ Database authentication error:', error);
-          console.error('❌ Error details:', {
+          console.error('❌ [Auth] Database authentication error:', error);
+          console.error('❌ [Auth] Error details:', {
             message: error instanceof Error ? error.message : 'Unknown error',
             code: (error as { code?: string })?.code,
             stack:
@@ -162,11 +172,27 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      console.log('🔍 [Auth] Session callback called');
+      console.log('🔍 [Auth] Token:', {
+        sub: token.sub,
+        role: token.role,
+        tenantId: token.tenantId,
+        tenantSlug: token.tenantSlug
+      });
+      
       if (token && session.user) {
         session.user.id = token.sub!;
         session.user.role = token.role;
         session.user.tenantId = token.tenantId;
         session.user.tenantSlug = token.tenantSlug;
+        
+        console.log('✅ [Auth] Session updated:', {
+          id: session.user.id,
+          email: session.user.email,
+          role: session.user.role,
+          tenantId: session.user.tenantId,
+          tenantSlug: session.user.tenantSlug
+        });
       }
       return session;
     },

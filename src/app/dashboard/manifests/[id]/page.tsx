@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+// Removed unused Badge import
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 

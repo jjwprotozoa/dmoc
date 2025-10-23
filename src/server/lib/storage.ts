@@ -1,8 +1,8 @@
 // FILE: src/server/lib/storage.ts
 // Minimal S3/MinIO wrapper with signed PUT/GET for media externalization.
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "@/lib/env";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const s3 = new S3Client({
   region: env.S3_REGION || "auto",

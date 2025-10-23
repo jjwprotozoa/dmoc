@@ -63,6 +63,7 @@ model Company {
   organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   drivers      Driver[]
   vehicles     Vehicle[]
+  manifests    Manifest[]
 
   @@map("companies")
 }
@@ -206,11 +207,15 @@ model FuelEntry {
 model Manifest {
   id               String   @id @default(cuid())
   tenantId         String
+  title            String?  // Display title for the manifest
+  status           String   @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+  scheduledAt      DateTime? // When the manifest is scheduled to start
   trackingId       String?  @map("trackingID")
   tripStateId      Int?     @map("tripStateID")
   routeId          String?  @map("routeID")
   clientId         String?  @map("clientID")
   transporterId    String?  @map("transporterID")
+  companyId        String?  @map("companyID") // Link to Company
   horseId          String?  @map("horseID")
   trailerId1       String?  @map("trailerID1")
   trailerId2       String?  @map("trailerID2")
@@ -226,6 +231,7 @@ model Manifest {
   dateTimeEnded    DateTime? @map("dateTimeEnded")
 
   tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  company      Company?       @relation(fields: [companyId], references: [id])
   route        Route?         @relation(fields: [routeId], references: [id])
   invoiceState InvoiceState?  @relation(fields: [invoiceStateId], references: [id])
   location     Location?      @relation("Manifest_locationId", fields: [locationId], references: [id])

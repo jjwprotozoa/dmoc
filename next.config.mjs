@@ -10,6 +10,7 @@ const nextConfig = {
     NEXTAUTH_SECRET:
       process.env.NEXTAUTH_SECRET ||
       'your-super-secret-jwt-key-that-is-at-least-32-characters-long',
+    NEXT_PUBLIC_DMOC_MIGRATION: process.env.NEXT_PUBLIC_DMOC_MIGRATION || '1',
   },
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client'],

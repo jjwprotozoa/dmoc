@@ -15,6 +15,7 @@ import {
     MapPin,
     Menu,
     Monitor,
+    // Removed unused MonitorSpeaker import
     Navigation,
     Phone,
     Radar,
@@ -55,6 +56,13 @@ const navigationGroups: NavGroup[] = [
     icon: ClipboardList,
     defaultOpen: true,
     items: [
+      {
+        id: 'all-manifests',
+        label: 'All Manifests',
+        href: '/dashboard/manifests',
+        icon: ClipboardList,
+        description: 'View and manage all manifests',
+      },
       {
         id: 'active-manifests',
         label: 'Active Manifests',

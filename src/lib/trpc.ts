@@ -13,6 +13,10 @@ export const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
       url: '/api/trpc',
+      headers() {
+        console.log('🔍 [tRPC] Making request to /api/trpc');
+        return {};
+      },
     }),
   ],
 });

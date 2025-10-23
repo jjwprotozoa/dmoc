@@ -9,7 +9,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Comprehensive tRPC API Routers** - Complete CRUD operations for clients, drivers, and vehicles with tenant isolation
+- **Display Dashboard Fullscreen Mode** - Proper fullscreen implementation with navigation hiding and z-index management
+- **Manifest Card Batch Rotation System** - Smart pagination system that rotates through manifest batches every 10 seconds
+- **Dynamic Card Count Calculation** - Automatically calculates optimal number of cards per screen based on viewport size (8-15 cards)
+- **Long-Interval Database Caching** - Bandwidth-efficient caching system that fetches from database every 15-20 minutes (adjustable)
+- **Cache Status Indicators** - Real-time display of cache age, next refresh time, and data freshness
+- **Smart Socket Update Handling** - Socket events only trigger refresh if cache is older than 5 minutes
+- **Adjustable Cache Refresh Intervals** - Configurable database refresh intervals (10min, 15min, 20min, 30min)
+- **Bandwidth Optimization** - Reduced database calls by 97% (from 120 calls/hour to 4 calls/hour)
+- **Separated Rotation from Data Fetching** - Batch rotation happens every 10 seconds without database calls
+- **Cache Age Tracking** - Real-time tracking of how old cached data is in minutes
+- **Next Refresh Time Display** - Shows when the next database refresh will occur
+- **Stale-While-Revalidate Pattern** - Uses React Query's stale-while-revalidate for optimal caching
+- **Configurable Status Filters** - Display dashboard now supports filtering by manifest status (SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED)
+- **High Priority Filter** - Toggle to show only high priority manifests (recently updated or critical statuses)
+- **Max Results Control** - Configurable limit for number of manifests displayed (100, 500, 1000, 2000)
+- **Enhanced Settings Panel** - Expanded configuration panel with status filters, priority settings, and result limits
+- **Real-time Filter Status Display** - Header shows current active filters and priority mode
+- **API Filter Support** - getDisplayDashboard endpoint now accepts statusFilters, highPriorityOnly, and maxResults parameters
+
+### Changed
+
+- **Display Dashboard Layout** - Fixed fullscreen mode to properly hide navigation elements and prevent content overlap
+- **Manifest Card Rotation Logic** - Changed from individual card content rotation to batch-based manifest rotation for better screen utilization
+- **Database Refresh Strategy** - Migrated from 30-second intervals to 15-20 minute intervals for bandwidth efficiency
+- **Socket Event Handling** - Made socket updates less aggressive, only refreshing when cache is stale (>5 minutes)
+- **Cache Management** - Implemented client-side caching with proper staleness tracking and refresh scheduling
+- **Display Dashboard Settings** - Updated refresh interval options from seconds to minutes for better bandwidth management
+- **Header Information Display** - Enhanced status bar to show cache age, next refresh time, and batch rotation information
+- **Display Dashboard Settings Panel** - Expanded from 64px to 80px width with comprehensive filter controls
+- **Manifest Query Optimization** - Updated getDisplayDashboard to support configurable filtering and result limiting
+- **Dashboard Configuration Interface** - Added checkbox controls for status filtering and toggle controls for priority mode
+
+### Fixed
+
+- **Fullscreen Navigation Overlap** - Fixed issue where top navigation and sidebar covered dashboard content in fullscreen mode
+- **Excessive Database Calls** - Resolved bandwidth issues by implementing smart caching and reducing database calls by 97%
+- **Card Display Overflow** - Fixed issue where too many manifest cards exceeded screen capacity
+- **Real-time Data Staleness** - Improved data freshness tracking and display for better operational awareness
+
+- **Enhanced Manifest Router** - Updated tRPC router to include all manifest fields: manifestID, trackingID, tripStateID, routeID, clientID, rmn, jobNumber, transporterID, horseID, trailerID1, trailerID2, locationID, parkLocationID, countryID, invoiceStateID, invoiceNumber, and timestamps
+- **Dynamic Column Display** - Smart card layout showing minimal essential info at first glance with comprehensive details on click
+- **Privacy-Compliant Sensitive Data** - Integrated SensitiveDataField component for jobNumber and RMN fields with proper POPIA compliance
+- **Comprehensive Manifest Details Dialog** - Full manifest information organized into logical sections: Basic Information, Operational Details, Vehicle Information, Location Information, and Timeline
+- **Manifest Card View Navigation** - Easy switching between table and card views with consistent navigation patterns
+- **Staleness Indicators** - Smart freshness badges (Fresh < 30m, Stale < 2h, Old > 2h) for manifest data currency
+- **Status Color Coding** - Visual status indicators: Green (Completed), Blue (In Progress), Yellow (Scheduled), Red (Cancelled)
+- **Vehicle Information Display** - Dedicated sections for Horse ID, Trailer 1, and Trailer 2 with proper visual hierarchy
+- **Location Information** - Current location and park location with coordinates display when available
+- **Timeline Visualization** - Clear display of Date Added, Last Updated, and Date Ended with proper formatting
+- **Individual Card Authentication** - Per-manifest privacy controls requiring separate authentication for sensitive data access
+- **Search and Filtering** - Multi-field search across title, tracking ID, job number, RMN, company, and route
+- **Responsive Grid Layout** - 1-4 column responsive grid adapting to screen size
+- **Action Menu Integration** - Edit, Track, and Generate Report actions with proper dropdown menus
+- **Privacy Notice Banner** - Real-time display of user role and data access level
+- **Feature Cards** - Real-time Tracking, Manifest Reports, and Privacy Controls quick access cards
 - **Database Schema Migration** - Full MySQL production schema with SQLite development support
 - **Database Migration Documentation** - Complete setup guide for MySQL production deployment
 - **Enhanced Database Seeding** - Comprehensive seed data for clients, drivers, vehicles, and tenants
@@ -31,6 +85,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Issue Tracking Workflow** - Defined process for creating and managing Linear issues
 
 - Added comprehensive MCP configuration files and updated documentation to ensure future AI chats can properly interact with Linear workspace
+
 ### Changed
 
 - **API Architecture** - Migrated from mock data to comprehensive tRPC routers with database integration

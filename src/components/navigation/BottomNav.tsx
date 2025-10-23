@@ -2,23 +2,24 @@
 'use client';
 
 import {
-  Archive,
-  Car,
-  FileText,
-  Globe,
-  Heart,
-  Home,
-  MapPin,
-  MoreHorizontal,
-  Phone,
-  Radar,
-  Receipt,
-  Route,
-  Settings,
-  Shield,
-  Truck,
-  User,
-  Users,
+    Archive,
+    Car,
+    ClipboardList,
+    FileText,
+    Globe,
+    Heart,
+    Home,
+    MapPin,
+    MoreHorizontal,
+    Phone,
+    Radar,
+    Receipt,
+    Route,
+    Settings,
+    Shield,
+    Truck,
+    User,
+    Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -74,6 +75,12 @@ const primaryNavItems: NavItem[] = [
 
 // Secondary navigation items (shown in expanded menu)
 const secondaryNavItems: NavItem[] = [
+  {
+    id: 'all-manifests',
+    label: 'All Manifests',
+    href: '/dashboard/manifests',
+    icon: ClipboardList,
+  },
   {
     id: 'closed-manifests',
     label: 'Closed Manifests',
