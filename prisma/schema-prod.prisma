@@ -1,0 +1,350 @@
+// prisma/schema-prod.prisma
+// Production schema using PostgreSQL
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  settings  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizations Organization[]
+  users         User[]
+  manifests     Manifest[]
+  companies     Company[]
+  routes        Route[]
+  locations     Location[]
+  vehicles      Vehicle[]
+  drivers       Driver[]
+  clients       Client[]
+  transporters  Transporter[]
+  countries     Country[]
+  invoiceStates InvoiceState[]
+  offenses      Offense[]
+  devices       Device[]
+  whatsappData  WhatsappData[]
+  manifestLocations ManifestLocation[]
+  manifestAudits ManifestAudit[]
+
+  @@map("tenants")
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  slug      String
+  settings  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, slug])
+  @@map("organizations")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  tenantId     String
+  email        String   @unique
+  name         String?
+  passwordHash String?
+  role         String   @default("USER") // USER, ADMIN, MANAGER
+  tenantSlug   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("users")
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  contactInfo Json?    // JSON for flexible contact information
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifests Manifest[]
+
+  @@unique([tenantId, name])
+  @@map("companies")
+}
+
+model Route {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  startPoint  String?
+  endPoint    String?
+  distance    Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifests Manifest[]
+
+  @@unique([tenantId, name])
+  @@map("routes")
+}
+
+model Location {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  latitude    Float?
+  longitude   Float?
+  address     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant           Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifests        Manifest[]         @relation("Manifest_locationId")
+  parkManifests    Manifest[]         @relation("Manifest_parkLocationId")
+  manifestLocations ManifestLocation[]
+
+  @@unique([tenantId, name])
+  @@map("locations")
+}
+
+model Vehicle {
+  id          String   @id @default(cuid())
+  tenantId    String
+  registrationNumber String
+  make        String?
+  model       String?
+  year        Int?
+  capacity    Float?
+  status      String   @default("ACTIVE") // ACTIVE, INACTIVE, MAINTENANCE
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("vehicles")
+}
+
+model Driver {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  licenseNumber String?
+  phone       String?
+  email       String?
+  status      String   @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("drivers")
+}
+
+model Client {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  contactInfo Json?    // JSON for flexible contact information
+  status      String   @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("clients")
+}
+
+model Transporter {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  contactInfo Json?    // JSON for flexible contact information
+  status      String   @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("transporters")
+}
+
+model Country {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  code      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifests Manifest[]
+
+  @@map("countries")
+}
+
+model InvoiceState {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  code      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifests Manifest[]
+
+  @@unique([tenantId, code])
+  @@map("invoice_states")
+}
+
+model Offense {
+  id          String   @id @default(cuid())
+  tenantId    String
+  manifestId  String?
+  description String
+  severity    String   @default("LOW") // LOW, MEDIUM, HIGH, CRITICAL
+  status      String   @default("OPEN") // OPEN, INVESTIGATING, RESOLVED, CLOSED
+  reportedAt  DateTime @default(now())
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("offenses")
+}
+
+model Device {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  imei        String?  @unique
+  phoneNumber String?
+  status      String   @default("ACTIVE") // ACTIVE, INACTIVE, MAINTENANCE
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  locationPings LocationPing[]
+  whatsappData WhatsappData[]
+
+  @@map("devices")
+}
+
+model LocationPing {
+  id        String   @id @default(cuid())
+  deviceId  String
+  latitude  Float
+  longitude Float
+  timestamp DateTime @default(now())
+  accuracy  Float?
+  speed     Float?
+  heading   Float?
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@map("location_pings")
+}
+
+model WhatsappData {
+  id        String   @id @default(cuid())
+  tenantId  String
+  deviceId  String?
+  manifestId String?
+  message   String
+  sender    String?
+  timestamp DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  device   Device?  @relation(fields: [deviceId], references: [id])
+  manifest Manifest? @relation(fields: [manifestId], references: [id])
+
+  @@map("whatsapp_data")
+}
+
+model Manifest {
+  id               String   @id @default(cuid())
+  tenantId         String
+  title            String?  // Display title for the manifest
+  status           String   @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+  scheduledAt      DateTime? // When the manifest is scheduled to start
+  trackingId       String?  @map("trackingID")
+  tripStateId      Int?     @map("tripStateID")
+  routeId          String?  @map("routeID")
+  clientId         String?  @map("clientID")
+  transporterId    String?  @map("transporterID")
+  companyId        String?  @map("companyID") // Link to Company
+  horseId          String?  @map("horseID")
+  trailerId1       String?  @map("trailerID1")
+  trailerId2       String?  @map("trailerID2")
+  locationId       String?  @map("locationID")
+  parkLocationId   String?  @map("parkLocationID")
+  countryId        Int?     @map("countryID")
+  invoiceStateId   String?  @map("invoiceStateID")
+  invoiceNumber    String?  @map("invoiceNumber")
+  rmn              String?
+  jobNumber        String?
+  dateTimeAdded    DateTime @default(now()) @map("dateTimeAdded")
+  dateTimeUpdated  DateTime? @updatedAt @map("dateTimeLastUpdate")
+  dateTimeEnded    DateTime? @map("dateTimeEnded")
+
+  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  company      Company?       @relation(fields: [companyId], references: [id])
+  route        Route?         @relation(fields: [routeId], references: [id])
+  invoiceState InvoiceState?  @relation(fields: [invoiceStateId], references: [id])
+  location     Location?      @relation("Manifest_locationId", fields: [locationId], references: [id])
+  parkLocation Location?      @relation("Manifest_parkLocationId", fields: [parkLocationId], references: [id])
+
+  locations    ManifestLocation[]
+  whatsapp     WhatsappData[]
+  audits       ManifestAudit[]
+
+  @@index([tenantId, dateTimeUpdated])
+  @@map("manifests")
+}
+
+model ManifestLocation {
+  id          String   @id @default(cuid())
+  tenantId    String
+  manifestId  String
+  latitude    Float
+  longitude   Float
+  recordedAt  DateTime @default(now())
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifest Manifest @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+
+  @@map("manifest_locations")
+}
+
+model ManifestAudit {
+  id         String   @id @default(cuid())
+  tenantId   String
+  manifestId String
+  action     String
+  oldValues  Json     // JSON for flexible audit data
+  newValues  Json     // JSON for flexible audit data
+  createdAt  DateTime @default(now())
+
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifest Manifest @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+
+  @@map("manifest_audits")
+}
