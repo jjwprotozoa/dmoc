@@ -738,7 +738,274 @@ async function main() {
 
   console.log('✅ Created admin user:', adminUser.email);
 
-  console.log('🎉 Database seeding completed successfully!');
+  // Create Manifest Core seed data
+  console.log('🌱 Creating Manifest Core seed data...');
+
+  // Create user roles
+  const adminRole = await prisma.userRole.upsert({
+    where: { code: "ADMIN" },
+    update: {},
+    create: { name: "Admin", code: "ADMIN" },
+  });
+
+  const opsRole = await prisma.userRole.upsert({
+    where: { code: "OPS" },
+    update: {},
+    create: { name: "Operations", code: "OPS" },
+  });
+
+  console.log('✅ Created user roles');
+
+  // Create invoice states
+  const newState = await prisma.invoiceState.upsert({
+    where: { code: "NEW" },
+    update: {},
+    create: { name: "New", code: "NEW" },
+  });
+
+  const sentState = await prisma.invoiceState.upsert({
+    where: { code: "SENT" },
+    update: {},
+    create: { name: "Sent", code: "SENT" },
+  });
+
+  const paidState = await prisma.invoiceState.upsert({
+    where: { code: "PAID" },
+    update: {},
+    create: { name: "Paid", code: "PAID" },
+  });
+
+  console.log('✅ Created invoice states');
+
+  // Create routes
+  const route1 = await prisma.route.upsert({
+    where: { id: "route-1" },
+    update: { tenantId: tenant.id, name: "Cape Town → Durban" },
+    create: { tenantId: tenant.id, name: "Cape Town → Durban" },
+  });
+
+  const route2 = await prisma.route.upsert({
+    where: { id: "route-2" },
+    update: { tenantId: tenant.id, name: "Johannesburg → Cape Town" },
+    create: { tenantId: tenant.id, name: "Johannesburg → Cape Town" },
+  });
+
+  console.log('✅ Created routes');
+
+  // Create locations
+  const location1 = await prisma.location.create({
+    data: {
+      tenantId: tenant.id,
+      description: "Cape Town Depot",
+      latitude: -33.9249,
+      longitude: 18.4241,
+    },
+  });
+
+  const location2 = await prisma.location.create({
+    data: {
+      tenantId: tenant.id,
+      description: "Durban Port",
+      latitude: -29.8587,
+      longitude: 31.0218,
+    },
+  });
+
+  const location3 = await prisma.location.create({
+    data: {
+      tenantId: tenant.id,
+      description: "Johannesburg Hub",
+      latitude: -26.2041,
+      longitude: 28.0473,
+    },
+  });
+
+  console.log('✅ Created locations');
+
+  // Create demo manifests
+  const manifest1 = await prisma.manifest.create({
+    data: {
+      tenantId: tenant.id,
+      trackingId: "TRK-001",
+      routeId: route1.id,
+      locationId: location1.id,
+      invoiceStateId: newState.id,
+      rmn: "RMN-001",
+      jobNumber: "JOB-001",
+    },
+  });
+
+  const manifest2 = await prisma.manifest.create({
+    data: {
+      tenantId: tenant.id,
+      trackingId: "TRK-002",
+      routeId: route2.id,
+      locationId: location3.id,
+      invoiceStateId: sentState.id,
+      rmn: "RMN-002",
+      jobNumber: "JOB-002",
+    },
+  });
+
+  console.log('✅ Created manifests');
+
+  // Create manifest locations (tracking data)
+  await prisma.manifestLocation.createMany({
+    data: [
+      {
+        tenantId: tenant.id,
+        manifestId: manifest1.id,
+        latitude: -33.92,
+        longitude: 18.42,
+        recordedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+      },
+      {
+        tenantId: tenant.id,
+        manifestId: manifest1.id,
+        latitude: -34.0,
+        longitude: 19.0,
+        recordedAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+      },
+      {
+        tenantId: tenant.id,
+        manifestId: manifest1.id,
+        latitude: -34.5,
+        longitude: 19.5,
+        recordedAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+      },
+      {
+        tenantId: tenant.id,
+        manifestId: manifest2.id,
+        latitude: -26.2,
+        longitude: 28.0,
+        recordedAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
+      },
+      {
+        tenantId: tenant.id,
+        manifestId: manifest2.id,
+        latitude: -26.5,
+        longitude: 27.5,
+        recordedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+      },
+    ],
+  });
+
+  console.log('✅ Created manifest locations');
+
+  // Create WhatsApp data with sample media
+  const whatsappData1 = await prisma.whatsappData.create({
+    data: {
+      tenantId: tenant.id,
+      manifestId: manifest1.id,
+    },
+  });
+
+  const whatsappData2 = await prisma.whatsappData.create({
+    data: {
+      tenantId: tenant.id,
+      manifestId: manifest2.id,
+    },
+  });
+
+  // Create sample WhatsApp files
+  await prisma.whatsappFile.createMany({
+    data: [
+      {
+        tenantId: tenant.id,
+        whatsappDataId: whatsappData1.id,
+        fileName: "delivery_confirmation.pdf",
+        uri: "https://example.com/files/delivery_confirmation.pdf",
+        mimeType: "application/pdf",
+        sizeBytes: 245760,
+        checksum: "sha256:abc123def456",
+      },
+      {
+        tenantId: tenant.id,
+        whatsappDataId: whatsappData1.id,
+        fileName: "route_photo.jpg",
+        uri: "https://example.com/files/route_photo.jpg",
+        mimeType: "image/jpeg",
+        sizeBytes: 1024000,
+        checksum: "sha256:def456ghi789",
+      },
+    ],
+  });
+
+  // Create sample WhatsApp media
+  await prisma.whatsappMedia.createMany({
+    data: [
+      {
+        tenantId: tenant.id,
+        whatsappDataId: whatsappData2.id,
+        extension: "mp4",
+        uri: "https://example.com/media/delivery_video.mp4",
+        mimeType: "video/mp4",
+        sizeBytes: 5242880,
+        checksum: "sha256:ghi789jkl012",
+      },
+    ],
+  });
+
+  // Create sample WhatsApp locations
+  await prisma.whatsappLocation.createMany({
+    data: [
+      {
+        tenantId: tenant.id,
+        whatsappDataId: whatsappData1.id,
+        latitude: -33.9250,
+        longitude: 18.4242,
+        thumbnailUri: "https://example.com/thumbnails/location_thumb.jpg",
+      },
+      {
+        tenantId: tenant.id,
+        whatsappDataId: whatsappData2.id,
+        latitude: -26.2042,
+        longitude: 28.0474,
+        thumbnailUri: "https://example.com/thumbnails/location_thumb2.jpg",
+      },
+    ],
+  });
+
+  console.log('✅ Created WhatsApp data');
+
+  // Create audit entries
+  await prisma.manifestAudit.createMany({
+    data: [
+      {
+        tenantId: tenant.id,
+        manifestId: manifest1.id,
+        action: "create",
+        oldValues: "{}",
+        newValues: JSON.stringify({
+          trackingId: "TRK-001",
+          routeId: route1.id,
+          locationId: location1.id,
+        }),
+      },
+      {
+        tenantId: tenant.id,
+        manifestId: manifest1.id,
+        action: "location_update",
+        oldValues: JSON.stringify({ latitude: -33.92, longitude: 18.42 }),
+        newValues: JSON.stringify({ latitude: -34.0, longitude: 19.0 }),
+      },
+      {
+        tenantId: tenant.id,
+        manifestId: manifest2.id,
+        action: "create",
+        oldValues: "{}",
+        newValues: JSON.stringify({
+          trackingId: "TRK-002",
+          routeId: route2.id,
+          locationId: location3.id,
+        }),
+      },
+    ],
+  });
+
+  console.log('✅ Created audit entries');
+
+  console.log('🎉 Manifest Core seeding completed successfully!');
 }
 
 main()

@@ -22,6 +22,7 @@ const envSchema = z.object({
   S3_BUCKET: z.string().optional().default('logistics-media'),
   S3_ACCESS_KEY_ID: z.string().optional().default('minioadmin'),
   S3_SECRET_ACCESS_KEY: z.string().optional().default('minioadmin'),
+  S3_FORCE_PATH_STYLE: z.string().optional().default('true'),
 
   // Webhook Secrets
   TRACCAR_WEBHOOK_SECRET: z.string().optional().default('traccar-secret-key'),
@@ -52,6 +53,7 @@ try {
       S3_BUCKET: 'logistics-media',
       S3_ACCESS_KEY_ID: 'minioadmin',
       S3_SECRET_ACCESS_KEY: 'minioadmin',
+      S3_FORCE_PATH_STYLE: 'true',
       TRACCAR_WEBHOOK_SECRET: 'traccar-secret-key',
       WHATSAPP_WEBHOOK_SECRET: 'whatsapp-secret-key',
       NODE_ENV: 'development',
