@@ -4,7 +4,7 @@
 import { Lock, LogIn, Mail } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
@@ -14,11 +14,26 @@ export default function SignInPage() {
   const [credentialsFilled, setCredentialsFilled] = useState(false);
   const router = useRouter();
 
+  // Debug logging
+  useEffect(() => {
+    console.log('📧 Email changed to:', email);
+  }, [email]);
+
+  useEffect(() => {
+    console.log('🔑 Password changed to:', password);
+  }, [password]);
+
   const fillDemoCredentials = () => {
+    console.log('🔐 Filling demo credentials...');
+    console.log('📧 Current email:', email);
+    console.log('🔑 Current password:', password);
+    
     setEmail('admin@digiwize.com');
     setPassword('admin123');
     setError(''); // Clear any existing errors
     setCredentialsFilled(true);
+
+    console.log('✅ Credentials set to admin@digiwize.com / admin123');
 
     // Reset the visual feedback after 2 seconds
     setTimeout(() => setCredentialsFilled(false), 2000);
