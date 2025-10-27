@@ -343,3 +343,15 @@ model ManifestAudit {
 
   @@map("manifest_audits")
 }
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  source      String
+  payload     Json     // JSON for PostgreSQL
+  processedAt DateTime?
+  status      String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("webhook_events")
+}
