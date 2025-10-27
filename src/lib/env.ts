@@ -37,6 +37,11 @@ const envSchema = z.object({
 // Only parse environment variables if not in build mode
 let env: z.infer<typeof envSchema>;
 try {
+  // Handle Vercel PostgreSQL environment variable naming
+  if (!process.env.DATABASE_URL && process.env.dmoc_DATABASE_URL) {
+    process.env.DATABASE_URL = process.env.dmoc_DATABASE_URL;
+  }
+  
   env = envSchema.parse(process.env);
 } catch (error) {
   // During build time, use defaults

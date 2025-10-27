@@ -266,9 +266,62 @@ model WhatsappData {
 
   tenant   Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   manifest Manifest?          @relation(fields: [manifestId], references: [id])
+  files    WhatsappFile[]
+  locations WhatsappLocation[]
+  media    WhatsappMedia[]
 
   @@index([tenantId, manifestId])
   @@map("whatsapp_data")
+}
+
+model WhatsappFile {
+  id            String @id @default(cuid())
+  tenantId      String
+  whatsappDataId String
+  fileName      String
+  uri           String   // s3://bucket/key or https URL
+  mimeType      String?
+  sizeBytes     Int?
+  checksum      String?  // sha256
+
+  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent   WhatsappData @relation(fields: [whatsappDataId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, whatsappDataId])
+  @@map("whatsapp_files")
+}
+
+model WhatsappLocation {
+  id            String @id @default(cuid())
+  tenantId      String
+  whatsappDataId String
+  latitude      Float
+  longitude     Float
+  thumbnailUri  String?
+
+  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent   WhatsappData @relation(fields: [whatsappDataId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, whatsappDataId])
+  @@map("whatsapp_location")
+}
+
+model WhatsappMedia {
+  id            String @id @default(cuid())
+  tenantId     String
+  whatsappDataId String
+  extension    String?
+  link         String? // original source link if any
+  uri          String   // externalized object storage
+  mimeType     String?
+  sizeBytes    Int?
+  checksum     String?
+
+  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent   WhatsappData @relation(fields: [whatsappDataId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, whatsappDataId])
+  @@map("whatsapp_media")
 }
 
 model Manifest {
