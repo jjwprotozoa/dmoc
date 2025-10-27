@@ -50,13 +50,27 @@ S3_SECRET_ACCESS_KEY=your-secret-key
 # Connect to Vercel project
 vercel link
 
+# Pull environment variables
+vercel env pull .env.production
+
+# Switch to production PostgreSQL schema
+npm run db:prod
+
 # Run database migration
-vercel env pull .env.local
 npx prisma db push
 
-# Seed production database
-npx tsx prisma/seed-production.ts
+# Seed production database (basic data)
+npm run db:seed:prod
+
+# Migrate manifest data from local SQLite to production PostgreSQL
+npm run db:migrate:manifests
 ```
+
+## Quick Start
+
+**Just need to get manifest data showing?** See `DEPLOYMENT_QUICK_START.md` for 3-step guide.
+
+**Need detailed instructions?** See `PRODUCTION_SETUP.md` for complete setup guide.
 
 ## Testing Production Authentication
 

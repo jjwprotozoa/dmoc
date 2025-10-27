@@ -29,6 +29,7 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:prod": "tsx prisma/seed-production.ts",
+    "db:migrate:manifests": "tsx prisma/seed-production-manifests.ts",
     "deploy:prod": "npm run db:prod && npm run db:push && npm run db:seed:prod && npm run build",
     "dmoc:import:active": "tsx scripts/import/dmoc/index.ts --file=./data/active_manifests.txt",
     "dmoc:import:active:dry": "tsx scripts/import/dmoc/index.ts --file=./data/active_manifests.txt --dry-run"

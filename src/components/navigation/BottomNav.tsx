@@ -10,6 +10,7 @@ import {
     Heart,
     Home,
     MapPin,
+    Monitor,
     MoreHorizontal,
     Phone,
     Radar,
@@ -158,6 +159,12 @@ const secondaryNavItems: NavItem[] = [
     label: 'Health',
     href: '/dashboard/manifest-health',
     icon: Heart,
+  },
+  {
+    id: 'display-dashboard',
+    label: 'Display',
+    href: '/dashboard/manifests/display',
+    icon: Monitor,
   },
 ];
 

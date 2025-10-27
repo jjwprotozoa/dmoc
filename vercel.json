@@ -12,5 +12,10 @@
     "src/app/api/**/*.ts": {
       "maxDuration": 30
     }
+  },
+  "git": {
+    "deploymentEnabled": {
+      "production": true
+    }
   }
 }

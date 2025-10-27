@@ -7,8 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Production Database Connection** - Fixed manifest data not displaying on deployed Vercel app by configuring PostgreSQL database connection and seeding production data
+- **Production Schema Relations** - Fixed missing relation fields in production schema for Country and Location models
+- **Unique Constraint on trackingId** - Added @unique constraint to manifest trackingId field to enable upsert operations
+- **ChunkLoadError on App Layout** - Fixed Next.js chunk loading errors caused by duplicate layout files in conflicting route groups (src/app/(dashboard)/layout.tsx and src/app/dashboard/layout.tsx). Removed unused (dashboard) route group to resolve conflicts.
+- **Authentication Failure** - Fixed admin login authentication by generating correct bcrypt password hash for 'admin123' in database seed. Updated prisma/seed.ts with proper hash and re-seeded database.
+- **Demo Credentials Auto-Fill** - Fixed demo credentials button functionality on sign-in page. Button now properly fills email and password fields when clicked.
+
 ### Added
 
+- **Display Dashboard Navigation** - Added Display Dashboard link to SidebarNav (desktop) and BottomNav (mobile) under Manifests section for easy access to real-time display screen
+- **Production Database Configuration** - PostgreSQL database setup at db.prisma.io with complete schema migration
+- **Production Deployment Documentation** - Added PRODUCTION_SETUP.md, DEPLOYMENT_QUICK_START.md, and PRODUCTION_SETUP_COMPLETE.md guides
+- **Production Seed Scripts** - Created seed-production.ts for basic data and seed-production-simple-manifests.ts for sample manifests
+- **Database Migration Tools** - Added manifest migration script (seed-production-manifests.ts) for SQLite to PostgreSQL data transfer
+- **Production Environment Support** - Environment variable configuration for Vercel deployment with DATABASE_URL setup
+- **Admin Credentials for Production** - Production admin user (admin@digiwize.com / admin123) with proper tenant setup
+- **Sample Manifest Data** - 5 sample manifests created in production database for testing deployment
 - **Display Dashboard Fullscreen Mode** - Proper fullscreen implementation with navigation hiding and z-index management
 - **Manifest Card Batch Rotation System** - Smart pagination system that rotates through manifest batches every 10 seconds
 - **Dynamic Card Count Calculation** - Automatically calculates optimal number of cards per screen based on viewport size (8-15 cards)
@@ -30,6 +47,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Production Schema Migration** - Updated schema-prod.prisma with proper relations for Country and ManifestLocation models to support production deployments
+- **Vercel Configuration** - Updated vercel.json with improved build process and deployment settings
+- **Database Schema Switching** - Enhanced db:prod script to properly switch between SQLite (dev) and PostgreSQL (prod) schemas
 - **Display Dashboard Layout** - Fixed fullscreen mode to properly hide navigation elements and prevent content overlap
 - **Manifest Card Rotation Logic** - Changed from individual card content rotation to batch-based manifest rotation for better screen utilization
 - **Database Refresh Strategy** - Migrated from 30-second intervals to 15-20 minute intervals for bandwidth efficiency

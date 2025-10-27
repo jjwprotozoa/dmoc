@@ -726,12 +726,13 @@ async function main() {
   // Create a default admin user
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@digiwize.com' },
-    update: {},
+    update: {
+      passwordHash: '$2b$10$xxPTgK809I1UugOo8kD4neAMKWMsdKdo0RuGBmmgvOWQ9Rg9yn92G', // 'admin123'
+    },
     create: {
       tenantId: tenant.id,
       email: 'admin@digiwize.com',
-      passwordHash:
-        '$2b$10$e/YMqCHUJXoCqEeN.Ei6N.1G8vBm/KTX/6g9A89J0y6rimfh1fRRG', // 'admin123'
+      passwordHash: '$2b$10$xxPTgK809I1UugOo8kD4neAMKWMsdKdo0RuGBmmgvOWQ9Rg9yn92G', // 'admin123'
       role: 'ADMIN',
     },
   });

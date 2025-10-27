@@ -285,7 +285,7 @@ model Manifest {
   title            String?  // Display title for the manifest
   status           String   @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
   scheduledAt      DateTime? // When the manifest is scheduled to start
-  trackingId       String?  @map("trackingID")
+  trackingId       String?  @unique @map("trackingID")
   tripStateId      Int?     @map("tripStateID")
   routeId          String?  @map("routeID")
   clientId         String?  @map("clientID")
@@ -296,7 +296,7 @@ model Manifest {
   trailerId2       String?  @map("trailerID2")
   locationId       String?  @map("locationID")
   parkLocationId   String?  @map("parkLocationID")
-  countryId        Int?     @map("countryID")
+  countryId        String?  @map("countryID")
   invoiceStateId   String?  @map("invoiceStateID")
   invoiceNumber    String?  @map("invoiceNumber")
   rmn              String?
@@ -311,6 +311,7 @@ model Manifest {
   invoiceState InvoiceState?  @relation(fields: [invoiceStateId], references: [id])
   location     Location?      @relation("Manifest_locationId", fields: [locationId], references: [id])
   parkLocation Location?      @relation("Manifest_parkLocationId", fields: [parkLocationId], references: [id])
+  country      Country?       @relation(fields: [countryId], references: [code])
 
   locations    ManifestLocation[]
   whatsapp     WhatsappData[]
@@ -324,12 +325,14 @@ model ManifestLocation {
   id          String   @id @default(cuid())
   tenantId    String
   manifestId  String
+  locationId  String?
   latitude    Float
   longitude   Float
   recordedAt  DateTime @default(now())
 
-  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  manifest Manifest @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifest Manifest  @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+  location Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
 
   @@map("manifest_locations")
 }

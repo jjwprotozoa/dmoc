@@ -84,6 +84,13 @@ const navigationGroups: NavGroup[] = [
         icon: Heart,
         description: 'System health monitoring',
       },
+      {
+        id: 'display-dashboard',
+        label: 'Display Dashboard',
+        href: '/dashboard/manifests/display',
+        icon: Monitor,
+        description: 'Real-time display screen',
+      },
     ],
   },
   {

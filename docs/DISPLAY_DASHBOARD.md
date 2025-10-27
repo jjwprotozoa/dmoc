@@ -280,3 +280,8 @@ Potential features to add:
 - [Manifest Core](./manifest-core.md)
 - [Real-time Updates](../src/server/ws/socket.ts)
 - [tRPC API](../src/server/api/routers/manifest.ts)
+
+
+
+
+
