@@ -59,7 +59,7 @@ interface ManifestItem {
   trailerId2: string | null;
   locationId: string | null;
   parkLocationId: string | null;
-  countryId: number | null;
+  countryId: string | null;
   invoiceStateId: string | null;
   invoiceNumber: string | null;
   rmn: string | null;
@@ -331,8 +331,9 @@ export default function ManifestsCardViewPage() {
       {/* Manifests Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mb-8">
         {manifests.map((manifest: ManifestItem) => {
+          const now = typeof window !== 'undefined' ? Date.now() : 0;
           const minutesSinceUpdate = manifest.dateTimeUpdated 
-            ? Math.floor((Date.now() - new Date(manifest.dateTimeUpdated).getTime()) / (1000 * 60))
+            ? Math.floor((now - new Date(manifest.dateTimeUpdated).getTime()) / (1000 * 60))
             : 999;
           
           const staleness = getStalenessBadge(minutesSinceUpdate);
