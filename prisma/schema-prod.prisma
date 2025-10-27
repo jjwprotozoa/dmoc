@@ -32,6 +32,9 @@ model Tenant {
   offenses      Offense[]
   devices       Device[]
   whatsappData  WhatsappData[]
+  whatsappFiles WhatsappFile[]
+  whatsappLocations WhatsappLocation[]
+  whatsappMedia WhatsappMedia[]
   manifestLocations ManifestLocation[]
   manifestAudits ManifestAudit[]
 
