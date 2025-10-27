@@ -175,7 +175,7 @@ export function DisplayDashboard({
   const formatRelativeTime = (dateString: string | null): string => {
     if (!dateString) return 'N/A';
     
-    const now = new Date();
+    const now = typeof window !== 'undefined' ? new Date() : new Date(0);
     const dateObj = new Date(dateString);
     const diffMs = now.getTime() - dateObj.getTime();
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
@@ -208,7 +208,7 @@ export function DisplayDashboard({
     if (manifest.status === 'CANCELLED') return 0;
     
     const start = new Date(manifest.dateTimeAdded).getTime();
-    const now = Date.now();
+    const now = typeof window !== 'undefined' ? Date.now() : 0;
     const elapsed = now - start;
     
     // Estimate: average trip is 8 hours
@@ -219,8 +219,9 @@ export function DisplayDashboard({
   };
 
   const getStalenessColor = (manifest: ManifestItem): string => {
+    const now = typeof window !== 'undefined' ? Date.now() : 0;
     const minutesSinceUpdate = manifest.dateTimeUpdated 
-      ? Math.floor((Date.now() - new Date(manifest.dateTimeUpdated).getTime()) / (1000 * 60))
+      ? Math.floor((now - new Date(manifest.dateTimeUpdated).getTime()) / (1000 * 60))
       : 999;
 
     if (minutesSinceUpdate > 120) return 'text-red-600';
@@ -257,7 +258,7 @@ export function DisplayDashboard({
             </div>
             <div className="flex items-center space-x-2 text-xs text-gray-400">
               <Clock className="w-3 h-3" />
-              <span>{new Date().toLocaleTimeString()}</span>
+              <span suppressHydrationWarning>{new Date().toLocaleTimeString()}</span>
             </div>
           </div>
           
@@ -402,10 +403,10 @@ export function DisplayDashboard({
         </div>
 
         <div className="mt-1 text-xs text-gray-400">
-          Last updated: {lastRefresh.toLocaleTimeString()} • 
+          <span suppressHydrationWarning>Last updated: {lastRefresh.toLocaleTimeString()}</span> • 
           Auto-refresh: {autoRefresh ? 'ON' : 'OFF'} ({cacheRefreshInterval}min) •
           Cache age: {Math.round(cacheAge)}min • 
-          Next refresh: {nextRefreshTime.toLocaleTimeString()} •
+          <span suppressHydrationWarning>Next refresh: {nextRefreshTime.toLocaleTimeString()}</span> •
           Filters: {statusFilters.join(', ')} {highPriorityOnly ? '(High Priority)' : ''} •
           Showing: {currentBatch + 1}/{totalBatches} batches ({currentManifests.length} cards) •
           Total manifests: {manifests.length}
@@ -537,8 +538,9 @@ export function DisplayDashboard({
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2">
             {currentManifests.map((manifest: ManifestItem) => {
+              const now = typeof window !== 'undefined' ? Date.now() : 0;
               const minutesSinceUpdate = manifest.dateTimeUpdated 
-                ? Math.floor((Date.now() - new Date(manifest.dateTimeUpdated).getTime()) / (1000 * 60))
+                ? Math.floor((now - new Date(manifest.dateTimeUpdated).getTime()) / (1000 * 60))
                 : 999;
               
               const isCritical = minutesSinceUpdate > 120;
