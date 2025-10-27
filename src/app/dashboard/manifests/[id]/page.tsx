@@ -51,9 +51,9 @@ export default function ManifestDetailPage() {
         <TabsContent value="details">
           <Card><CardContent className="p-4">
             <div className="grid grid-cols-2 gap-4">
-              <div><b>Invoice State:</b> {data.invoiceState?.name ?? "—"}</div>
+              <div><b>Invoice State:</b> {(data as any).invoiceState?.name ?? "—"}</div>
               <div><b>Route:</b> {data.route?.name ?? "—"}</div>
-              <div><b>Location:</b> {data.location?.description ?? "—"}</div>
+              <div><b>Location:</b> {(data as any).location?.description ?? "—"}</div>
               <div><b>RMN:</b> {data.rmn ?? "—"}</div>
               <div><b>Job #:</b> {data.jobNumber ?? "—"}</div>
               <div><b>Updated:</b> {data.dateTimeUpdated ? new Date(data.dateTimeUpdated).toLocaleString() : "—"}</div>
