@@ -1,8 +1,8 @@
 // FILE: tests/manifest.router.test.ts
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { appRouter } from '@/server/api/root';
 import { createTRPCContext } from '@/server/api/trpc';
 import { PrismaClient } from '@prisma/client';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const prisma = new PrismaClient();
 
@@ -85,7 +85,7 @@ describe('Manifest Router', () => {
     } as any;
     const caller = appRouter.createCaller(ctx);
     
-    const result = await caller.manifest.list({ limit: 10 });
+    const result = await caller.manifest.list({ take: 10 });
     
     expect(result.items).toBeDefined();
     expect(Array.isArray(result.items)).toBe(true);

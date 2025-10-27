@@ -1,12 +1,12 @@
 // FILE: src/app/dashboard/manifests/[id]/page.tsx
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trpc } from "@/lib/trpc";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 // Removed unused Badge import
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -52,7 +52,7 @@ export default function ManifestDetailPage() {
           <Card><CardContent className="p-4">
             <div className="grid grid-cols-2 gap-4">
               <div><b>Invoice State:</b> {(data as any).invoiceState?.name ?? "—"}</div>
-              <div><b>Route:</b> {data.route?.name ?? "—"}</div>
+              <div><b>Route:</b> {(data as any).route?.name ?? "—"}</div>
               <div><b>Location:</b> {(data as any).location?.description ?? "—"}</div>
               <div><b>RMN:</b> {data.rmn ?? "—"}</div>
               <div><b>Job #:</b> {data.jobNumber ?? "—"}</div>
