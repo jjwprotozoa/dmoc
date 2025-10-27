@@ -160,10 +160,11 @@ function AuditList({ manifestId }: { manifestId: string }) {
   const { data, isLoading } = trpc.manifest.audit.useQuery({ manifestId, limit: 50 });
   if (isLoading) return <div className="p-4">Loading…</div>;
   if (!data?.length) return <div className="p-4 text-sm">No audit entries.</div>;
+  const auditData = data as unknown as Array<{ id: string; action: string; createdAt: string; newValues: string }>;
   return (
     <Card><CardContent className="p-4">
       <ul className="space-y-2 text-sm">
-        {data.map((a) => (
+        {auditData.map((a) => (
           <li key={a.id}>
             <div className="font-medium">{a.action} • {new Date(a.createdAt).toLocaleString()}</div>
             <pre className="bg-muted p-2 rounded text-xs overflow-x-auto">{JSON.stringify(JSON.parse(a.newValues), null, 2)}</pre>
