@@ -233,16 +233,13 @@ model Offense {
 model Device {
   id          String   @id @default(cuid())
   tenantId    String
-  name        String
-  imei        String?  @unique
-  phoneNumber String?
-  status      String   @default("ACTIVE") // ACTIVE, INACTIVE, MAINTENANCE
+  externalId  String   @unique
+  lastPingAt  DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   locationPings LocationPing[]
-  whatsappData WhatsappData[]
 
   @@map("devices")
 }
@@ -250,12 +247,12 @@ model Device {
 model LocationPing {
   id        String   @id @default(cuid())
   deviceId  String
-  latitude  Float
-  longitude Float
-  timestamp DateTime @default(now())
-  accuracy  Float?
+  lat       Float
+  lng       Float
   speed     Float?
   heading   Float?
+  timestamp DateTime
+  createdAt DateTime @default(now())
 
   device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
 
@@ -263,19 +260,14 @@ model LocationPing {
 }
 
 model WhatsappData {
-  id        String   @id @default(cuid())
-  tenantId  String
-  deviceId  String?
+  id         String   @id @default(cuid())
+  tenantId   String
   manifestId String?
-  message   String
-  sender    String?
-  timestamp DateTime @default(now())
-  createdAt DateTime @default(now())
 
-  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  device   Device?  @relation(fields: [deviceId], references: [id])
-  manifest Manifest? @relation(fields: [manifestId], references: [id])
+  tenant   Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifest Manifest?          @relation(fields: [manifestId], references: [id])
 
+  @@index([tenantId, manifestId])
   @@map("whatsapp_data")
 }
 
