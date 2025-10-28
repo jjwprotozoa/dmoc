@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Real-time Filter Status Display** - Header shows current active filters and priority mode
 - **API Filter Support** - getDisplayDashboard endpoint now accepts statusFilters, highPriorityOnly, and maxResults parameters
 
+- Align dev and production Prisma schemas - Synchronized all model definitions to eliminate database-related errors on Vercel - Fixed passwordHash null handling in auth.ts for production schema compatibility - Aligned Client, Driver, Vehicle, Location models between dev and production - Added missing models (VehicleCombination, FuelEntry, UserProfile) to production schema - Removed duplicate Offense and InvoiceState models - Ensured DATABASE_URL environment variable mapping runs before Prisma initialization
 ### Changed
 
 - **Production Schema Migration** - Updated schema-prod.prisma with proper relations for Country and ManifestLocation models to support production deployments
