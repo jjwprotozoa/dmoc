@@ -33,7 +33,8 @@ interface ManifestItem {
   companyId: string | null;
   company?: { id: string; name: string } | null;
   route?: { id: string; name: string } | null;
-  location?: { id: string; description: string; latitude: number | null; longitude: number | null } | null;
+  location?: { id: string; description: string | null; latitude: number | null; longitude: number | null } | null;
+  parkLocation?: { id: string; description: string | null; latitude: number | null; longitude: number | null } | null;
   scheduledAt: string | null;
   dateTimeAdded: string;
   dateTimeUpdated: string | null;
