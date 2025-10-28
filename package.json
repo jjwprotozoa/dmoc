@@ -9,7 +9,7 @@
     "dev:clean:win": "scripts\\dev-start.bat",
     "build": "npm run db:dev && prisma generate && next build",
     "start": "NODE_ENV=production node server.js",
-    "vercel-build": "node scripts/prebuild.js && npm run db:prod && prisma generate && next build",
+    "vercel-build": "npm run db:dev && prisma generate && next build",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "test": "vitest",
