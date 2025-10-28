@@ -344,7 +344,7 @@ model Manifest {
   trailerId2       String?  @map("trailerID2")
   locationId       String?  @map("locationID")
   parkLocationId   String?  @map("parkLocationID")
-  countryId        String?  @map("countryID")
+  countryId        Int?     @map("countryID")
   invoiceStateId   String?  @map("invoiceStateID")
   invoiceNumber    String?  @map("invoiceNumber")
   rmn              String?
