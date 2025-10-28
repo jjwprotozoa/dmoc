@@ -62,7 +62,7 @@ interface ManifestItem {
   trailerId2: string | null;
   locationId: string | null;
   parkLocationId: string | null;
-  countryId: number | null; // Changed from string | null to number | null to match Prisma schema
+  countryId: string | null; // References Country.code (String) in Prisma schema
   invoiceStateId: string | null;
   invoiceNumber: string | null;
   rmn: string | null;
