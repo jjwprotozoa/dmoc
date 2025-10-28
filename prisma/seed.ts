@@ -796,7 +796,8 @@ async function main() {
   const location1 = await prisma.location.create({
     data: {
       tenantId: tenant.id,
-      description: "Cape Town Depot",
+      name: "Cape Town Depot",
+      description: "Main depot in Cape Town",
       latitude: -33.9249,
       longitude: 18.4241,
     },
@@ -805,7 +806,8 @@ async function main() {
   const location2 = await prisma.location.create({
     data: {
       tenantId: tenant.id,
-      description: "Durban Port",
+      name: "Durban Port",
+      description: "Port of Durban",
       latitude: -29.8587,
       longitude: 31.0218,
     },
@@ -814,7 +816,8 @@ async function main() {
   const location3 = await prisma.location.create({
     data: {
       tenantId: tenant.id,
-      description: "Johannesburg Hub",
+      name: "Johannesburg Hub",
+      description: "Main hub in Johannesburg",
       latitude: -26.2041,
       longitude: 28.0473,
     },
