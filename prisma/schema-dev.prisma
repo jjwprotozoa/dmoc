@@ -72,8 +72,10 @@ model User {
   id           String   @id @default(cuid())
   tenantId     String
   email        String   @unique
-  passwordHash String
-  role         String   @default("OPERATOR") // ADMIN, MANAGER, OPERATOR
+  name         String?
+  passwordHash String?
+  role         String   @default("USER") // USER, ADMIN, MANAGER
+  tenantSlug   String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -249,15 +251,16 @@ model ManifestLocation {
   id          String   @id @default(cuid())
   tenantId    String
   manifestId  String
+  locationId  String?
   latitude    Float
   longitude   Float
   recordedAt  DateTime @default(now())
 
-  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  manifest Manifest @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifest Manifest  @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+  location Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
 
-  @@index([tenantId, manifestId, recordedAt])
-  @@map("manifestlocations")
+  @@map("manifest_locations")
 }
 
 model InvoiceState {
@@ -283,20 +286,22 @@ model Route {
 }
 
 model Location {
-  id             String   @id @default(cuid()) @map("locationID")
-  tenantId       String
-  description    String
-  coordinatesRaw String?  @map("coordinates")
-  latitude       Float?
-  longitude      Float?
-  countryId      Int?
-  dateTimeAdded  DateTime @default(now()) @map("dateTimeAdded")
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String   @default("") // Default for compatibility
+  description String?
+  latitude    Float?
+  longitude   Float?
+  address     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  tenant          Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  manifestsAt     Manifest[]  @relation("Manifest_locationId")
-  manifestsParked Manifest[]  @relation("Manifest_parkLocationId")
+  tenant           Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifests        Manifest[]         @relation("Manifest_locationId")
+  parkManifests    Manifest[]         @relation("Manifest_parkLocationId")
+  manifestLocations ManifestLocation[]
 
-  @@index([tenantId, description])
+  @@unique([tenantId, name])
   @@map("locations")
 }
 
@@ -413,8 +418,7 @@ model ManifestAudit {
   tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   manifest Manifest @relation(fields: [manifestId], references: [id], onDelete: Cascade)
 
-  @@index([tenantId, manifestId, createdAt])
-  @@map("manifest_audit")
+  @@map("manifest_audits")
 }
 
 model Offense {

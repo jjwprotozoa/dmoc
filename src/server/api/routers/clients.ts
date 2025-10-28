@@ -87,8 +87,8 @@ export const clientsRouter = router({
       z.object({
         id: z.string(),
         name: z.string().optional(),
-        address: z.string().optional(),
-        displayValue: z.string().optional(),
+        contactInfo: z.any().optional(),
+        status: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {

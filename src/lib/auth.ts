@@ -108,6 +108,13 @@ export const authOptions: NextAuthOptions = {
           });
 
           console.log('🔍 [Auth] Testing password...');
+          
+          // Check if passwordHash exists (required for production schema compatibility)
+          if (!user.passwordHash) {
+            console.log('❌ [Auth] No password hash found for user:', credentials.email);
+            return null;
+          }
+
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
             user.passwordHash
