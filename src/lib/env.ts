@@ -38,8 +38,31 @@ const envSchema = z.object({
 let env: z.infer<typeof envSchema>;
 try {
   // Handle Vercel PostgreSQL environment variable naming
-  if (!process.env.DATABASE_URL && process.env.dmoc_DATABASE_URL) {
-    process.env.DATABASE_URL = process.env.dmoc_DATABASE_URL;
+  // Try different common prefixes for Vercel's auto-added database integrations
+  if (!process.env.DATABASE_URL) {
+    const possibleNames = [
+      'dmoc_DATABASE_URL',
+      'dmoc_POSTGRES_URL',
+      'POSTGRES_URL',
+      'DATABASE_URL'
+    ];
+    
+    for (const name of possibleNames) {
+      if (process.env[name]) {
+        process.env.DATABASE_URL = process.env[name];
+        console.log(`✅ [Environment] Using ${name} as DATABASE_URL`);
+        break;
+      }
+    }
+  }
+  
+  // Log the database URL configuration for debugging (without exposing the full URL)
+  if (process.env.DATABASE_URL) {
+    const dbUrl = process.env.DATABASE_URL;
+    const maskedUrl = dbUrl.includes('@') 
+      ? dbUrl.replace(/:\/\/.*@/, '://***@')
+      : 'file:./dev.db';
+    console.log(`🗄️ [Environment] Database URL: ${maskedUrl}`);
   }
   
   env = envSchema.parse(process.env);

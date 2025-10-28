@@ -9,7 +9,7 @@
     "dev:clean:win": "scripts\\dev-start.bat",
     "build": "npm run db:dev && prisma generate && next build",
     "start": "NODE_ENV=production node server.js",
-    "vercel-build": "DATABASE_URL=${dmoc_DATABASE_URL:-$DATABASE_URL} npm run db:prod && prisma generate && next build",
+    "vercel-build": "node scripts/prebuild.js && npm run db:prod && prisma generate && next build",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "test": "vitest",
@@ -31,6 +31,7 @@
     "db:seed:prod": "tsx prisma/seed-production.ts",
     "db:migrate:manifests": "tsx prisma/seed-production-manifests.ts",
     "deploy:prod": "npm run db:prod && npm run db:push && npm run db:seed:prod && npm run build",
+    "generate:secret": "node scripts/generate-nextauth-secret.js",
     "dmoc:import:active": "tsx scripts/import/dmoc/index.ts --file=./data/active_manifests.txt",
     "dmoc:import:active:dry": "tsx scripts/import/dmoc/index.ts --file=./data/active_manifests.txt --dry-run"
   },

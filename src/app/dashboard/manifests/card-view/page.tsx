@@ -4,41 +4,44 @@
 'use client';
 
 import {
-    ArrowLeft,
-    Calendar,
-    CheckCircle,
-    Clock,
-    Edit,
-    Eye,
-    FileText,
-    MapPin,
-    MoreHorizontal,
-    Package,
-    Plus,
-    RefreshCw,
-    Shield,
-    Truck,
-    XCircle
+  ArrowLeft,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Edit,
+  Eye,
+  FileText,
+  MapPin,
+  MoreHorizontal,
+  Package,
+  Plus,
+  RefreshCw,
+  Shield,
+  Truck,
+  XCircle,
 } from 'lucide-react';
 import { useState } from 'react';
-import { FilterState, ManifestFilters } from '../../../../components/dashboard/ManifestFilters';
+import {
+  FilterState,
+  ManifestFilters,
+} from '../../../../components/dashboard/ManifestFilters';
 import { AuthDialog } from '../../../../components/ui/auth-dialog';
 import { Button } from '../../../../components/ui/button';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '../../../../components/ui/dialog';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '../../../../components/ui/dropdown-menu';
 import { SensitiveDataField } from '../../../../components/ui/sensitive-data-field';
 import { PrivacyConfig } from '../../../../lib/privacy';
@@ -59,7 +62,7 @@ interface ManifestItem {
   trailerId2: string | null;
   locationId: string | null;
   parkLocationId: string | null;
-  countryId: string | null;
+  countryId: number | null; // Changed from string | null to number | null to match Prisma schema
   invoiceStateId: string | null;
   invoiceNumber: string | null;
   rmn: string | null;
@@ -73,8 +76,18 @@ interface ManifestItem {
   company?: { id: string; name: string } | null;
   route?: { id: string; name: string } | null;
   invoiceState?: { name: string; code: string } | null;
-  location?: { id: string; description: string; latitude: number | null; longitude: number | null } | null;
-  parkLocation?: { id: string; description: string; latitude: number | null; longitude: number | null } | null;
+  location?: {
+    id: string;
+    description: string;
+    latitude: number | null;
+    longitude: number | null;
+  } | null;
+  parkLocation?: {
+    id: string;
+    description: string;
+    latitude: number | null;
+    longitude: number | null;
+  } | null;
 }
 
 export default function ManifestsCardViewPage() {
@@ -88,7 +101,9 @@ export default function ManifestsCardViewPage() {
   const [selectedManifests, setSelectedManifests] = useState<string[]>([]);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
-  const [unlockedManifests, setUnlockedManifests] = useState<Set<number>>(new Set());
+  const [unlockedManifests, setUnlockedManifests] = useState<Set<number>>(
+    new Set()
+  );
   // Removed unused callContact state - fixed linting errors
 
   // Privacy controls - in real app this would come from auth system
@@ -111,7 +126,8 @@ export default function ManifestsCardViewPage() {
     customDateFrom: filters.customDateFrom,
     customDateTo: filters.customDateTo,
     staleness: filters.staleness !== 'all' ? filters.staleness : undefined,
-    quickFilter: filters.quickFilter !== 'all' ? filters.quickFilter : undefined,
+    quickFilter:
+      filters.quickFilter !== 'all' ? filters.quickFilter : undefined,
     take: 50,
     skip: 0,
   });
@@ -163,7 +179,8 @@ export default function ManifestsCardViewPage() {
     } else {
       // Regular users need authentication for each card
       setPendingAction(
-        () => () => setUnlockedManifests((prev) => new Set([...prev, manifestId]))
+        () => () =>
+          setUnlockedManifests((prev) => new Set([...prev, manifestId]))
       );
       setShowAuthDialog(true);
     }
@@ -173,17 +190,17 @@ export default function ManifestsCardViewPage() {
 
   const formatDate = (dateString: string | null): string => {
     if (!dateString) return 'N/A';
-    
+
     const now = new Date();
     const dateObj = new Date(dateString);
-    
+
     if (isNaN(dateObj.getTime())) return 'Invalid date';
-    
+
     const diffMs = now.getTime() - dateObj.getTime();
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMinutes / 60);
     const diffDays = Math.floor(diffHours / 24);
-    
+
     if (diffDays > 0) {
       return `${diffDays}d ago`;
     } else if (diffHours > 0) {
@@ -242,12 +259,18 @@ export default function ManifestsCardViewPage() {
           <div className="page-header-title">
             <FileText className="w-8 h-8 text-amber-600" />
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Manifests</h1>
-              <p className="text-gray-600 text-sm sm:text-base">Card view • Comprehensive manifest management</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Manifests
+              </h1>
+              <p className="text-gray-600 text-sm sm:text-base">
+                Card view • Comprehensive manifest management
+              </p>
             </div>
           </div>
           <div className="page-header-actions">
-            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">Card view</span>
+            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+              Card view
+            </span>
             <a
               href="/dashboard/manifests"
               className="inline-flex items-center gap-1 px-3 py-1.5 text-sm bg-gray-100 text-gray-800 rounded-lg hover:bg-gray-200 transition-colors"
@@ -288,18 +311,20 @@ export default function ManifestsCardViewPage() {
       {/* Modern Filter Component */}
       <ManifestFilters
         filters={filters}
-        counts={filterCounts || {
-          all: 0,
-          active: 0,
-          waiting: 0,
-          breakdown: 0,
-          accident: 0,
-          logistical: 0,
-          closed: 0,
-          handed_over: 0,
-          foreign: 0,
-          total: 0,
-        }}
+        counts={
+          filterCounts || {
+            all: 0,
+            active: 0,
+            waiting: 0,
+            breakdown: 0,
+            accident: 0,
+            logistical: 0,
+            closed: 0,
+            handed_over: 0,
+            foreign: 0,
+            total: 0,
+          }
+        }
         onFiltersChange={handleFiltersChange}
         onRefresh={() => refetch()}
         isLoading={isLoading}
@@ -332,10 +357,13 @@ export default function ManifestsCardViewPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mb-8">
         {manifests.map((manifest: ManifestItem) => {
           const now = typeof window !== 'undefined' ? Date.now() : 0;
-          const minutesSinceUpdate = manifest.dateTimeUpdated 
-            ? Math.floor((now - new Date(manifest.dateTimeUpdated).getTime()) / (1000 * 60))
+          const minutesSinceUpdate = manifest.dateTimeUpdated
+            ? Math.floor(
+                (now - new Date(manifest.dateTimeUpdated).getTime()) /
+                  (1000 * 60)
+              )
             : 999;
-          
+
           const staleness = getStalenessBadge(minutesSinceUpdate);
           const manifestIdNumber = parseInt(manifest.id.slice(-8), 16);
           // Removed unused isUnlocked variable
@@ -367,7 +395,9 @@ export default function ManifestsCardViewPage() {
                         {manifest.title || manifest.trackingId || 'Untitled'}
                       </h3>
                       <p className="text-xs text-gray-500">
-                        {manifest.trackingId ? `ID: ${manifest.trackingId}` : 'No tracking ID'}
+                        {manifest.trackingId
+                          ? `ID: ${manifest.trackingId}`
+                          : 'No tracking ID'}
                       </p>
                     </div>
                   </div>
@@ -399,7 +429,9 @@ export default function ManifestsCardViewPage() {
                       Track Manifest
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => handleManifestAction('generate-report', manifest)}
+                      onClick={() =>
+                        handleManifestAction('generate-report', manifest)
+                      }
                     >
                       <FileText className="mr-2 h-4 w-4" />
                       Generate Report
@@ -412,7 +444,9 @@ export default function ManifestsCardViewPage() {
                 {/* Status */}
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-gray-500">Status:</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(manifest.status)}`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(manifest.status)}`}
+                  >
                     {manifest.status}
                   </span>
                 </div>
@@ -472,7 +506,9 @@ export default function ManifestsCardViewPage() {
                 {/* Staleness */}
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-gray-500">Staleness:</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${staleness.color}`}>
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${staleness.color}`}
+                  >
                     {staleness.label}
                   </span>
                 </div>
@@ -507,8 +543,13 @@ export default function ManifestsCardViewPage() {
                       <DialogHeader>
                         <DialogTitle className="flex items-center space-x-2">
                           <FileText className="w-6 h-6 text-amber-600" />
-                          <span>Manifest Details - {manifest.trackingId || 'Untitled'}</span>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(manifest.status)}`}>
+                          <span>
+                            Manifest Details -{' '}
+                            {manifest.trackingId || 'Untitled'}
+                          </span>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(manifest.status)}`}
+                          >
                             {manifest.status}
                           </span>
                         </DialogTitle>
@@ -520,38 +561,68 @@ export default function ManifestsCardViewPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                         {/* Basic Information */}
                         <div className="space-y-4">
-                          <h3 className="font-semibold text-gray-900">Basic Information</h3>
+                          <h3 className="font-semibold text-gray-900">
+                            Basic Information
+                          </h3>
                           <div className="space-y-3">
                             <div>
-                              <label className="text-sm font-medium text-gray-500">Title</label>
-                              <p className="text-gray-900">{manifest.title || 'N/A'}</p>
+                              <label className="text-sm font-medium text-gray-500">
+                                Title
+                              </label>
+                              <p className="text-gray-900">
+                                {manifest.title || 'N/A'}
+                              </p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-500">Tracking ID</label>
-                              <p className="text-gray-900 font-mono">{manifest.trackingId || 'N/A'}</p>
+                              <label className="text-sm font-medium text-gray-500">
+                                Tracking ID
+                              </label>
+                              <p className="text-gray-900 font-mono">
+                                {manifest.trackingId || 'N/A'}
+                              </p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-500">Status</label>
+                              <label className="text-sm font-medium text-gray-500">
+                                Status
+                              </label>
                               <p className="text-gray-900">{manifest.status}</p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-500">Company</label>
-                              <p className="text-gray-900">{manifest.company?.name || 'N/A'}</p>
+                              <label className="text-sm font-medium text-gray-500">
+                                Company
+                              </label>
+                              <p className="text-gray-900">
+                                {manifest.company?.name || 'N/A'}
+                              </p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-500">Route</label>
-                              <p className="text-gray-900">{manifest.route?.name || 'N/A'}</p>
+                              <label className="text-sm font-medium text-gray-500">
+                                Route
+                              </label>
+                              <p className="text-gray-900">
+                                {manifest.route?.name || 'N/A'}
+                              </p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-500">Scheduled At</label>
-                              <p className="text-gray-900">{manifest.scheduledAt ? new Date(manifest.scheduledAt).toLocaleString() : 'N/A'}</p>
+                              <label className="text-sm font-medium text-gray-500">
+                                Scheduled At
+                              </label>
+                              <p className="text-gray-900">
+                                {manifest.scheduledAt
+                                  ? new Date(
+                                      manifest.scheduledAt
+                                    ).toLocaleString()
+                                  : 'N/A'}
+                              </p>
                             </div>
                           </div>
                         </div>
 
                         {/* Sensitive Information */}
                         <div className="space-y-4">
-                          <h3 className="font-semibold text-gray-900">Operational Details</h3>
+                          <h3 className="font-semibold text-gray-900">
+                            Operational Details
+                          </h3>
                           <div className="space-y-3">
                             <SensitiveDataField
                               label="Job Number"
@@ -559,7 +630,9 @@ export default function ManifestsCardViewPage() {
                               type="id"
                               config={privacyConfig}
                               itemId={manifestIdNumber}
-                              onUnlock={() => handleUnlockManifest(manifestIdNumber)}
+                              onUnlock={() =>
+                                handleUnlockManifest(manifestIdNumber)
+                              }
                             />
                             <SensitiveDataField
                               label="RMN"
@@ -567,23 +640,41 @@ export default function ManifestsCardViewPage() {
                               type="id"
                               config={privacyConfig}
                               itemId={manifestIdNumber}
-                              onUnlock={() => handleUnlockManifest(manifestIdNumber)}
+                              onUnlock={() =>
+                                handleUnlockManifest(manifestIdNumber)
+                              }
                             />
                             <div>
-                              <label className="text-sm font-medium text-gray-500">Trip State ID</label>
-                              <p className="text-gray-900">{manifest.tripStateId || 'N/A'}</p>
+                              <label className="text-sm font-medium text-gray-500">
+                                Trip State ID
+                              </label>
+                              <p className="text-gray-900">
+                                {manifest.tripStateId || 'N/A'}
+                              </p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-500">Client ID</label>
-                              <p className="text-gray-900">{manifest.clientId || 'N/A'}</p>
+                              <label className="text-sm font-medium text-gray-500">
+                                Client ID
+                              </label>
+                              <p className="text-gray-900">
+                                {manifest.clientId || 'N/A'}
+                              </p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-500">Transporter ID</label>
-                              <p className="text-gray-900">{manifest.transporterId || 'N/A'}</p>
+                              <label className="text-sm font-medium text-gray-500">
+                                Transporter ID
+                              </label>
+                              <p className="text-gray-900">
+                                {manifest.transporterId || 'N/A'}
+                              </p>
                             </div>
                             <div>
-                              <label className="text-sm font-medium text-gray-500">Invoice Number</label>
-                              <p className="text-gray-900">{manifest.invoiceNumber || 'N/A'}</p>
+                              <label className="text-sm font-medium text-gray-500">
+                                Invoice Number
+                              </label>
+                              <p className="text-gray-900">
+                                {manifest.invoiceNumber || 'N/A'}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -591,12 +682,16 @@ export default function ManifestsCardViewPage() {
 
                       {/* Vehicle Information */}
                       <div className="mt-6 pt-6 border-t border-gray-200">
-                        <h3 className="font-semibold text-gray-900 mb-4">Vehicle Information</h3>
+                        <h3 className="font-semibold text-gray-900 mb-4">
+                          Vehicle Information
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="bg-gray-50 p-4 rounded-lg">
                             <div className="flex items-center space-x-2 mb-2">
                               <Truck className="w-4 h-4 text-blue-600" />
-                              <span className="text-sm font-medium text-gray-700">Horse ID</span>
+                              <span className="text-sm font-medium text-gray-700">
+                                Horse ID
+                              </span>
                             </div>
                             <p className="text-lg font-bold text-gray-900">
                               {manifest.horseId || 'N/A'}
@@ -605,7 +700,9 @@ export default function ManifestsCardViewPage() {
                           <div className="bg-gray-50 p-4 rounded-lg">
                             <div className="flex items-center space-x-2 mb-2">
                               <Package className="w-4 h-4 text-green-600" />
-                              <span className="text-sm font-medium text-gray-700">Trailer 1</span>
+                              <span className="text-sm font-medium text-gray-700">
+                                Trailer 1
+                              </span>
                             </div>
                             <p className="text-lg font-bold text-gray-900">
                               {manifest.trailerId1 || 'N/A'}
@@ -614,7 +711,9 @@ export default function ManifestsCardViewPage() {
                           <div className="bg-gray-50 p-4 rounded-lg">
                             <div className="flex items-center space-x-2 mb-2">
                               <Package className="w-4 h-4 text-orange-600" />
-                              <span className="text-sm font-medium text-gray-700">Trailer 2</span>
+                              <span className="text-sm font-medium text-gray-700">
+                                Trailer 2
+                              </span>
                             </div>
                             <p className="text-lg font-bold text-gray-900">
                               {manifest.trailerId2 || 'N/A'}
@@ -625,68 +724,98 @@ export default function ManifestsCardViewPage() {
 
                       {/* Location Information */}
                       <div className="mt-6 pt-6 border-t border-gray-200">
-                        <h3 className="font-semibold text-gray-900 mb-4">Location Information</h3>
+                        <h3 className="font-semibold text-gray-900 mb-4">
+                          Location Information
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="bg-gray-50 p-4 rounded-lg">
                             <div className="flex items-center space-x-2 mb-2">
                               <MapPin className="w-4 h-4 text-purple-600" />
-                              <span className="text-sm font-medium text-gray-700">Current Location</span>
+                              <span className="text-sm font-medium text-gray-700">
+                                Current Location
+                              </span>
                             </div>
                             <p className="text-lg font-bold text-gray-900">
                               {manifest.location?.description || 'N/A'}
                             </p>
-                            {manifest.location?.latitude && manifest.location?.longitude && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                {manifest.location.latitude.toFixed(4)}, {manifest.location.longitude.toFixed(4)}
-                              </p>
-                            )}
+                            {manifest.location?.latitude &&
+                              manifest.location?.longitude && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {manifest.location.latitude.toFixed(4)},{' '}
+                                  {manifest.location.longitude.toFixed(4)}
+                                </p>
+                              )}
                           </div>
                           <div className="bg-gray-50 p-4 rounded-lg">
                             <div className="flex items-center space-x-2 mb-2">
                               <MapPin className="w-4 h-4 text-indigo-600" />
-                              <span className="text-sm font-medium text-gray-700">Park Location</span>
+                              <span className="text-sm font-medium text-gray-700">
+                                Park Location
+                              </span>
                             </div>
                             <p className="text-lg font-bold text-gray-900">
                               {manifest.parkLocation?.description || 'N/A'}
                             </p>
-                            {manifest.parkLocation?.latitude && manifest.parkLocation?.longitude && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                {manifest.parkLocation.latitude.toFixed(4)}, {manifest.parkLocation.longitude.toFixed(4)}
-                              </p>
-                            )}
+                            {manifest.parkLocation?.latitude &&
+                              manifest.parkLocation?.longitude && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  {manifest.parkLocation.latitude.toFixed(4)},{' '}
+                                  {manifest.parkLocation.longitude.toFixed(4)}
+                                </p>
+                              )}
                           </div>
                         </div>
                       </div>
 
                       {/* Timestamps */}
                       <div className="mt-6 pt-6 border-t border-gray-200">
-                        <h3 className="font-semibold text-gray-900 mb-4">Timeline</h3>
+                        <h3 className="font-semibold text-gray-900 mb-4">
+                          Timeline
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                           <div className="bg-gray-50 p-4 rounded-lg">
                             <div className="flex items-center space-x-2 mb-2">
                               <Clock className="w-4 h-4 text-green-600" />
-                              <span className="text-sm font-medium text-gray-700">Date Added</span>
+                              <span className="text-sm font-medium text-gray-700">
+                                Date Added
+                              </span>
                             </div>
                             <p className="text-lg font-bold text-gray-900">
-                              {manifest.dateTimeAdded ? new Date(manifest.dateTimeAdded).toLocaleString() : 'N/A'}
+                              {manifest.dateTimeAdded
+                                ? new Date(
+                                    manifest.dateTimeAdded
+                                  ).toLocaleString()
+                                : 'N/A'}
                             </p>
                           </div>
                           <div className="bg-gray-50 p-4 rounded-lg">
                             <div className="flex items-center space-x-2 mb-2">
                               <Calendar className="w-4 h-4 text-blue-600" />
-                              <span className="text-sm font-medium text-gray-700">Last Updated</span>
+                              <span className="text-sm font-medium text-gray-700">
+                                Last Updated
+                              </span>
                             </div>
                             <p className="text-lg font-bold text-gray-900">
-                              {manifest.dateTimeUpdated ? new Date(manifest.dateTimeUpdated).toLocaleString() : 'N/A'}
+                              {manifest.dateTimeUpdated
+                                ? new Date(
+                                    manifest.dateTimeUpdated
+                                  ).toLocaleString()
+                                : 'N/A'}
                             </p>
                           </div>
                           <div className="bg-gray-50 p-4 rounded-lg">
                             <div className="flex items-center space-x-2 mb-2">
                               <CheckCircle className="w-4 h-4 text-red-600" />
-                              <span className="text-sm font-medium text-gray-700">Date Ended</span>
+                              <span className="text-sm font-medium text-gray-700">
+                                Date Ended
+                              </span>
                             </div>
                             <p className="text-lg font-bold text-gray-900">
-                              {manifest.dateTimeEnded ? new Date(manifest.dateTimeEnded).toLocaleString() : 'N/A'}
+                              {manifest.dateTimeEnded
+                                ? new Date(
+                                    manifest.dateTimeEnded
+                                  ).toLocaleString()
+                                : 'N/A'}
                             </p>
                           </div>
                         </div>
@@ -703,13 +832,17 @@ export default function ManifestsCardViewPage() {
                         </Button>
                         <Button
                           variant="outline"
-                          onClick={() => handleManifestAction('track', manifest)}
+                          onClick={() =>
+                            handleManifestAction('track', manifest)
+                          }
                         >
                           <MapPin className="w-4 h-4 mr-2" />
                           Track Manifest
                         </Button>
                         <Button
-                          onClick={() => handleManifestAction('generate-report', manifest)}
+                          onClick={() =>
+                            handleManifestAction('generate-report', manifest)
+                          }
                         >
                           <FileText className="w-4 h-4 mr-2" />
                           Generate Report
@@ -749,24 +882,36 @@ export default function ManifestsCardViewPage() {
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <MapPin className="w-8 h-8 text-amber-600 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Real-time Tracking</h3>
-          <p className="text-gray-600 mb-4">Monitor manifest locations and progress</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Real-time Tracking
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Monitor manifest locations and progress
+          </p>
           <button className="text-amber-600 hover:text-amber-700 font-medium">
             View Tracking →
           </button>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <FileText className="w-8 h-8 text-amber-600 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Manifest Reports</h3>
-          <p className="text-gray-600 mb-4">Generate comprehensive manifest reports</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Manifest Reports
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Generate comprehensive manifest reports
+          </p>
           <button className="text-amber-600 hover:text-amber-700 font-medium">
             Generate Reports →
           </button>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <Shield className="w-8 h-8 text-amber-600 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Privacy Controls</h3>
-          <p className="text-gray-600 mb-4">Manage sensitive data access and compliance</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Privacy Controls
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Manage sensitive data access and compliance
+          </p>
           <button className="text-amber-600 hover:text-amber-700 font-medium">
             View Privacy →
           </button>
@@ -781,7 +926,6 @@ export default function ManifestsCardViewPage() {
         title="View Sensitive Information"
         description="Please authenticate to view unmasked manifest details for this specific manifest"
       />
-
     </div>
   );
 }

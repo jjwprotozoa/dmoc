@@ -6,16 +6,12 @@
   "devCommand": "npm run dev",
   "env": {
     "NEXTAUTH_URL": "https://dmoc.vercel.app",
-    "VERCEL": "1"
+    "VERCEL": "1",
+    "NODE_ENV": "production"
   },
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
-    }
-  },
-  "git": {
-    "deploymentEnabled": {
-      "production": true
     }
   }
 }
