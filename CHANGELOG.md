@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **TypeScript Seed File Errors** - Fixed TypeScript errors in prisma/seed.ts for Location model creation by removing @default("") from Location.name field to make it required, resolving LocationUncheckedCreateInput type issues
+- **Build Artifact Cleanup** - Removed tsconfig.tsbuildinfo build artifact from git repository
 - **Production Database Connection** - Fixed manifest data not displaying on deployed Vercel app by configuring PostgreSQL database connection and seeding production data
 - **Production Schema Relations** - Fixed missing relation fields in production schema for Country and Location models
 - **Unique Constraint on trackingId** - Added @unique constraint to manifest trackingId field to enable upsert operations
