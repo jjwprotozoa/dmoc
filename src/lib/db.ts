@@ -1,5 +1,7 @@
 // src/lib/db.ts
 import { PrismaClient } from '@prisma/client';
+// Import env to ensure DATABASE_URL mapping happens before Prisma instantiation
+import './env';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
