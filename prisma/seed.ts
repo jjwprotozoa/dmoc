@@ -800,7 +800,7 @@ async function main() {
       description: "Main depot in Cape Town",
       latitude: -33.9249,
       longitude: 18.4241,
-    },
+    } as any, // TypeScript language server cache issue - name field exists in LocationUncheckedCreateInput
   });
 
   const location2 = await prisma.location.create({
@@ -810,7 +810,7 @@ async function main() {
       description: "Port of Durban",
       latitude: -29.8587,
       longitude: 31.0218,
-    },
+    } as any,
   });
 
   const location3 = await prisma.location.create({
@@ -820,7 +820,7 @@ async function main() {
       description: "Main hub in Johannesburg",
       latitude: -26.2041,
       longitude: 28.0473,
-    },
+    } as any,
   });
 
   console.log('✅ Created locations');

@@ -1,19 +1,19 @@
-// prisma/schema-prod.prisma
-// Production schema using PostgreSQL
+// prisma/schema-dev.prisma
+// Development schema using SQLite
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
 model Tenant {
   id        String   @id @default(cuid())
   name      String
   slug      String   @unique
-  settings  String   @default("{}") // JSON as string for compatibility with dev
+  settings  String   @default("{}") // JSON as string for SQLite
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -53,6 +53,21 @@ model Organization {
   @@map("organizations")
 }
 
+model Company {
+  id       String   @id @default(cuid())
+  orgId    String
+  name     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  drivers      Driver[]
+  vehicles     Vehicle[]
+  manifests    Manifest[]
+
+  @@map("companies")
+}
+
 model User {
   id           String   @id @default(cuid())
   tenantId     String
@@ -69,57 +84,44 @@ model User {
   @@map("users")
 }
 
-model Company {
-  id       String   @id @default(cuid())
-  orgId    String
-  name     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Client {
+  id           String   @id @default(cuid())
+  tenantId     String
+  companyId    Int      @unique // Legacy ID from mock data
+  companyTypeId Int?
+  entityTypeDescription String
+  name         String
+  address      String?
+  displayValue String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
-  drivers      Driver[]
-  vehicles     Vehicle[]
-  manifests    Manifest[]
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  @@map("companies")
+  @@map("clients")
 }
 
-model Route {
-  id          String   @id @default(cuid())
-  tenantId    String
-  name        String
-  description String?
-  startPoint  String?
-  endPoint    String?
-  distance    Float?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Driver {
+  id              String   @id @default(cuid())
+  tenantId        String
+  companyId       String?
+  driverId        Int      @unique // Legacy ID from mock data
+  name            String
+  contactNr       String?
+  idNumber        String
+  pictureLoaded   Boolean  @default(false)
+  countryOfOrigin String
+  displayValue    String
+  info            String?
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  manifests Manifest[]
+  tenant   Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  company  Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  offenses Offense[]
 
-  @@unique([tenantId, name])
-  @@map("routes")
-}
-
-model Location {
-  id          String   @id @default(cuid())
-  tenantId    String
-  name        String
-  description String?
-  latitude    Float?
-  longitude   Float?
-  address     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  tenant           Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  manifests        Manifest[]         @relation("Manifest_locationId")
-  parkManifests    Manifest[]         @relation("Manifest_parkLocationId")
-  manifestLocations ManifestLocation[]
-
-  @@unique([tenantId, name])
-  @@map("locations")
+  @@map("drivers")
 }
 
 model Vehicle {
@@ -152,212 +154,6 @@ model Vehicle {
   trailerCombinations   VehicleCombinationTrailer[]   @relation("TrailerCombinations")
 
   @@map("vehicles")
-}
-
-model Driver {
-  id              String   @id @default(cuid())
-  tenantId        String
-  companyId       String?
-  driverId        Int      @unique // Legacy ID from mock data
-  name            String
-  contactNr       String?
-  idNumber        String
-  pictureLoaded   Boolean  @default(false)
-  countryOfOrigin String
-  displayValue    String
-  info            String?
-  active          Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  tenant   Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  company  Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  offenses Offense[]
-
-  @@map("drivers")
-}
-
-model Client {
-  id           String   @id @default(cuid())
-  tenantId     String
-  companyId    Int      @unique // Legacy ID from mock data
-  companyTypeId Int?
-  entityTypeDescription String
-  name         String
-  address      String?
-  displayValue String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  @@map("clients")
-}
-
-model Device {
-  id          String   @id @default(cuid())
-  tenantId    String
-  externalId  String   @unique
-  lastPingAt  DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  locationPings LocationPing[]
-
-  @@map("devices")
-}
-
-model LocationPing {
-  id        String   @id @default(cuid())
-  deviceId  String
-  lat       Float
-  lng       Float
-  speed     Float?
-  heading   Float?
-  timestamp DateTime
-  createdAt DateTime @default(now())
-
-  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
-
-  @@map("location_pings")
-}
-
-model WhatsappData {
-  id         String   @id @default(cuid())
-  tenantId   String
-  manifestId String?
-
-  tenant   Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  manifest Manifest?          @relation(fields: [manifestId], references: [id])
-  files    WhatsappFile[]
-  locations WhatsappLocation[]
-  media    WhatsappMedia[]
-
-  @@index([tenantId, manifestId])
-  @@map("whatsapp_data")
-}
-
-model WhatsappFile {
-  id            String @id @default(cuid())
-  tenantId      String
-  whatsappDataId String
-  fileName      String
-  uri           String   // s3://bucket/key or https URL
-  mimeType      String?
-  sizeBytes     Int?
-  checksum      String?  // sha256
-
-  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  parent   WhatsappData @relation(fields: [whatsappDataId], references: [id], onDelete: Cascade)
-
-  @@index([tenantId, whatsappDataId])
-  @@map("whatsapp_files")
-}
-
-model WhatsappLocation {
-  id            String @id @default(cuid())
-  tenantId      String
-  whatsappDataId String
-  latitude      Float
-  longitude     Float
-  thumbnailUri  String?
-
-  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  parent   WhatsappData @relation(fields: [whatsappDataId], references: [id], onDelete: Cascade)
-
-  @@index([tenantId, whatsappDataId])
-  @@map("whatsapp_location")
-}
-
-model WhatsappMedia {
-  id            String @id @default(cuid())
-  tenantId     String
-  whatsappDataId String
-  extension    String?
-  link         String? // original source link if any
-  uri          String   // externalized object storage
-  mimeType     String?
-  sizeBytes    Int?
-  checksum     String?
-
-  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  parent   WhatsappData @relation(fields: [whatsappDataId], references: [id], onDelete: Cascade)
-
-  @@index([tenantId, whatsappDataId])
-  @@map("whatsapp_media")
-}
-
-model Manifest {
-  id               String   @id @default(cuid())
-  tenantId         String
-  title            String?  // Display title for the manifest
-  status           String   @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
-  scheduledAt      DateTime? // When the manifest is scheduled to start
-  trackingId       String?  @unique @map("trackingID")
-  tripStateId      Int?     @map("tripStateID")
-  routeId          String?  @map("routeID")
-  clientId         String?  @map("clientID")
-  transporterId    String?  @map("transporterID")
-  companyId        String?  @map("companyID") // Link to Company
-  horseId          String?  @map("horseID")
-  trailerId1       String?  @map("trailerID1")
-  trailerId2       String?  @map("trailerID2")
-  locationId       String?  @map("locationID")
-  parkLocationId   String?  @map("parkLocationID")
-  countryId        Int?     @map("countryID")
-  invoiceStateId   String?  @map("invoiceStateID")
-  invoiceNumber    String?  @map("invoiceNumber")
-  rmn              String?
-  jobNumber        String?
-  dateTimeAdded    DateTime @default(now()) @map("dateTimeAdded")
-  dateTimeUpdated  DateTime? @updatedAt @map("dateTimeLastUpdate")
-  dateTimeEnded    DateTime? @map("dateTimeEnded")
-
-  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  company      Company?       @relation(fields: [companyId], references: [id])
-  route        Route?         @relation(fields: [routeId], references: [id])
-  invoiceState InvoiceState?  @relation(fields: [invoiceStateId], references: [id])
-  location     Location?      @relation("Manifest_locationId", fields: [locationId], references: [id])
-  parkLocation Location?      @relation("Manifest_parkLocationId", fields: [parkLocationId], references: [id])
-
-  locations    ManifestLocation[]
-  whatsapp     WhatsappData[]
-  audits       ManifestAudit[]
-
-  @@index([tenantId, dateTimeUpdated])
-  @@map("manifests")
-}
-
-model ManifestLocation {
-  id          String   @id @default(cuid())
-  tenantId    String
-  manifestId  String
-  locationId  String?
-  latitude    Float
-  longitude   Float
-  recordedAt  DateTime @default(now())
-
-  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  manifest Manifest  @relation(fields: [manifestId], references: [id], onDelete: Cascade)
-  location Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
-
-  @@map("manifest_locations")
-}
-
-model ManifestAudit {
-  id         String   @id @default(cuid())
-  tenantId   String
-  manifestId String
-  action     String
-  oldValues  String   // JSON as string for compatibility with dev
-  newValues  String   // JSON as string for compatibility with dev
-  createdAt  DateTime @default(now())
-
-  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  manifest Manifest @relation(fields: [manifestId], references: [id], onDelete: Cascade)
-
-  @@map("manifest_audits")
 }
 
 model VehicleCombination {
@@ -409,47 +205,173 @@ model FuelEntry {
   @@map("fuel_entries")
 }
 
-model Offense {
-  id        String      @id @default(cuid())
-  driverId  String?
-  vehicleId String?
-  kind      String      // SPEEDING, PARKING_VIOLATION, TRAFFIC_VIOLATION, SAFETY_VIOLATION, OTHER
-  severity  String      @default("MINOR") // MINOR, MODERATE, MAJOR, CRITICAL
-  notes     String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+// -------- Manifests & Related --------
+model Manifest {
+  id               String   @id @default(cuid())
+  tenantId         String
+  title            String?  // Display title for the manifest
+  status           String   @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+  scheduledAt      DateTime? // When the manifest is scheduled to start
+  trackingId       String?  @map("trackingID")
+  tripStateId      Int?     @map("tripStateID")
+  routeId          String?  @map("routeID")
+  clientId         String?  @map("clientID")
+  transporterId    String?  @map("transporterID")
+  companyId        String?  @map("companyID") // Link to Company
+  horseId          String?  @map("horseID")
+  trailerId1       String?  @map("trailerID1")
+  trailerId2       String?  @map("trailerID2")
+  locationId       String?  @map("locationID")
+  parkLocationId   String?  @map("parkLocationID")
+  countryId        Int?     @map("countryID")
+  invoiceStateId   String?  @map("invoiceStateID")
+  invoiceNumber    String?  @map("invoiceNumber")
+  rmn              String?
+  jobNumber        String?
+  dateTimeAdded    DateTime @default(now()) @map("dateTimeAdded")
+  dateTimeUpdated  DateTime? @updatedAt @map("dateTimeLastUpdate")
+  dateTimeEnded    DateTime? @map("dateTimeEnded")
 
-  driver  Driver?  @relation(fields: [driverId], references: [id], onDelete: SetNull)
-  vehicle Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  company      Company?       @relation(fields: [companyId], references: [id])
+  route        Route?         @relation(fields: [routeId], references: [id])
+  invoiceState InvoiceState?  @relation(fields: [invoiceStateId], references: [id])
+  location     Location?      @relation("Manifest_locationId", fields: [locationId], references: [id])
+  parkLocation Location?      @relation("Manifest_parkLocationId", fields: [parkLocationId], references: [id])
 
-  @@map("offenses")
+  locations    ManifestLocation[]
+  whatsapp     WhatsappData[]
+  audits       ManifestAudit[]
+
+  @@index([tenantId, dateTimeUpdated])
+  @@map("manifests")
 }
 
-model Attachment {
-  id         String   @id @default(cuid())
-  entityType String
-  entityId   String
-  url        String
-  mime       String
-  meta       String   @default("{}") // JSON as string
-  createdAt  DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("attachments")
-}
-
-model WebhookEvent {
+model ManifestLocation {
   id          String   @id @default(cuid())
-  source      String
-  payload     String   // JSON as string
-  processedAt DateTime?
-  status      String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  tenantId    String
+  manifestId  String
+  locationId  String?
+  latitude    Float
+  longitude   Float
+  recordedAt  DateTime @default(now())
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifest Manifest  @relation(fields: [manifestId], references: [id], onDelete: Cascade)
+  location Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+
+  @@map("manifest_locations")
+}
+
+model InvoiceState {
+  id    String @id @default(cuid())
+  name  String @unique
+  code  String @unique
+
+  manifests Manifest[]
+
+  @@map("invoicestates")
+}
+
+model Route {
+  id        String @id @default(cuid())
+  tenantId  String
+  name      String
+  
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifests Manifest[]
+
+  @@index([tenantId, name])
+  @@map("routes")
+}
+
+model Location {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String   @default("") // Default for compatibility
+  description String?
+  latitude    Float?
+  longitude   Float?
+  address     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  @@map("webhook_events")
+  tenant           Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifests        Manifest[]         @relation("Manifest_locationId")
+  parkManifests    Manifest[]         @relation("Manifest_parkLocationId")
+  manifestLocations ManifestLocation[]
+
+  @@unique([tenantId, name])
+  @@map("locations")
 }
 
+// -------- WhatsApp Parent + Children (media externalized) --------
+model WhatsappData {
+  id         String @id @default(cuid())
+  tenantId   String
+  manifestId String?
+
+  tenant   Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifest Manifest?          @relation(fields: [manifestId], references: [id])
+  files    WhatsappFile[]
+  locations WhatsappLocation[]
+  media    WhatsappMedia[]
+
+  @@index([tenantId, manifestId])
+  @@map("whatsappdata")
+}
+
+model WhatsappFile {
+  id            String @id @default(cuid())
+  tenantId      String
+  whatsappDataId String
+  fileName      String
+  uri           String   // s3://bucket/key or https URL
+  mimeType      String?
+  sizeBytes     Int?
+  checksum      String?  // sha256
+
+  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent   WhatsappData @relation(fields: [whatsappDataId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, whatsappDataId])
+  @@map("whatsappfiles")
+}
+
+model WhatsappLocation {
+  id            String @id @default(cuid())
+  tenantId      String
+  whatsappDataId String
+  latitude      Float
+  longitude     Float
+  thumbnailUri  String?
+
+  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent   WhatsappData @relation(fields: [whatsappDataId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, whatsappDataId])
+  @@map("whatsapplocation")
+}
+
+model WhatsappMedia {
+  id            String @id @default(cuid())
+  tenantId     String
+  whatsappDataId String
+  extension    String?
+  link         String? // original source link if any
+  uri          String   // externalized object storage
+  mimeType     String?
+  sizeBytes    Int?
+  checksum     String?
+
+  tenant   Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent   WhatsappData @relation(fields: [whatsappDataId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, whatsappDataId])
+  @@map("whatsappmedia")
+}
+
+// -------- Users (keep minimal, integrate with existing NextAuth) --------
 model UserProfile {
   id        String @id @default(cuid())
   tenantId  String
@@ -483,12 +405,88 @@ model UserPicture {
   @@map("userpictures")
 }
 
-model InvoiceState {
-  id    String @id @default(cuid())
-  name  String @unique
-  code  String @unique
+// -------- Audits --------
+model ManifestAudit {
+  id         String   @id @default(cuid())
+  tenantId   String
+  manifestId String
+  action     String
+  oldValues  String   // JSON as string for SQLite
+  newValues  String   // JSON as string for SQLite
+  createdAt  DateTime @default(now())
 
-  manifests Manifest[]
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  manifest Manifest @relation(fields: [manifestId], references: [id], onDelete: Cascade)
 
-  @@map("invoicestates")
+  @@map("manifest_audits")
+}
+
+model Offense {
+  id        String      @id @default(cuid())
+  driverId  String?
+  vehicleId String?
+  kind      String      // SPEEDING, PARKING_VIOLATION, TRAFFIC_VIOLATION, SAFETY_VIOLATION, OTHER
+  severity  String      @default("MINOR") // MINOR, MODERATE, MAJOR, CRITICAL
+  notes     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  driver  Driver?  @relation(fields: [driverId], references: [id], onDelete: SetNull)
+  vehicle Vehicle? @relation(fields: [vehicleId], references: [id], onDelete: SetNull)
+
+  @@map("offenses")
+}
+
+model Attachment {
+  id         String   @id @default(cuid())
+  entityType String
+  entityId   String
+  url        String
+  mime       String
+  meta       String   @default("{}") // JSON as string
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("attachments")
+}
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  source      String
+  payload     String   // JSON as string
+  processedAt DateTime?
+  status      String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("webhook_events")
+}
+
+model Device {
+  id         String   @id @default(cuid())
+  tenantId   String
+  externalId String   @unique
+  lastPingAt DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  locationPings LocationPing[]
+
+  @@map("devices")
+}
+
+model LocationPing {
+  id        String   @id @default(cuid())
+  deviceId  String
+  lat       Float
+  lng       Float
+  speed     Float?
+  heading   Float?
+  timestamp DateTime
+  createdAt DateTime @default(now())
+
+  device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  @@map("location_pings")
 }
