@@ -78,13 +78,13 @@ interface ManifestItem {
   invoiceState?: { name: string; code: string } | null;
   location?: {
     id: string;
-    description: string;
+    description: string | null;
     latitude: number | null;
     longitude: number | null;
   } | null;
   parkLocation?: {
     id: string;
-    description: string;
+    description: string | null;
     latitude: number | null;
     longitude: number | null;
   } | null;
@@ -355,7 +355,7 @@ export default function ManifestsCardViewPage() {
 
       {/* Manifests Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mb-8">
-        {manifests.map((manifest: ManifestItem) => {
+        {(manifests as ManifestItem[]).map((manifest: ManifestItem) => {
           const now = typeof window !== 'undefined' ? Date.now() : 0;
           const minutesSinceUpdate = manifest.dateTimeUpdated
             ? Math.floor(
