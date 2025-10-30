@@ -24,6 +24,8 @@ model Tenant {
   drivers       Driver[]
   vehicles      Vehicle[]
   vehicleCombinations VehicleCombination[]
+  contacts     Contact[]
+  logisticsOfficers LogisticsOfficer[]
   
   // New Manifest Core relations
   manifests        Manifest[]
@@ -212,7 +214,7 @@ model Manifest {
   title            String?  // Display title for the manifest
   status           String   @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
   scheduledAt      DateTime? // When the manifest is scheduled to start
-  trackingId       String?  @map("trackingID")
+  trackingId       String?  @unique @map("trackingID")
   tripStateId      Int?     @map("tripStateID")
   routeId          String?  @map("routeID")
   clientId         String?  @map("clientID")
@@ -274,21 +276,27 @@ model InvoiceState {
 }
 
 model Route {
-  id        String @id @default(cuid())
-  tenantId  String
-  name      String
-  
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  startPoint  String?
+  endPoint    String?
+  distance    Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   manifests Manifest[]
 
-  @@index([tenantId, name])
+  @@unique([tenantId, name])
   @@map("routes")
 }
 
 model Location {
   id          String   @id @default(cuid())
   tenantId    String
-  name        String   @default("") // Default for compatibility
+  name        String
   description String?
   latitude    Float?
   longitude   Float?
@@ -318,7 +326,7 @@ model WhatsappData {
   media    WhatsappMedia[]
 
   @@index([tenantId, manifestId])
-  @@map("whatsappdata")
+  @@map("whatsapp_data")
 }
 
 model WhatsappFile {
@@ -335,7 +343,7 @@ model WhatsappFile {
   parent   WhatsappData @relation(fields: [whatsappDataId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, whatsappDataId])
-  @@map("whatsappfiles")
+  @@map("whatsapp_files")
 }
 
 model WhatsappLocation {
@@ -350,7 +358,7 @@ model WhatsappLocation {
   parent   WhatsappData @relation(fields: [whatsappDataId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, whatsappDataId])
-  @@map("whatsapplocation")
+  @@map("whatsapp_location")
 }
 
 model WhatsappMedia {
@@ -368,7 +376,7 @@ model WhatsappMedia {
   parent   WhatsappData @relation(fields: [whatsappDataId], references: [id], onDelete: Cascade)
 
   @@index([tenantId, whatsappDataId])
-  @@map("whatsappmedia")
+  @@map("whatsapp_media")
 }
 
 // -------- Users (keep minimal, integrate with existing NextAuth) --------
@@ -489,4 +497,52 @@ model LocationPing {
   device Device @relation(fields: [deviceId], references: [id], onDelete: Cascade)
 
   @@map("location_pings")
+}
+
+model Country {
+  id            Int       @id @default(autoincrement())
+  name          String
+  abbreviation  String
+  flag          String?   // Emoji flag (e.g., 🇿🇲 for Zambia)
+  dateTimeAdded DateTime?  @default(now())
+  displayValue  String
+
+  @@map("countries")
+}
+
+// Contact: Tenant-scoped contact directory
+model Contact {
+  id              String   @id @default(cuid())
+  tenantId        String
+  name            String
+  contactNr       String
+  idNumber        String
+  pictureLoaded   Boolean  @default(false)
+  countryOfOrigin String
+  displayValue    String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, name])
+  @@map("contacts")
+}
+
+// LogisticsOfficer: Tenant-scoped model for logistics officers assignment and management
+model LogisticsOfficer {
+  id         String   @id @default(cuid()) // cuid primary key (string)
+  tenantId   String
+  name       String
+  role       String?
+  email      String?
+  phone      String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, name])
+  @@map("logistics_officers")
 }

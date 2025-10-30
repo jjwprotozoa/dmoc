@@ -95,11 +95,11 @@ export function SensitiveDataField({
   const maskedData = getMaskedData();
 
   return (
-    <div className={`flex items-center justify-between text-xs ${className}`}>
-      <span className="text-gray-500">{label}:</span>
-      <div className="flex items-center space-x-1">
+    <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between text-xs ${className}`}>
+      <span className="text-gray-500 whitespace-nowrap">{label}:</span>
+      <div className="flex items-center space-x-1 mt-1 sm:mt-0 max-w-full">
         <span
-          className={`text-gray-900 ${maskedData.masked ? 'font-mono' : ''}`}
+          className={`text-gray-900 ${maskedData.masked ? 'font-mono' : ''} break-all max-w-full block leading-snug`}
         >
           {maskedData.display}
         </span>

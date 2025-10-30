@@ -1,6 +1,6 @@
 {
   "name": "dmoc-web",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "DMOC Web (PWA) - Multi-tenant logistics operations app",
   "private": true,
   "scripts": {
@@ -26,14 +26,15 @@
     "postinstall": "prisma generate",
     "db:dev": "node scripts/copy-schema.js prisma/schema-dev.prisma prisma/schema.prisma && prisma generate",
     "db:prod": "node scripts/copy-schema.js prisma/schema-prod.prisma prisma/schema.prisma && prisma generate",
-    "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts",
-    "db:seed:prod": "tsx prisma/seed-production.ts",
-    "db:migrate:manifests": "tsx prisma/seed-production-manifests.ts",
+    "db:push": "node scripts/load-env.js prisma db push",
+    "db:seed": "node scripts/load-env.js tsx prisma/seed.ts",
+    "db:seed:prod": "node scripts/load-env.js tsx prisma/seed-production.ts",
+    "db:migrate:manifests": "node scripts/load-env.js tsx prisma/seed-production-manifests.ts",
     "deploy:prod": "npm run db:prod && npm run db:push && npm run db:seed:prod && npm run build",
     "generate:secret": "node scripts/generate-nextauth-secret.js",
     "dmoc:import:active": "tsx scripts/import/dmoc/index.ts --file=./data/active_manifests.txt",
-    "dmoc:import:active:dry": "tsx scripts/import/dmoc/index.ts --file=./data/active_manifests.txt --dry-run"
+    "dmoc:import:active:dry": "tsx scripts/import/dmoc/index.ts --file=./data/active_manifests.txt --dry-run",
+    "seed": "tsx prisma/seed.ts"
   },
   "keywords": [
     "nextjs",
@@ -57,6 +58,7 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "@tanstack/react-query": "^4.36.0",
     "@trpc/client": "^10.45.0",
     "@trpc/next": "^10.45.0",
@@ -69,6 +71,7 @@
     "clsx": "^2.1.1",
     "dexie": "^3.2.0",
     "leaflet": "^1.9.4",
+    "libphonenumber-js": "^1.11.12",
     "lucide-react": "^0.292.0",
     "minio": "^7.1.0",
     "next": "^14.0.0",
@@ -100,7 +103,7 @@
     "eslint-config-prettier": "^10.1.8",
     "postcss": "^8.4.0",
     "prettier": "^3.1.0",
-    "tsx": "^4.20.6",
+    "tsx": "^4.7.0",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0",
     "workbox-precaching": "^7.3.0",

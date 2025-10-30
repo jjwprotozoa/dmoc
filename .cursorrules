@@ -128,3 +128,5 @@ mcp_Linear_get_team({ query: 'justwessels' });
 - Use mock data from seed files to understand Windows data structure
 - Maintain feature parity between Windows and web versions
 - Document any missing features or behavioral differences
+
+- **Incremental Edits:** For non-trivial or multi-section file changes, always break down edits into the smallest logical steps possible (one function, handler, or modal per edit; never wholesale rewrites). Apply changes incrementally and verify results before proceeding. If a large code edit fails, retry as a sequence of smaller changes instead of replacing the entire file. Agents and developers should prefer 3–5 focused edits for multi-part features/refactors/UI pages for reliability and easier debugging.

@@ -24,6 +24,8 @@ model Tenant {
   drivers       Driver[]
   vehicles      Vehicle[]
   vehicleCombinations VehicleCombination[]
+  contacts     Contact[]
+  logisticsOfficers LogisticsOfficer[]
   
   // New Manifest Core relations
   manifests        Manifest[]
@@ -491,4 +493,52 @@ model InvoiceState {
   manifests Manifest[]
 
   @@map("invoicestates")
+}
+
+// Tenant-scoped Contact directory (store contactNr in E.164)
+model Contact {
+  id              String   @id @default(cuid())
+  tenantId        String
+  name            String
+  contactNr       String
+  idNumber        String
+  pictureLoaded   Boolean  @default(false)
+  countryOfOrigin String
+  displayValue    String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, name])
+  @@map("contacts")
+}
+
+model Country {
+  id            Int       @id @default(autoincrement())
+  name          String
+  abbreviation  String
+  flag          String?
+  dateTimeAdded DateTime? @default(now())
+  displayValue  String
+
+  @@map("countries")
+}
+
+// LogisticsOfficer: Tenant-scoped model for logistics officers assignment and management
+model LogisticsOfficer {
+  id         String   @id @default(cuid())
+  tenantId   String
+  name       String
+  role       String?
+  email      String?
+  phone      String?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, name])
+  @@map("logistics_officers")
 }

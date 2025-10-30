@@ -2,31 +2,31 @@
 'use client';
 
 import {
-    Archive,
-    Building2,
-    Car,
-    CarFront,
-    ChevronDown,
-    ChevronRight,
-    ClipboardList,
-    FileText,
-    Globe,
-    Heart,
-    MapPin,
-    Menu,
-    Monitor,
-    // Removed unused MonitorSpeaker import
-    Navigation,
-    Phone,
-    Radar,
-    Receipt,
-    Route,
-    Settings,
-    Shield,
-    Truck,
-    User,
-    Users,
-    X,
+  Archive,
+  Building2,
+  Car,
+  CarFront,
+  ChevronDown,
+  ChevronRight,
+  ClipboardList,
+  FileText,
+  Globe,
+  Heart,
+  MapPin,
+  Menu,
+  Monitor,
+  // Removed unused MonitorSpeaker import
+  Navigation,
+  Phone,
+  Radar,
+  Receipt,
+  Route,
+  Settings,
+  Shield,
+  Truck,
+  User,
+  Users,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -335,7 +335,9 @@ export function SidebarNav({ user }: SidebarNavProps) {
               }
             `}
           >
-            <Truck className={`w-4 h-4 ${pathname === '/dashboard' ? 'text-white' : 'text-gray-300'}`} />
+            <Truck
+              className={`w-4 h-4 ${pathname === '/dashboard' ? 'text-white' : 'text-gray-300'}`}
+            />
             {!isCollapsed && <span className="ml-3">Dashboard</span>}
             {pathname === '/dashboard' && !isCollapsed && (
               <div className="ml-auto w-2 h-2 bg-white rounded-full" />
@@ -354,12 +356,12 @@ export function SidebarNav({ user }: SidebarNavProps) {
               );
 
               return (
-                <div key={group.id} className="space-y-1">
+                <div key={group.id} className="space-y-1 relative">
                   {/* Group Header */}
                   <button
                     onClick={() => toggleGroup(group.id)}
                     className={`
-                      w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg
+                      w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg relative z-10
                       transition-all duration-200 ease-in-out
                       ${
                         hasActiveItem
@@ -393,11 +395,11 @@ export function SidebarNav({ user }: SidebarNavProps) {
                   </button>
 
                   {/* Group Items */}
-                  {!isCollapsed && (
+                  {!isCollapsed && isExpanded && (
                     <div
                       className={`
-                      transition-all duration-300 ease-in-out
-                      ${isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}
+                      transition-all duration-300 ease-in-out overflow-hidden relative z-0
+                      max-h-96 opacity-100
                     `}
                     >
                       <div className="ml-4 space-y-1 pt-1">

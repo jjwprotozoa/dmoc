@@ -1,9 +1,13 @@
 // prisma/seed.ts
 import { PrismaClient } from '@prisma/client';
+import fs from 'fs';
+import path from 'path';
 
 const prisma = new PrismaClient();
 
 async function main() {
+  // Diagnostic: print prisma client keys to verify countries model accessor
+  console.log('Prisma client models:', Object.keys(prisma));
   console.log('🌱 Starting database seed...');
 
   // Create a default tenant
@@ -792,229 +796,345 @@ async function main() {
 
   console.log('✅ Created routes');
 
-  // Create locations
-  const location1 = await prisma.location.create({
-    data: {
-      tenantId: tenant.id,
-      name: "Cape Town Depot",
-      description: "Main depot in Cape Town",
-      latitude: -33.9249,
-      longitude: 18.4241,
-    } as any, // TypeScript language server cache issue - name field exists in LocationUncheckedCreateInput
-  });
+  // Seed countries (using correct model name, robust error handling)
+  try {
+    const countries = [
+      { id: 3, name: 'BOTSWANA', abbreviation: 'BW', flag: '🇧🇼', displayValue: 'BOTSWANA' },
+      { id: 6, name: 'CONGO (DRC)', abbreviation: 'DRC', flag: '🇨🇩', displayValue: 'CONGO (DRC)' },
+      { id: 12, name: 'KENYA', abbreviation: 'KE', flag: '🇰🇪', displayValue: 'KENYA' },
+      { id: 10, name: 'MALAWI', abbreviation: 'MW', flag: '🇲🇼', displayValue: 'MALAWI' },
+      { id: 7, name: 'MOZAMBIQUE', abbreviation: 'MZ', flag: '🇲🇿', displayValue: 'MOZAMBIQUE' },
+      { id: 4, name: 'NAMIBIA', abbreviation: 'NM', flag: '🇳🇦', displayValue: 'NAMIBIA' },
+      { id: 11, name: 'SOMALIA', abbreviation: 'SO', flag: '🇸🇴', displayValue: 'SOMALIA' },
+      { id: 8, name: 'SOUTH AFRICA', abbreviation: 'RSA', flag: '🇿🇦', displayValue: 'SOUTH AFRICA' },
+      { id: 2, name: 'TANZANIA', abbreviation: 'TZ', flag: '🇹🇿', displayValue: 'TANZANIA' },
+      { id: 9, name: 'UNKNOWN', abbreviation: 'TBA', flag: '❓', displayValue: 'UNKNOWN' },
+      { id: 1, name: 'ZAMBIA', abbreviation: 'ZM', flag: '🇿🇲', displayValue: 'ZAMBIA' },
+      { id: 5, name: 'ZIMBABWE', abbreviation: 'ZB', flag: '🇿🇼', displayValue: 'ZIMBABWE' },
+    ];
+    for (const countryData of countries) {
+      await prisma.country.upsert({
+        where: { id: countryData.id },
+        update: { ...countryData },
+        create: { ...countryData },
+      });
+    }
+    console.log('✅ Seeded countries');
+  } catch (err) {
+    console.error('❌ Could not seed countries:', err);
+  }
 
-  const location2 = await prisma.location.create({
-    data: {
-      tenantId: tenant.id,
-      name: "Durban Port",
-      description: "Port of Durban",
-      latitude: -29.8587,
-      longitude: 31.0218,
-    } as any,
-  });
-
-  const location3 = await prisma.location.create({
-    data: {
-      tenantId: tenant.id,
-      name: "Johannesburg Hub",
-      description: "Main hub in Johannesburg",
-      latitude: -26.2041,
-      longitude: 28.0473,
-    } as any,
-  });
-
-  console.log('✅ Created locations');
-
-  // Create demo manifests
-  const manifest1 = await prisma.manifest.create({
-    data: {
-      tenantId: tenant.id,
-      title: "Cape Town to Johannesburg Route",
-      status: "IN_PROGRESS",
-      scheduledAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      trackingId: "TRK-001",
-      routeId: route1.id,
-      locationId: location1.id,
-      invoiceStateId: newState.id,
-      rmn: "RMN-001",
-      jobNumber: "JOB-001",
-    },
-  });
-
-  const manifest2 = await prisma.manifest.create({
-    data: {
-      tenantId: tenant.id,
-      title: "Durban to Pretoria Route",
-      status: "SCHEDULED",
-      scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
-      trackingId: "TRK-002",
-      routeId: route2.id,
-      locationId: location3.id,
-      invoiceStateId: sentState.id,
-      rmn: "RMN-002",
-      jobNumber: "JOB-002",
-    },
-  });
-
-  console.log('✅ Created manifests');
-
-  // Create manifest locations (tracking data)
-  await prisma.manifestLocation.createMany({
-    data: [
+  // Robust location upserts (avoid unique constraint failures and no variable leaks)
+  try {
+    const locations = [
       {
-        tenantId: tenant.id,
-        manifestId: manifest1.id,
-        latitude: -33.92,
-        longitude: 18.42,
-        recordedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        name: 'Cape Town Depot',
+        description: 'Main depot in Cape Town',
+        latitude: -33.9249,
+        longitude: 18.4241,
       },
       {
-        tenantId: tenant.id,
-        manifestId: manifest1.id,
-        latitude: -34.0,
-        longitude: 19.0,
-        recordedAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+        name: 'Durban Port',
+        description: 'Port of Durban',
+        latitude: -29.8587,
+        longitude: 31.0218,
       },
       {
+        name: 'Johannesburg Hub',
+        description: 'Main hub in Johannesburg',
+        latitude: -26.2041,
+        longitude: 28.0473,
+      },
+    ];
+    for (const loc of locations) {
+      await prisma.location.upsert({
+        where: { tenantId_name: { tenantId: tenant.id, name: loc.name } },
+        update: {
+          description: loc.description,
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+        },
+        create: {
+          tenantId: tenant.id,
+          name: loc.name,
+          description: loc.description,
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+        },
+      });
+    }
+    console.log('✅ Created locations');
+
+    // Fetch seeded locations' IDs for use in demo manifests
+    const capeTownDepot = await prisma.location.findUnique({ where: { tenantId_name: { tenantId: tenant.id, name: 'Cape Town Depot' } } });
+    const durbanPort = await prisma.location.findUnique({ where: { tenantId_name: { tenantId: tenant.id, name: 'Durban Port' } } });
+    const johannesburgHub = await prisma.location.findUnique({ where: { tenantId_name: { tenantId: tenant.id, name: 'Johannesburg Hub' } } });
+
+    // Create demo manifests
+    const manifest1 = await prisma.manifest.create({
+      data: {
+        tenantId: tenant.id,
+        title: "Cape Town to Johannesburg Route",
+        status: "IN_PROGRESS",
+        scheduledAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        trackingId: "TRK-001",
+        routeId: route1.id,
+        locationId: capeTownDepot?.id,
+        invoiceStateId: newState.id,
+        rmn: "RMN-001",
+        jobNumber: "JOB-001",
+      },
+    });
+
+    const manifest2 = await prisma.manifest.create({
+      data: {
+        tenantId: tenant.id,
+        title: "Durban to Pretoria Route",
+        status: "SCHEDULED",
+        scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+        trackingId: "TRK-002",
+        routeId: route2.id,
+        locationId: johannesburgHub?.id,
+        invoiceStateId: sentState.id,
+        rmn: "RMN-002",
+        jobNumber: "JOB-002",
+      },
+    });
+
+    console.log('✅ Created manifests');
+
+    // Create manifest locations (tracking data)
+    await prisma.manifestLocation.createMany({
+      data: [
+        {
+          tenantId: tenant.id,
+          manifestId: manifest1.id,
+          latitude: -33.92,
+          longitude: 18.42,
+          recordedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        },
+        {
+          tenantId: tenant.id,
+          manifestId: manifest1.id,
+          latitude: -34.0,
+          longitude: 19.0,
+          recordedAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+        },
+        {
+          tenantId: tenant.id,
+          manifestId: manifest1.id,
+          latitude: -34.5,
+          longitude: 19.5,
+          recordedAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+        },
+        {
+          tenantId: tenant.id,
+          manifestId: manifest2.id,
+          latitude: -26.2,
+          longitude: 28.0,
+          recordedAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
+        },
+        {
+          tenantId: tenant.id,
+          manifestId: manifest2.id,
+          latitude: -26.5,
+          longitude: 27.5,
+          recordedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+        },
+      ],
+    });
+
+    console.log('✅ Created manifest locations');
+
+    // Create WhatsApp data with sample media
+    const whatsappData1 = await prisma.whatsappData.create({
+      data: {
         tenantId: tenant.id,
         manifestId: manifest1.id,
-        latitude: -34.5,
-        longitude: 19.5,
-        recordedAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
       },
-      {
+    });
+
+    const whatsappData2 = await prisma.whatsappData.create({
+      data: {
         tenantId: tenant.id,
         manifestId: manifest2.id,
-        latitude: -26.2,
-        longitude: 28.0,
-        recordedAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
       },
-      {
-        tenantId: tenant.id,
-        manifestId: manifest2.id,
-        latitude: -26.5,
-        longitude: 27.5,
-        recordedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-      },
-    ],
-  });
+    });
 
-  console.log('✅ Created manifest locations');
+    // Create sample WhatsApp files
+    await prisma.whatsappFile.createMany({
+      data: [
+        {
+          tenantId: tenant.id,
+          whatsappDataId: whatsappData1.id,
+          fileName: "delivery_confirmation.pdf",
+          uri: "https://example.com/files/delivery_confirmation.pdf",
+          mimeType: "application/pdf",
+          sizeBytes: 245760,
+          checksum: "sha256:abc123def456",
+        },
+        {
+          tenantId: tenant.id,
+          whatsappDataId: whatsappData1.id,
+          fileName: "route_photo.jpg",
+          uri: "https://example.com/files/route_photo.jpg",
+          mimeType: "image/jpeg",
+          sizeBytes: 1024000,
+          checksum: "sha256:def456ghi789",
+        },
+      ],
+    });
 
-  // Create WhatsApp data with sample media
-  const whatsappData1 = await prisma.whatsappData.create({
-    data: {
-      tenantId: tenant.id,
-      manifestId: manifest1.id,
-    },
-  });
+    // Create sample WhatsApp media
+    await prisma.whatsappMedia.createMany({
+      data: [
+        {
+          tenantId: tenant.id,
+          whatsappDataId: whatsappData2.id,
+          extension: "mp4",
+          uri: "https://example.com/media/delivery_video.mp4",
+          mimeType: "video/mp4",
+          sizeBytes: 5242880,
+          checksum: "sha256:ghi789jkl012",
+        },
+      ],
+    });
 
-  const whatsappData2 = await prisma.whatsappData.create({
-    data: {
-      tenantId: tenant.id,
-      manifestId: manifest2.id,
-    },
-  });
+    // Create sample WhatsApp locations
+    await prisma.whatsappLocation.createMany({
+      data: [
+        {
+          tenantId: tenant.id,
+          whatsappDataId: whatsappData1.id,
+          latitude: -33.9250,
+          longitude: 18.4242,
+          thumbnailUri: "https://example.com/thumbnails/location_thumb.jpg",
+        },
+        {
+          tenantId: tenant.id,
+          whatsappDataId: whatsappData2.id,
+          latitude: -26.2042,
+          longitude: 28.0474,
+          thumbnailUri: "https://example.com/thumbnails/location_thumb2.jpg",
+        },
+      ],
+    });
 
-  // Create sample WhatsApp files
-  await prisma.whatsappFile.createMany({
-    data: [
-      {
-        tenantId: tenant.id,
-        whatsappDataId: whatsappData1.id,
-        fileName: "delivery_confirmation.pdf",
-        uri: "https://example.com/files/delivery_confirmation.pdf",
-        mimeType: "application/pdf",
-        sizeBytes: 245760,
-        checksum: "sha256:abc123def456",
-      },
-      {
-        tenantId: tenant.id,
-        whatsappDataId: whatsappData1.id,
-        fileName: "route_photo.jpg",
-        uri: "https://example.com/files/route_photo.jpg",
-        mimeType: "image/jpeg",
-        sizeBytes: 1024000,
-        checksum: "sha256:def456ghi789",
-      },
-    ],
-  });
+    console.log('✅ Created WhatsApp data');
 
-  // Create sample WhatsApp media
-  await prisma.whatsappMedia.createMany({
-    data: [
-      {
-        tenantId: tenant.id,
-        whatsappDataId: whatsappData2.id,
-        extension: "mp4",
-        uri: "https://example.com/media/delivery_video.mp4",
-        mimeType: "video/mp4",
-        sizeBytes: 5242880,
-        checksum: "sha256:ghi789jkl012",
-      },
-    ],
-  });
+    // Create audit entries
+    await prisma.manifestAudit.createMany({
+      data: [
+        {
+          tenantId: tenant.id,
+          manifestId: manifest1.id,
+          action: "create",
+          oldValues: "{}",
+          newValues: JSON.stringify({
+            trackingId: "TRK-001",
+            routeId: route1.id,
+            locationId: capeTownDepot?.id,
+          }),
+        },
+        {
+          tenantId: tenant.id,
+          manifestId: manifest1.id,
+          action: "location_update",
+          oldValues: JSON.stringify({ latitude: -33.92, longitude: 18.42 }),
+          newValues: JSON.stringify({ latitude: -34.0, longitude: 19.0 }),
+        },
+        {
+          tenantId: tenant.id,
+          manifestId: manifest2.id,
+          action: "create",
+          oldValues: "{}",
+          newValues: JSON.stringify({
+            trackingId: "TRK-002",
+            routeId: route2.id,
+            locationId: johannesburgHub?.id,
+          }),
+        },
+      ],
+    });
 
-  // Create sample WhatsApp locations
-  await prisma.whatsappLocation.createMany({
-    data: [
-      {
-        tenantId: tenant.id,
-        whatsappDataId: whatsappData1.id,
-        latitude: -33.9250,
-        longitude: 18.4242,
-        thumbnailUri: "https://example.com/thumbnails/location_thumb.jpg",
-      },
-      {
-        tenantId: tenant.id,
-        whatsappDataId: whatsappData2.id,
-        latitude: -26.2042,
-        longitude: 28.0474,
-        thumbnailUri: "https://example.com/thumbnails/location_thumb2.jpg",
-      },
-    ],
-  });
+    console.log('✅ Created audit entries');
 
-  console.log('✅ Created WhatsApp data');
+    console.log('🎉 Manifest Core seeding completed successfully!');
+  } catch (err) {
+    console.error('❌ Could not seed locations:', err);
+  }
 
-  // Create audit entries
-  await prisma.manifestAudit.createMany({
-    data: [
-      {
-        tenantId: tenant.id,
-        manifestId: manifest1.id,
-        action: "create",
-        oldValues: "{}",
-        newValues: JSON.stringify({
-          trackingId: "TRK-001",
-          routeId: route1.id,
-          locationId: location1.id,
-        }),
-      },
-      {
-        tenantId: tenant.id,
-        manifestId: manifest1.id,
-        action: "location_update",
-        oldValues: JSON.stringify({ latitude: -33.92, longitude: 18.42 }),
-        newValues: JSON.stringify({ latitude: -34.0, longitude: 19.0 }),
-      },
-      {
-        tenantId: tenant.id,
-        manifestId: manifest2.id,
-        action: "create",
-        oldValues: "{}",
-        newValues: JSON.stringify({
-          trackingId: "TRK-002",
-          routeId: route2.id,
-          locationId: location3.id,
-        }),
-      },
-    ],
-  });
+  // --- Logistics Officers Seeding ---
+  const officersFile = path.join(__dirname, '../docs/Logistics_Officers.txt');
+  if (fs.existsSync(officersFile)) {
+    const file = fs.readFileSync(officersFile, 'utf-8');
+    const rows = file.split('\n');
+    const header = rows[0].split(/\t/);
+    const idx = (col: string) => header.findIndex(h => h.trim().toLowerCase() === col.toLowerCase());
 
-  console.log('✅ Created audit entries');
+    const tenantMap: Record<string, { tenantKey: string, displayName: string }> = {
+      "ZAMBIA":   { tenantKey: 'tenant_cobra', displayName: 'Cobra' },
+      "ZIMBABWE": { tenantKey: 'tenant_delta', displayName: 'Delta' },
+      "TANZANIA": { tenantKey: 'tenant_tanzania', displayName: 'Tanzania' },
+      // Add more as needed
+    };
 
-  console.log('🎉 Manifest Core seeding completed successfully!');
+    const foundTenantKeys = new Set<string>();
+    for (let i = 1; i < rows.length; ++i) {
+      const row = rows[i].split(/\t/);
+      const country = row[idx('CountryOfOrigin')];
+      if (tenantMap[country]) foundTenantKeys.add(tenantMap[country].tenantKey);
+    }
+
+    const tenantKeyToId: Record<string, string> = {};
+    for (const tenantKey of Array.from(foundTenantKeys)) {
+      const info = Object.values(tenantMap).find(t => t.tenantKey === tenantKey);
+      const name = info?.displayName || tenantKey.replace('tenant_','');
+      const slug = tenantKey.replace('tenant_','').toLowerCase();
+      const tenant = await prisma.tenant.upsert({
+        where: { id: tenantKey },
+        update: {},
+        create: { id: tenantKey, name, slug, settings: '{}' },
+      });
+      tenantKeyToId[tenantKey] = tenant.id;
+    }
+
+    const officers: any[] = [];
+    for (let i = 1; i < rows.length; ++i) {
+      const row = rows[i].split(/\t/);
+      if (!row[idx('Name')] || !row[idx('CountryOfOrigin')]) continue;
+      const country = row[idx('CountryOfOrigin')];
+      const mapEntry = tenantMap[country];
+      const tenantKey = mapEntry?.tenantKey;
+      const mappedTenantId = tenantKey ? tenantKeyToId[tenantKey] : undefined;
+      if (!mappedTenantId) continue;
+
+      const pictureLoadedRaw = (row[idx('PictureLoaded')] ?? '').toString();
+      const normalized = pictureLoadedRaw.trim().toLowerCase();
+      const isActive = ['true', '1', 'yes', 'y'].includes(normalized);
+
+      officers.push({
+        tenantId: mappedTenantId,
+        name: row[idx('Name')],
+        role: "Officer",
+        email: null,
+        phone: row[idx('ContactNr')] || null,
+        isActive,
+      });
+    }
+
+    // Clear existing officers and reseed to correct flags
+    await prisma.logisticsOfficer.deleteMany({});
+
+    if (officers.length > 0) {
+      await prisma.logisticsOfficer.createMany({ data: officers });
+      console.log(`✅ Seeded ${officers.length} logistics officers.`);
+    } else {
+      console.log('ℹ️ No logistics officers to seed.');
+    }
+  } else {
+    console.warn('⚠️ Logistics officers file not found at', officersFile);
+  }
 }
 
 main()

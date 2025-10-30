@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_(No unreleased changes yet)_
+
+## [1.1.0] - 2025-10-30
+
+### Added
+- Contacts: Card/grid page using reusable POPIA components (`SensitiveDataField`, `PrivacyNotice`, `AuthDialog`)
+- Contacts: CRUD UI (Add/Edit/Delete) with reusable `ContactFormDialog`
+- Contacts: Country dropdown with flag in Add/Edit dialog (reusing countries data)
+- Contacts: Country dropdown search filter inside the menu for quick selection
+- Contacts: Country flags rendered on cards and in details modal
+- Contacts: Phone input with country dialing code prefix and international formatting on save
+
+- Align dev+prod schemas, add Contact/LogisticsOfficer/Country, normalize core fields & tables [Database Schema Alignment]
+### Changed
+- Sensitive fields: improved responsive wrapping in `SensitiveDataField` so long IDs/contacts always fit on cards (mobile-friendly)
+- Contacts: POPIA unlock behavior aligned to Drivers page (per-record unlock set + pending auth flow)
+
+### Added
+- Contacts: Card/grid page using reusable POPIA components (`SensitiveDataField`, `PrivacyNotice`, `AuthDialog`)
+- Contacts: CRUD UI (Add/Edit/Delete) with reusable `ContactFormDialog`
+- Contacts: Country dropdown with flag in Add/Edit dialog (reusing countries data)
+- Contacts: Country dropdown search filter inside the menu for quick selection
+- Contacts: Country flags rendered on cards and in details modal
+- Contacts: Phone input with country dialing code prefix and international formatting on save
+- Logistics Officers: Prisma model and import pipeline from `docs/Logistics_Officers.txt` (see `docs/LOGISTICS_OFFICERS_IMPORT.md`)
+- tRPC `logisticsOfficers` router with search, tenant/country filters, active/inactive filter, pagination, and total counts
+- Card-based Logistics Officers UI with modal detail, POPIA-aware masking via `SensitiveDataField` and `PrivacyNotice`
+- Dynamic filter options sourced from `tenants.getAll` and `countries.list`
+
+### Changed
+- Officers dashboard wired to live data; replaced placeholders with full data flow (server pagination + filters)
+- Sensitive fields: improved responsive wrapping in `SensitiveDataField` so long IDs/contacts always fit on cards (mobile-friendly)
+- Contacts: POPIA unlock behavior aligned to Drivers page (per-record unlock set + pending auth flow)
+
+### Fixed
+- Seed: robust, case-insensitive parsing of `PictureLoaded` → `isActive`; re-seeded officers with correct status
+- Officers search input no longer triggers errors or unwanted submits; Enter key suppressed
+
 ### Fixed
 
 - **TypeScript Seed File Errors** - Fixed TypeScript errors in prisma/seed.ts for Location model creation by removing @default("") from Location.name field to make it required, resolving LocationUncheckedCreateInput type issues
@@ -48,6 +86,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **API Filter Support** - getDisplayDashboard endpoint now accepts statusFilters, highPriorityOnly, and maxResults parameters
 
 - Align dev and production Prisma schemas - Synchronized all model definitions to eliminate database-related errors on Vercel - Fixed passwordHash null handling in auth.ts for production schema compatibility - Aligned Client, Driver, Vehicle, Location models between dev and production - Added missing models (VehicleCombination, FuelEntry, UserProfile) to production schema - Removed duplicate Offense and InvoiceState models - Ensured DATABASE_URL environment variable mapping runs before Prisma initialization
+
+- Countries Add modal: now requires official country pick via dropdown, autofills all fields; Add button avoids mobile bottom nav
 ### Changed
 
 - **Production Schema Migration** - Updated schema-prod.prisma with proper relations for Country and ManifestLocation models to support production deployments
@@ -64,6 +104,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Manifest Query Optimization** - Updated getDisplayDashboard to support configurable filtering and result limiting
 - **Dashboard Configuration Interface** - Added checkbox controls for status filtering and toggle controls for priority mode
 
+- Countries: removed edit functionality - countries can only be added from official list or deleted for data integrity
+- Country cards: improved long-name wrapping, never splits words; auto-adjust font size for better fit; redundant values hidden
 ### Fixed
 
 - **Fullscreen Navigation Overlap** - Fixed issue where top navigation and sidebar covered dashboard content in fullscreen mode
