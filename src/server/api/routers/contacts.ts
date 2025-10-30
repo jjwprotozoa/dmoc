@@ -2,6 +2,7 @@
 // Contacts router: tenant-scoped CRUD with E.164 phone storage
 
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { createTRPCRouter, publicProcedure } from '../trpc';
 import { TRPCError } from '@trpc/server';
 
@@ -27,17 +28,17 @@ export const contactsRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const where = {
+      const where: Prisma.ContactWhereInput = {
         tenantId: input.tenantId,
         OR: input.search
           ? [
-              { name: { contains: input.search, mode: 'insensitive' } },
+              { name: { contains: input.search } },
               { contactNr: { contains: input.search } },
-              { idNumber: { contains: input.search, mode: 'insensitive' } },
-              { countryOfOrigin: { contains: input.search, mode: 'insensitive' } },
+              { idNumber: { contains: input.search } },
+              { countryOfOrigin: { contains: input.search } },
             ]
           : undefined,
-      } as const;
+      };
 
       const [items, total] = await Promise.all([
         ctx.db.contact.findMany({ where, take: input.take, skip: input.skip, orderBy: { updatedAt: 'desc' } }),
