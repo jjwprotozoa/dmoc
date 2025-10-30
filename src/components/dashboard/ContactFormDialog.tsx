@@ -18,16 +18,24 @@ interface ContactFormDialogProps {
   onSave: (contact: Omit<Contact, 'id' | 'dateTimeAdded' | 'displayValue'> & Partial<Pick<Contact, 'id' | 'dateTimeAdded' | 'displayValue'>>) => void;
 }
 
-const initialState = {
+type ContactFormState = {
+  name: string;
+  contactNr: string;
+  idNumber: string;
+  pictureLoaded: boolean;
+  countryOfOrigin: string;
+};
+
+const initialState: ContactFormState = {
   name: '',
   contactNr: '',
   idNumber: '',
   pictureLoaded: false,
   countryOfOrigin: 'UNKNOWN',
-} as const;
+};
 
 export default function ContactFormDialog({ open, onOpenChange, initial, onSave }: ContactFormDialogProps) {
-  const [form, setForm] = useState({ ...initialState });
+  const [form, setForm] = useState<ContactFormState>({ ...initialState });
   const [error, setError] = useState('');
   const [countrySearch, setCountrySearch] = useState('');
   const [phoneLocal, setPhoneLocal] = useState(''); // national digits without country code

@@ -10,7 +10,7 @@ import { AuthDialog } from '@/components/ui/auth-dialog';
 import { Button } from '@/components/ui/button';
 import ContactFormDialog from './ContactFormDialog';
 import countriesData from '@/data/countries.full.json';
-import { User, CheckCircle, XCircle, Globe, Pencil, Trash2, Plus } from 'lucide-react';
+import { User, CheckCircle, XCircle, Pencil, Trash2, Plus } from 'lucide-react';
 
 export interface Contact {
   id: number;
@@ -104,9 +104,9 @@ export default function ContactCardGrid({ contacts, onEdit, onDelete, onCreate }
               <div className="flex w-full items-start justify-between">
                 <div className="w-14 h-14 rounded-full bg-gray-200 flex items-center justify-center mb-2">
                   {contact.pictureLoaded ? (
-                    <CheckCircle className="w-7 h-7 text-green-500" title="Picture Loaded" />
+                    <CheckCircle className="w-7 h-7 text-green-500" />
                   ) : (
-                    <User className="w-7 h-7 text-gray-400" title="No Photo" />
+                    <User className="w-7 h-7 text-gray-400" />
                   )}
                 </div>
                 <div className="flex gap-2">
@@ -169,9 +169,9 @@ export default function ContactCardGrid({ contacts, onEdit, onDelete, onCreate }
               </DialogHeader>
               <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center mb-4 mx-auto">
                 {selectedContact.pictureLoaded ? (
-                  <CheckCircle className="w-11 h-11 text-green-500" title="Picture Loaded" />
+                  <CheckCircle className="w-11 h-11 text-green-500" />
                 ) : (
-                  <XCircle className="w-11 h-11 text-gray-400" title="No Photo" />
+                  <XCircle className="w-11 h-11 text-gray-400" />
                 )}
               </div>
               <div className="space-y-2 mb-3">

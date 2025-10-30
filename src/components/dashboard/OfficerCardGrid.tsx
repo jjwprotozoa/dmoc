@@ -26,6 +26,7 @@ interface OfficerCardGridProps {
 // TODO: Replace with real role/current user context
 const mockRole = 'manager';
 const privacyConfig = {
+  userRole: mockRole,
   canViewSensitive: ['admin', 'manager'].includes(mockRole),
   unlockedItems: new Set<number>(), // Expansion: allow unlocking record-by-record
 };

@@ -40,17 +40,17 @@ export const contactsRouter = createTRPCRouter({
       } as const;
 
       const [items, total] = await Promise.all([
-        ctx.prisma.contact.findMany({ where, take: input.take, skip: input.skip, orderBy: { updatedAt: 'desc' } }),
-        ctx.prisma.contact.count({ where }),
+        ctx.db.contact.findMany({ where, take: input.take, skip: input.skip, orderBy: { updatedAt: 'desc' } }),
+        ctx.db.contact.count({ where }),
       ]);
       return { items, total };
     }),
 
   create: publicProcedure.input(baseContact).mutation(async ({ ctx, input }) => {
     try {
-      const contact = await ctx.prisma.contact.create({ data: input });
+      const contact = await ctx.db.contact.create({ data: input });
       return contact;
-    } catch (e) {
+    } catch {
       throw new TRPCError({ code: 'BAD_REQUEST', message: 'Failed to create contact' });
     }
   }),
@@ -61,17 +61,17 @@ export const contactsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { id, ...data } = input;
-      const existing = await ctx.prisma.contact.findFirst({ where: { id, tenantId: data.tenantId } });
+      const existing = await ctx.db.contact.findFirst({ where: { id, tenantId: data.tenantId } });
       if (!existing) throw new TRPCError({ code: 'NOT_FOUND', message: 'Contact not found' });
-      return ctx.prisma.contact.update({ where: { id }, data });
+      return ctx.db.contact.update({ where: { id }, data });
     }),
 
   delete: publicProcedure
     .input(z.object({ id: z.string().min(1), tenantId: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      const existing = await ctx.prisma.contact.findFirst({ where: { id: input.id, tenantId: input.tenantId } });
+      const existing = await ctx.db.contact.findFirst({ where: { id: input.id, tenantId: input.tenantId } });
       if (!existing) throw new TRPCError({ code: 'NOT_FOUND', message: 'Contact not found' });
-      await ctx.prisma.contact.delete({ where: { id: input.id } });
+      await ctx.db.contact.delete({ where: { id: input.id } });
       return { ok: true };
     }),
 });
