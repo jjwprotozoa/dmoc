@@ -8,7 +8,7 @@ export interface PrivacyConfig {
   userRole: string;
   canViewSensitive: boolean;
   isAuthenticated?: boolean;
-  unlockedItems?: Set<number>;
+  unlockedItems?: Set<string | number>;
 }
 
 export interface MaskedData {
@@ -23,7 +23,7 @@ export interface MaskedData {
 export function maskContactNumber(
   contactNumber: string,
   config: PrivacyConfig,
-  itemId?: number
+  itemId?: string | number
 ): MaskedData {
   if (!contactNumber || contactNumber.length === 0) {
     return { display: 'N/A', masked: false };
@@ -56,7 +56,7 @@ export function maskContactNumber(
 export function maskIdNumber(
   idNumber: string,
   config: PrivacyConfig,
-  itemId?: number
+  itemId?: string | number
 ): string {
   const isUnlocked = itemId ? config.unlockedItems?.has(itemId) : false;
   if (config.canViewSensitive || isUnlocked) return idNumber;
@@ -73,7 +73,7 @@ export function maskIdNumber(
 export function maskEmail(
   email: string,
   config: PrivacyConfig,
-  itemId?: number
+  itemId?: string | number
 ): MaskedData {
   if (!email || email.length === 0) {
     return { display: 'N/A', masked: false };
@@ -107,7 +107,7 @@ export function maskEmail(
 export function maskAddress(
   address: string,
   config: PrivacyConfig,
-  itemId?: number
+  itemId?: string | number
 ): string {
   if (!address || address.length === 0) {
     return 'No address';
@@ -152,7 +152,7 @@ export function getPrivacyNotice(userRole: string): string {
  */
 export function usePrivacyConfig(
   userRole: string,
-  unlockedItems: Set<number> = new Set()
+  unlockedItems: Set<string | number> = new Set()
 ) {
   return {
     userRole,

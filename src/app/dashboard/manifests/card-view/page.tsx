@@ -133,6 +133,14 @@ export default function ManifestsCardViewPage() {
   });
 
   const manifests = data?.items || [];
+  
+  // Debug logging
+  console.log('🔍 Manifests query:', { 
+    isLoading, 
+    error: error?.message, 
+    count: manifests.length,
+    total: data?.total 
+  });
 
   const handleFiltersChange = (newFilters: FilterState) => {
     setFilters(newFilters);

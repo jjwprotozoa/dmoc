@@ -472,7 +472,7 @@ export default function ClientsCardViewPage() {
   const [dateRangeFilter, setDateRangeFilter] = useState<string>('All Time');
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
-  const [unlockedClients, setUnlockedClients] = useState<Set<number>>(
+  const [unlockedClients, setUnlockedClients] = useState<Set<string | number>>(
     new Set()
   );
 
@@ -587,7 +587,7 @@ export default function ClientsCardViewPage() {
     }
   };
 
-  const handleUnlockClient = (clientId: number) => {
+  const handleUnlockClient = (clientId: string | number) => {
     if (canViewSensitive) {
       // Admin/manager can always unlock
       setUnlockedClients((prev) => new Set([...prev, clientId]));

@@ -1,14 +1,59 @@
 // prisma/seed.ts
+// Comprehensive data import from .txt files for all models
 import { PrismaClient } from '@prisma/client';
 import fs from 'fs';
 import path from 'path';
 
 const prisma = new PrismaClient();
 
+// Helper to parse tab-separated values
+function parseTSV(content: string): { headers: string[]; rows: string[][] } {
+  const lines = content
+    .trim()
+    .split('\n')
+    .filter((line) => line.trim());
+  if (lines.length === 0) return { headers: [], rows: [] };
+
+  const headers = lines[0]
+    .split('\t')
+    .map((h) => h.trim())
+    .filter((h) => h !== '');
+  const rows = lines.slice(1).map((line) => {
+    const cells = line.split('\t').map((cell) => cell.trim());
+    // Remove leading empty cell if present (files start with tab)
+    return cells[0] === '' ? cells.slice(1) : cells;
+  });
+
+  return { headers, rows };
+}
+
+// Helper to parse date strings (format: "M/D/YYYY H:MM AM/PM")
+function parseDate(dateStr: string | undefined | null): Date | null {
+  if (!dateStr || dateStr.trim() === '' || dateStr === '-1') return null;
+  try {
+    const date = new Date(dateStr);
+    return isNaN(date.getTime()) ? null : date;
+  } catch {
+    return null;
+  }
+}
+
+// Helper to parse boolean from string
+function parseBoolean(val: string | undefined | null): boolean {
+  if (!val) return false;
+  const lower = val.toLowerCase().trim();
+  return lower === 'true' || lower === '1' || lower === 'yes';
+}
+
+// Helper to parse integer
+function parseIntSafe(val: string | undefined | null): number | null {
+  if (!val || val.trim() === '' || val === '-1') return null;
+  const parsed = parseInt(val, 10);
+  return isNaN(parsed) ? null : parsed;
+}
+
 async function main() {
-  // Diagnostic: print prisma client keys to verify countries model accessor
-  console.log('Prisma client models:', Object.keys(prisma));
-  console.log('🌱 Starting database seed...');
+  console.log('🌱 Starting comprehensive database seed from .txt files...');
 
   // Create a default tenant
   const tenant = await prisma.tenant.upsert({
@@ -29,1117 +74,431 @@ async function main() {
     },
   });
 
-  console.log('✅ Created tenant:', tenant.name);
+  console.log('✅ Created/verified tenant:', tenant.name);
+  const tenantId = tenant.id;
 
-  // Create clients from mock data
-  const clients = [
-    {
-      companyId: 3103,
-      name: 'ACCESS',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'ACCESS',
-    },
-    {
-      companyId: 3881,
-      name: 'AFRICA WAKAWAKA',
-      address: 'TANZANIA',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'AFRICA WAKAWAKA',
-    },
-    {
-      companyId: 3300,
-      name: 'AFRICLAN',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'AFRICLAN',
-    },
-    {
-      companyId: 4087,
-      name: 'CML / NYATI MUFULIRA TO DURBAN',
-      address: 'CML / Nyati Mufulira to Durban',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'CML / NYATI MUFULIRA TO [',
-    },
-    {
-      companyId: 3725,
-      name: 'DELTA',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'DELTA',
-    },
-    {
-      companyId: 3726,
-      name: 'DELTA FORCE / ZERODEGREES',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'DELTA FORCE / ZERODEGREES',
-    },
-    {
-      companyId: 3727,
-      name: 'DELTA PUMA RISK',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'DELTA PUMA RISK',
-    },
-    {
-      companyId: 3728,
-      name: 'DELTA ESCORTS/CML KANSANSHI-DAR',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'DELTA ESCORTS/CML KANSANSHI-DAR',
-    },
-    {
-      companyId: 3729,
-      name: 'DELTA/POLYTRA',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'DELTA/POLYTRA',
-    },
-    {
-      companyId: 3730,
-      name: 'GREENDOOR',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'GREENDOOR',
-    },
-    {
-      companyId: 3731,
-      name: 'INARA',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'INARA',
-    },
-    {
-      companyId: 3732,
-      name: 'INARA (LIBERTY)',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'INARA (LIBERTY)',
-    },
-    {
-      companyId: 3733,
-      name: 'INARA MOXICO',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'INARA MOXICO',
-    },
-    {
-      companyId: 3734,
-      name: 'KOBRACLIENT2',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'KOBRACLIENT2',
-    },
-    {
-      companyId: 3735,
-      name: 'LINK AFRICA',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'LINK AFRICA',
-    },
-    {
-      companyId: 3736,
-      name: 'MYSTICAL',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'MYSTICAL',
-    },
-    {
-      companyId: 3737,
-      name: 'RELOAD ADD',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD ADD',
-    },
-    {
-      companyId: 3738,
-      name: 'RELOAD CITIC',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD CITIC',
-    },
-    {
-      companyId: 3739,
-      name: 'RELOAD CNMC/IXMTRACKING',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD CNMC/IXMTRACKING',
-    },
-    {
-      companyId: 3740,
-      name: 'RELOAD DELTA ASK',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD DELTA ASK',
-    },
-    {
-      companyId: 3741,
-      name: 'RELOAD KABWE/GRB',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD KABWE/GRB',
-    },
-    {
-      companyId: 3742,
-      name: 'RELOAD LCS',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD LCS',
-    },
-    {
-      companyId: 3743,
-      name: 'RELOAD TFC ASK',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD TFC ASK',
-    },
-    {
-      companyId: 3744,
-      name: 'RELOAD TFC HMC',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD TFC HMC',
-    },
-    {
-      companyId: 3745,
-      name: 'RELOAD TFC OCTAGON/RLD-CMS/KCM',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD TFC OCTAGON/RLD-CMS/KCM',
-    },
-    {
-      companyId: 3746,
-      name: 'RELOAD TFC RGT',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD TFC RGT',
-    },
-    {
-      companyId: 3747,
-      name: 'RELOAD TRAFIGURA',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD TRAFIGURA',
-    },
-    {
-      companyId: 3748,
-      name: 'RELOAD/DELTA LONSHI TRACKING',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD/DELTA LONSHI TRACKING',
-    },
-    {
-      companyId: 3749,
-      name: 'RELOAD/DELTA/TFC/MRI (ZAM_MZ)',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD/DELTA/TFC/MRI (ZAM_MZ)',
-    },
-    {
-      companyId: 3750,
-      name: 'RELOAD/MALMOZA/DELTA - TFC',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD/MALMOZA/DELTA - TFC',
-    },
-    {
-      companyId: 3751,
-      name: 'RELOAD/ZOPCO/DELTA BLISTERS',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD/ZOPCO/DELTA BLISTERS',
-    },
-    {
-      companyId: 3752,
-      name: 'RELOAD/ZOPCO/DELTA CATHODES',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RELOAD/ZOPCO/DELTA CATHODES',
-    },
-    {
-      companyId: 3753,
-      name: 'RL/DELTA/ZAM - TN/BBR/GRB',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RL/DELTA/ZAM - TN/BBR/GRB',
-    },
-    {
-      companyId: 3754,
-      name: 'RL/DELTA/TFC NDOLA TO DAR',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'RL/DELTA/TFC NDOLA TO DAR',
-    },
-    {
-      companyId: 3755,
-      name: 'TEST CLIENT',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'TEST CLIENT',
-    },
-    {
-      companyId: 3756,
-      name: 'TEST CLIENT 3',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'TEST CLIENT 3',
-    },
-    {
-      companyId: 3757,
-      name: 'TEST CLIENT2',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'TEST CLIENT2',
-    },
-    {
-      companyId: 3758,
-      name: 'TESTING CLIENT',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'TESTING CLIENT',
-    },
-    {
-      companyId: 3759,
-      name: 'ZALAWI ZAMBIA',
-      address: '',
-      entityTypeDescription: 'CLIENT',
-      displayValue: 'ZALAWI ZAMBIA',
-    },
-  ];
+  // ========== 1. Import Countries ==========
+  console.log('\n📊 Importing Countries...');
+  const countriesContent = fs.readFileSync(
+    path.join(process.cwd(), 'data', 'countries.txt'),
+    'utf-8'
+  );
+  const countriesData = parseTSV(countriesContent);
+  const countryMap = new Map<
+    number,
+    { id: number; name: string; abbreviation: string; displayValue: string }
+  >();
 
-  for (const clientData of clients) {
-    await prisma.client.upsert({
-      where: { companyId: clientData.companyId },
-      update: {},
-      create: {
-        tenantId: tenant.id,
-        ...clientData,
-      },
-    });
-  }
+  for (const row of countriesData.rows) {
+    // Column order: CountryID, Name, Abbreviation, DateTimeAdded, ID, DisplayValue
+    const countryId = parseIntSafe(row[0]); // CountryID
+    if (!countryId) continue;
 
-  console.log('✅ Created', clients.length, 'clients');
-
-  // Create drivers from mock data
-  const drivers = [
-    {
-      driverId: 21677,
-      name: 'LONGINO TOLOT',
-      contactNr: '255755340307',
-      idNumber: 'TAE719089',
-      pictureLoaded: false,
-      countryOfOrigin: 'TANZANIA',
-      displayValue: 'LONGINO TOLOT(TZ)',
-    },
-    {
-      driverId: 19280,
-      name: 'OMARY SAID OM',
-      contactNr: '0973143403',
-      idNumber: '1459820',
-      pictureLoaded: false,
-      countryOfOrigin: 'TANZANIA',
-      displayValue: 'OMARY SAID OM(TZ)',
-    },
-    {
-      driverId: 10797,
-      name: 'SALANJE MWADI',
-      contactNr: '',
-      idNumber: 'TAE049377',
-      pictureLoaded: false,
-      countryOfOrigin: 'TANZANIA',
-      displayValue: 'SALANJE MWADI(TZ)',
-    },
-    {
-      driverId: 19579,
-      name: 'ABDALLAH MOH',
-      contactNr: '250689078310',
-      idNumber: 'TAE684555',
-      pictureLoaded: true,
-      countryOfOrigin: 'ZAMBIA',
-      displayValue: 'ABDALLAH MOH(ZM)',
-    },
-    {
-      driverId: 18432,
-      name: 'JOHN DOE',
-      contactNr: '1234567890',
-      idNumber: 'US123456',
-      pictureLoaded: true,
-      countryOfOrigin: 'UNKNOWN',
-      displayValue: 'JOHN DOE(US)',
-    },
-    {
-      driverId: 34751,
-      name: 'DALE JONES MWANACHAMPA',
-      contactNr: '260977123456',
-      idNumber: 'ZM123456',
-      pictureLoaded: false,
-      countryOfOrigin: 'ZAMBIA',
-      displayValue: 'DALE JONES MWANACHAMPA(ZM)',
-    },
-    {
-      driverId: 15532,
-      name: 'DAMAS KASIAN MISUNZA',
-      contactNr: '255123456789',
-      idNumber: 'TZ789012',
-      pictureLoaded: true,
-      countryOfOrigin: 'TANZANIA',
-      displayValue: 'DAMAS KASIAN MISUNZA(TZ)',
-    },
-    {
-      driverId: 22362,
-      name: 'DANIEL AMOS',
-      contactNr: '255987654321',
-      idNumber: 'TZ345678',
-      pictureLoaded: false,
-      countryOfOrigin: 'TANZANIA',
-      displayValue: 'DANIEL AMOS(TZ)',
-    },
-  ];
-
-  for (const driverData of drivers) {
-    await prisma.driver.upsert({
-      where: { driverId: driverData.driverId },
-      update: {},
-      create: {
-        tenantId: tenant.id,
-        ...driverData,
-      },
-    });
-  }
-
-  console.log('✅ Created', drivers.length, 'drivers');
-
-  // Create vehicles from mock data
-  const vehicles = [
-    {
-      vehicleId: 4319,
-      vehicleTypeId: 8,
-      entityTypeDescription: 'HORSE',
-      registration: '0 (TBA)',
-      color: '',
-      countryOfOrigin: 'UNKNOWN',
-      displayValue: '0 (TBA)',
-      mileage: 125000,
-      lastServiceDate: new Date('2024-01-15'),
-      nextServiceDue: new Date('2024-04-15'),
-      status: 'Active',
-      currentDriver: 'John Doe',
-      location: 'Johannesburg, SA',
-      lastSeen: '2 minutes ago',
-    },
-    {
-      vehicleId: 23483,
-      vehicleTypeId: 8,
-      entityTypeDescription: 'HORSE',
-      registration: '0057AA21 (DRC)',
-      color: '',
-      countryOfOrigin: 'CONGO (DRC)',
-      displayValue: '0057AA21 (DRC)',
-      mileage: 89000,
-      lastServiceDate: new Date('2024-02-10'),
-      nextServiceDue: new Date('2024-05-10'),
-      status: 'In Transit',
-      currentDriver: 'Jane Smith',
-      location: 'Cape Town, SA',
-      lastSeen: '5 minutes ago',
-    },
-    {
-      vehicleId: 23007,
-      vehicleTypeId: 10,
-      entityTypeDescription: 'TRAILER',
-      registration: '0193AE10 (DRC)',
-      color: '',
-      countryOfOrigin: 'CONGO (DRC)',
-      displayValue: '0193AE10 (DRC)',
-      mileage: 67000,
-      lastServiceDate: new Date('2024-01-20'),
-      nextServiceDue: new Date('2024-04-20'),
-      status: 'Active',
-      currentDriver: 'Mike Johnson',
-      location: 'Durban, SA',
-      lastSeen: '1 hour ago',
-    },
-    {
-      vehicleId: 15298,
-      vehicleTypeId: 8,
-      entityTypeDescription: 'HORSE',
-      registration: '0249AB14 (TBA)',
-      color: '',
-      countryOfOrigin: 'UNKNOWN',
-      displayValue: '0249AB14 (TBA)',
-      mileage: 145000,
-      lastServiceDate: new Date('2024-02-05'),
-      nextServiceDue: new Date('2024-05-05'),
-      status: 'Maintenance',
-      currentDriver: 'Sarah Wilson',
-      location: 'Pretoria, SA',
-      lastSeen: '3 hours ago',
-    },
-    {
-      vehicleId: 21873,
-      vehicleTypeId: 8,
-      entityTypeDescription: 'HORSE',
-      registration: '0360AQ05 (DRC)',
-      color: '',
-      countryOfOrigin: 'CONGO (DRC)',
-      displayValue: '0360AQ05 (DRC)',
-      mileage: 98000,
-      lastServiceDate: new Date('2024-01-30'),
-      nextServiceDue: new Date('2024-04-30'),
-      status: 'Active',
-      currentDriver: 'David Brown',
-      location: 'Port Elizabeth, SA',
-      lastSeen: '10 minutes ago',
-    },
-    {
-      vehicleId: 22962,
-      vehicleTypeId: 10,
-      entityTypeDescription: 'TRAILER',
-      registration: '0362AQ05 (DRC)',
-      color: '',
-      countryOfOrigin: 'CONGO (DRC)',
-      displayValue: '0362AQ05 (DRC)',
-      mileage: 45000,
-      lastServiceDate: new Date('2024-02-15'),
-      nextServiceDue: new Date('2024-05-15'),
-      status: 'Active',
-      currentDriver: 'Lisa Anderson',
-      location: 'Bloemfontein, SA',
-      lastSeen: '30 minutes ago',
-    },
-    {
-      vehicleId: 23056,
-      vehicleTypeId: 8,
-      entityTypeDescription: 'HORSE',
-      registration: '0365AQ05 (DRC)',
-      color: '',
-      countryOfOrigin: 'CONGO (DRC)',
-      displayValue: '0365AQ05 (DRC)',
-      mileage: 112000,
-      lastServiceDate: new Date('2024-01-25'),
-      nextServiceDue: new Date('2024-04-25'),
-      status: 'In Transit',
-      currentDriver: 'Robert Taylor',
-      location: 'East London, SA',
-      lastSeen: '15 minutes ago',
-    },
-    {
-      vehicleId: 29056,
-      vehicleTypeId: 8,
-      entityTypeDescription: 'HORSE',
-      registration: '0777AS01 (ZB)',
-      color: '',
-      countryOfOrigin: 'ZIMBABWE',
-      displayValue: '0777AS01 (ZB)',
-      mileage: 76000,
-      lastServiceDate: new Date('2024-02-20'),
-      nextServiceDue: new Date('2024-05-20'),
-      status: 'Active',
-      currentDriver: 'Emma Davis',
-      location: 'Nelspruit, SA',
-      lastSeen: '5 minutes ago',
-    },
-  ];
-
-  for (const vehicleData of vehicles) {
-    await prisma.vehicle.upsert({
-      where: { vehicleId: vehicleData.vehicleId },
-      update: {},
-      create: {
-        tenantId: tenant.id,
-        ...vehicleData,
-      },
-    });
-  }
-
-  console.log('✅ Created', vehicles.length, 'vehicles');
-
-  // Create fuel entries for horses
-  const fuelEntries = [
-    {
-      vehicleId: 4319,
-      date: new Date('2024-03-15'),
-      amount: 85,
-      cost: 1275,
-      driver: 'John Doe',
-      odometerReading: 125000,
-      location: 'Johannesburg, SA',
-    },
-    {
-      vehicleId: 23483,
-      date: new Date('2024-03-12'),
-      amount: 95,
-      cost: 1425,
-      driver: 'Jane Smith',
-      odometerReading: 89000,
-      location: 'Cape Town, SA',
-    },
-    {
-      vehicleId: 15298,
-      date: new Date('2024-03-10'),
-      amount: 78,
-      cost: 1170,
-      driver: 'Sarah Wilson',
-      odometerReading: 145000,
-      location: 'Pretoria, SA',
-    },
-    {
-      vehicleId: 21873,
-      date: new Date('2024-03-08'),
-      amount: 88,
-      cost: 1320,
-      driver: 'David Brown',
-      odometerReading: 98000,
-      location: 'Port Elizabeth, SA',
-    },
-    {
-      vehicleId: 23056,
-      date: new Date('2024-03-05'),
-      amount: 92,
-      cost: 1380,
-      driver: 'Robert Taylor',
-      odometerReading: 112000,
-      location: 'East London, SA',
-    },
-    {
-      vehicleId: 29056,
-      date: new Date('2024-03-14'),
-      amount: 76,
-      cost: 1140,
-      driver: 'Emma Davis',
-      odometerReading: 76000,
-      location: 'Nelspruit, SA',
-    },
-  ];
-
-  for (const fuelData of fuelEntries) {
-    const vehicle = await prisma.vehicle.findUnique({
-      where: { vehicleId: fuelData.vehicleId },
-    });
-
-    if (vehicle) {
-      await prisma.fuelEntry.create({
-        data: {
-          vehicleId: vehicle.id,
-          date: fuelData.date,
-          amount: fuelData.amount,
-          cost: fuelData.cost,
-          driver: fuelData.driver,
-          odometerReading: fuelData.odometerReading,
-          location: fuelData.location,
-        },
-      });
-    }
-  }
-
-  console.log('✅ Created', fuelEntries.length, 'fuel entries');
-
-  // Create vehicle combinations
-  const vehicle4319 = await prisma.vehicle.findUnique({
-    where: { vehicleId: 4319 },
-  });
-  const vehicle23007 = await prisma.vehicle.findUnique({
-    where: { vehicleId: 23007 },
-  });
-  const vehicle23483 = await prisma.vehicle.findUnique({
-    where: { vehicleId: 23483 },
-  });
-  const vehicle22962 = await prisma.vehicle.findUnique({
-    where: { vehicleId: 22962 },
-  });
-  const vehicle23056 = await prisma.vehicle.findUnique({
-    where: { vehicleId: 23056 },
-  });
-  const vehicle21873 = await prisma.vehicle.findUnique({
-    where: { vehicleId: 21873 },
-  });
-  const vehicle15298 = await prisma.vehicle.findUnique({
-    where: { vehicleId: 15298 },
-  });
-
-  // VehicleCombination models not available in current schema
-  // TODO: Add VehicleCombination model to schema if needed
-  /*
-  if (vehicle4319 && vehicle23007) {
-    const combo1 = await prisma.vehicleCombination.create({
-      data: {
-        tenantId: tenant.id,
-        horseId: vehicle4319.id,
-        driver: 'John Doe',
-        status: 'In Transit',
-        startDate: new Date('2024-03-15'),
-        cargo: 'Copper Ore',
-        route: 'Johannesburg → Cape Town',
-      },
-    });
-
-    await prisma.vehicleCombinationTrailer.create({
-      data: {
-        combinationId: combo1.id,
-        trailerId: vehicle23007.id,
-      },
-    });
-  }
-
-  if (vehicle23483 && vehicle22962 && vehicle23056) {
-    const combo2 = await prisma.vehicleCombination.create({
-      data: {
-        tenantId: tenant.id,
-        horseId: vehicle23483.id,
-        driver: 'Jane Smith',
-        status: 'Loading',
-        startDate: new Date('2024-03-16'),
-        cargo: 'Agricultural Products',
-        route: 'Cape Town → Durban',
-      },
-    });
-
-    await prisma.vehicleCombinationTrailer.createMany({
-      data: [
-        { combinationId: combo2.id, trailerId: vehicle22962.id },
-        { combinationId: combo2.id, trailerId: vehicle23056.id },
-      ],
-    });
-  }
-
-  if (vehicle21873 && vehicle15298) {
-    const combo3 = await prisma.vehicleCombination.create({
-      data: {
-        tenantId: tenant.id,
-        horseId: vehicle21873.id,
-        driver: 'David Brown',
-        status: 'Active',
-        startDate: new Date('2024-03-14'),
-        cargo: 'General Freight',
-        route: 'Port Elizabeth → Bloemfontein',
-      },
-    });
-
-    await prisma.vehicleCombinationTrailer.create({
-      data: {
-        combinationId: combo3.id,
-        trailerId: vehicle15298.id,
-      },
-    });
-  }
-  */
-
-  console.log('✅ Skipped vehicle combinations (model not in schema)');
-
-  // Create a default admin user
-  const adminUser = await prisma.user.upsert({
-    where: { email: 'admin@digiwize.com' },
-    update: {},
-    create: {
-      tenantId: tenant.id,
-      email: 'admin@digiwize.com',
-      passwordHash:
-        '$2b$10$e/YMqCHUJXoCqEeN.Ei6N.1G8vBm/KTX/6g9A89J0y6rimfh1fRRG', // 'admin123'
-      role: 'ADMIN',
-    },
-  });
-
-  console.log('✅ Created admin user:', adminUser.email);
-
-  // Create Manifest Core seed data
-  console.log('🌱 Creating Manifest Core seed data...');
-
-  // Create user roles
-  const adminRole = await prisma.userRole.upsert({
-    where: { code: "ADMIN" },
-    update: {},
-    create: { name: "Admin", code: "ADMIN" },
-  });
-
-  const opsRole = await prisma.userRole.upsert({
-    where: { code: "OPS" },
-    update: {},
-    create: { name: "Operations", code: "OPS" },
-  });
-
-  console.log('✅ Created user roles');
-
-  // Create invoice states
-  const newState = await prisma.invoiceState.upsert({
-    where: { code: "NEW" },
-    update: {},
-    create: { name: "New", code: "NEW" },
-  });
-
-  const sentState = await prisma.invoiceState.upsert({
-    where: { code: "SENT" },
-    update: {},
-    create: { name: "Sent", code: "SENT" },
-  });
-
-  const paidState = await prisma.invoiceState.upsert({
-    where: { code: "PAID" },
-    update: {},
-    create: { name: "Paid", code: "PAID" },
-  });
-
-  console.log('✅ Created invoice states');
-
-  // Create routes
-  const route1 = await prisma.route.upsert({
-    where: { id: "route-1" },
-    update: { tenantId: tenant.id, name: "Cape Town → Durban" },
-    create: { tenantId: tenant.id, name: "Cape Town → Durban" },
-  });
-
-  const route2 = await prisma.route.upsert({
-    where: { id: "route-2" },
-    update: { tenantId: tenant.id, name: "Johannesburg → Cape Town" },
-    create: { tenantId: tenant.id, name: "Johannesburg → Cape Town" },
-  });
-
-  console.log('✅ Created routes');
-
-  // Seed countries (using correct model name, robust error handling)
-  try {
-    const countries = [
-      { id: 3, name: 'BOTSWANA', abbreviation: 'BW', flag: '🇧🇼', displayValue: 'BOTSWANA' },
-      { id: 6, name: 'CONGO (DRC)', abbreviation: 'DRC', flag: '🇨🇩', displayValue: 'CONGO (DRC)' },
-      { id: 12, name: 'KENYA', abbreviation: 'KE', flag: '🇰🇪', displayValue: 'KENYA' },
-      { id: 10, name: 'MALAWI', abbreviation: 'MW', flag: '🇲🇼', displayValue: 'MALAWI' },
-      { id: 7, name: 'MOZAMBIQUE', abbreviation: 'MZ', flag: '🇲🇿', displayValue: 'MOZAMBIQUE' },
-      { id: 4, name: 'NAMIBIA', abbreviation: 'NM', flag: '🇳🇦', displayValue: 'NAMIBIA' },
-      { id: 11, name: 'SOMALIA', abbreviation: 'SO', flag: '🇸🇴', displayValue: 'SOMALIA' },
-      { id: 8, name: 'SOUTH AFRICA', abbreviation: 'RSA', flag: '🇿🇦', displayValue: 'SOUTH AFRICA' },
-      { id: 2, name: 'TANZANIA', abbreviation: 'TZ', flag: '🇹🇿', displayValue: 'TANZANIA' },
-      { id: 9, name: 'UNKNOWN', abbreviation: 'TBA', flag: '❓', displayValue: 'UNKNOWN' },
-      { id: 1, name: 'ZAMBIA', abbreviation: 'ZM', flag: '🇿🇲', displayValue: 'ZAMBIA' },
-      { id: 5, name: 'ZIMBABWE', abbreviation: 'ZB', flag: '🇿🇼', displayValue: 'ZIMBABWE' },
-    ];
-    for (const countryData of countries) {
-      await prisma.country.upsert({
-        where: { id: countryData.id },
-        update: { ...countryData },
-        create: { ...countryData },
-      });
-    }
-    console.log('✅ Seeded countries');
-  } catch (err) {
-    console.error('❌ Could not seed countries:', err);
-  }
-
-  // Robust location upserts (avoid unique constraint failures and no variable leaks)
-  try {
-    const locations = [
-      {
-        name: 'Cape Town Depot',
-        description: 'Main depot in Cape Town',
-        latitude: -33.9249,
-        longitude: 18.4241,
-      },
-      {
-        name: 'Durban Port',
-        description: 'Port of Durban',
-        latitude: -29.8587,
-        longitude: 31.0218,
-      },
-      {
-        name: 'Johannesburg Hub',
-        description: 'Main hub in Johannesburg',
-        latitude: -26.2041,
-        longitude: 28.0473,
-      },
-    ];
-    for (const loc of locations) {
-      await prisma.location.upsert({
-        where: { tenantId_name: { tenantId: tenant.id, name: loc.name } },
-        update: {
-          description: loc.description,
-          latitude: loc.latitude,
-          longitude: loc.longitude,
-        },
-        create: {
-          tenantId: tenant.id,
-          name: loc.name,
-          description: loc.description,
-          latitude: loc.latitude,
-          longitude: loc.longitude,
-        },
-      });
-    }
-    console.log('✅ Created locations');
-
-    // Fetch seeded locations' IDs for use in demo manifests
-    const capeTownDepot = await prisma.location.findUnique({ where: { tenantId_name: { tenantId: tenant.id, name: 'Cape Town Depot' } } });
-    const durbanPort = await prisma.location.findUnique({ where: { tenantId_name: { tenantId: tenant.id, name: 'Durban Port' } } });
-    const johannesburgHub = await prisma.location.findUnique({ where: { tenantId_name: { tenantId: tenant.id, name: 'Johannesburg Hub' } } });
-
-    // Create demo manifests
-    const manifest1 = await prisma.manifest.create({
-      data: {
-        tenantId: tenant.id,
-        title: "Cape Town to Johannesburg Route",
-        status: "IN_PROGRESS",
-        scheduledAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        trackingId: "TRK-001",
-        routeId: route1.id,
-        locationId: capeTownDepot?.id,
-        invoiceStateId: newState.id,
-        rmn: "RMN-001",
-        jobNumber: "JOB-001",
-      },
-    });
-
-    const manifest2 = await prisma.manifest.create({
-      data: {
-        tenantId: tenant.id,
-        title: "Durban to Pretoria Route",
-        status: "SCHEDULED",
-        scheduledAt: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
-        trackingId: "TRK-002",
-        routeId: route2.id,
-        locationId: johannesburgHub?.id,
-        invoiceStateId: sentState.id,
-        rmn: "RMN-002",
-        jobNumber: "JOB-002",
-      },
-    });
-
-    console.log('✅ Created manifests');
-
-    // Create manifest locations (tracking data)
-    await prisma.manifestLocation.createMany({
-      data: [
-        {
-          tenantId: tenant.id,
-          manifestId: manifest1.id,
-          latitude: -33.92,
-          longitude: 18.42,
-          recordedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        },
-        {
-          tenantId: tenant.id,
-          manifestId: manifest1.id,
-          latitude: -34.0,
-          longitude: 19.0,
-          recordedAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
-        },
-        {
-          tenantId: tenant.id,
-          manifestId: manifest1.id,
-          latitude: -34.5,
-          longitude: 19.5,
-          recordedAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-        },
-        {
-          tenantId: tenant.id,
-          manifestId: manifest2.id,
-          latitude: -26.2,
-          longitude: 28.0,
-          recordedAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
-        },
-        {
-          tenantId: tenant.id,
-          manifestId: manifest2.id,
-          latitude: -26.5,
-          longitude: 27.5,
-          recordedAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-        },
-      ],
-    });
-
-    console.log('✅ Created manifest locations');
-
-    // Create WhatsApp data with sample media
-    const whatsappData1 = await prisma.whatsappData.create({
-      data: {
-        tenantId: tenant.id,
-        manifestId: manifest1.id,
-      },
-    });
-
-    const whatsappData2 = await prisma.whatsappData.create({
-      data: {
-        tenantId: tenant.id,
-        manifestId: manifest2.id,
-      },
-    });
-
-    // Create sample WhatsApp files
-    await prisma.whatsappFile.createMany({
-      data: [
-        {
-          tenantId: tenant.id,
-          whatsappDataId: whatsappData1.id,
-          fileName: "delivery_confirmation.pdf",
-          uri: "https://example.com/files/delivery_confirmation.pdf",
-          mimeType: "application/pdf",
-          sizeBytes: 245760,
-          checksum: "sha256:abc123def456",
-        },
-        {
-          tenantId: tenant.id,
-          whatsappDataId: whatsappData1.id,
-          fileName: "route_photo.jpg",
-          uri: "https://example.com/files/route_photo.jpg",
-          mimeType: "image/jpeg",
-          sizeBytes: 1024000,
-          checksum: "sha256:def456ghi789",
-        },
-      ],
-    });
-
-    // Create sample WhatsApp media
-    await prisma.whatsappMedia.createMany({
-      data: [
-        {
-          tenantId: tenant.id,
-          whatsappDataId: whatsappData2.id,
-          extension: "mp4",
-          uri: "https://example.com/media/delivery_video.mp4",
-          mimeType: "video/mp4",
-          sizeBytes: 5242880,
-          checksum: "sha256:ghi789jkl012",
-        },
-      ],
-    });
-
-    // Create sample WhatsApp locations
-    await prisma.whatsappLocation.createMany({
-      data: [
-        {
-          tenantId: tenant.id,
-          whatsappDataId: whatsappData1.id,
-          latitude: -33.9250,
-          longitude: 18.4242,
-          thumbnailUri: "https://example.com/thumbnails/location_thumb.jpg",
-        },
-        {
-          tenantId: tenant.id,
-          whatsappDataId: whatsappData2.id,
-          latitude: -26.2042,
-          longitude: 28.0474,
-          thumbnailUri: "https://example.com/thumbnails/location_thumb2.jpg",
-        },
-      ],
-    });
-
-    console.log('✅ Created WhatsApp data');
-
-    // Create audit entries
-    await prisma.manifestAudit.createMany({
-      data: [
-        {
-          tenantId: tenant.id,
-          manifestId: manifest1.id,
-          action: "create",
-          oldValues: "{}",
-          newValues: JSON.stringify({
-            trackingId: "TRK-001",
-            routeId: route1.id,
-            locationId: capeTownDepot?.id,
-          }),
-        },
-        {
-          tenantId: tenant.id,
-          manifestId: manifest1.id,
-          action: "location_update",
-          oldValues: JSON.stringify({ latitude: -33.92, longitude: 18.42 }),
-          newValues: JSON.stringify({ latitude: -34.0, longitude: 19.0 }),
-        },
-        {
-          tenantId: tenant.id,
-          manifestId: manifest2.id,
-          action: "create",
-          oldValues: "{}",
-          newValues: JSON.stringify({
-            trackingId: "TRK-002",
-            routeId: route2.id,
-            locationId: johannesburgHub?.id,
-          }),
-        },
-      ],
-    });
-
-    console.log('✅ Created audit entries');
-
-    console.log('🎉 Manifest Core seeding completed successfully!');
-  } catch (err) {
-    console.error('❌ Could not seed locations:', err);
-  }
-
-  // --- Logistics Officers Seeding ---
-  const officersFile = path.join(__dirname, '../docs/Logistics_Officers.txt');
-  if (fs.existsSync(officersFile)) {
-    const file = fs.readFileSync(officersFile, 'utf-8');
-    const rows = file.split('\n');
-    const header = rows[0].split(/\t/);
-    const idx = (col: string) => header.findIndex(h => h.trim().toLowerCase() === col.toLowerCase());
-
-    const tenantMap: Record<string, { tenantKey: string, displayName: string }> = {
-      "ZAMBIA":   { tenantKey: 'tenant_cobra', displayName: 'Cobra' },
-      "ZIMBABWE": { tenantKey: 'tenant_delta', displayName: 'Delta' },
-      "TANZANIA": { tenantKey: 'tenant_tanzania', displayName: 'Tanzania' },
-      // Add more as needed
+    const country = {
+      id: countryId,
+      name: row[1] || '', // Name
+      abbreviation: row[2] || '', // Abbreviation
+      displayValue: row[5] || row[1] || '', // DisplayValue (fallback to Name)
+      dateTimeAdded: parseDate(row[3]), // DateTimeAdded
     };
 
-    const foundTenantKeys = new Set<string>();
-    for (let i = 1; i < rows.length; ++i) {
-      const row = rows[i].split(/\t/);
-      const country = row[idx('CountryOfOrigin')];
-      if (tenantMap[country]) foundTenantKeys.add(tenantMap[country].tenantKey);
-    }
-
-    const tenantKeyToId: Record<string, string> = {};
-    for (const tenantKey of Array.from(foundTenantKeys)) {
-      const info = Object.values(tenantMap).find(t => t.tenantKey === tenantKey);
-      const name = info?.displayName || tenantKey.replace('tenant_','');
-      const slug = tenantKey.replace('tenant_','').toLowerCase();
-      const tenant = await prisma.tenant.upsert({
-        where: { id: tenantKey },
-        update: {},
-        create: { id: tenantKey, name, slug, settings: '{}' },
+    try {
+      await prisma.country.upsert({
+        where: { id: country.id },
+        update: country,
+        create: country,
       });
-      tenantKeyToId[tenantKey] = tenant.id;
+      countryMap.set(country.id, country);
+    } catch (error) {
+      console.warn(`⚠️  Failed to import country ${country.id}:`, error);
     }
-
-    const officers: any[] = [];
-    for (let i = 1; i < rows.length; ++i) {
-      const row = rows[i].split(/\t/);
-      if (!row[idx('Name')] || !row[idx('CountryOfOrigin')]) continue;
-      const country = row[idx('CountryOfOrigin')];
-      const mapEntry = tenantMap[country];
-      const tenantKey = mapEntry?.tenantKey;
-      const mappedTenantId = tenantKey ? tenantKeyToId[tenantKey] : undefined;
-      if (!mappedTenantId) continue;
-
-      const pictureLoadedRaw = (row[idx('PictureLoaded')] ?? '').toString();
-      const normalized = pictureLoadedRaw.trim().toLowerCase();
-      const isActive = ['true', '1', 'yes', 'y'].includes(normalized);
-
-      officers.push({
-        tenantId: mappedTenantId,
-        name: row[idx('Name')],
-        role: "Officer",
-        email: null,
-        phone: row[idx('ContactNr')] || null,
-        isActive,
-      });
-    }
-
-    // Clear existing officers and reseed to correct flags
-    await prisma.logisticsOfficer.deleteMany({});
-
-    if (officers.length > 0) {
-      await prisma.logisticsOfficer.createMany({ data: officers });
-      console.log(`✅ Seeded ${officers.length} logistics officers.`);
-    } else {
-      console.log('ℹ️ No logistics officers to seed.');
-    }
-  } else {
-    console.warn('⚠️ Logistics officers file not found at', officersFile);
   }
+  console.log(`✅ Imported ${countryMap.size} countries`);
+
+  // ========== 2. Import Locations ==========
+  console.log('\n📊 Importing Locations...');
+  const locationsContent = fs.readFileSync(
+    path.join(process.cwd(), 'data', 'locations.txt'),
+    'utf-8'
+  );
+  const locationsData = parseTSV(locationsContent);
+  let locationCount = 0;
+  let skippedCount = 0;
+
+  for (const row of locationsData.rows) {
+    // Column order: LocationID, CoutryID, CountryName, Description, DateTimeAdded, ID, DisplayValue
+    const locationId = parseIntSafe(row[0]); // LocationID
+    if (!locationId) continue;
+
+    const locationName = row[3] || row[6] || ''; // Description or DisplayValue
+    if (!locationName) continue;
+
+    const location = {
+      tenantId,
+      locationId,
+      countryId: parseIntSafe(row[1]) || undefined, // CoutryID (typo in data)
+      name: locationName,
+      description: row[3] || undefined, // Description
+      createdAt: parseDate(row[4]) || undefined, // DateTimeAdded
+      updatedAt: parseDate(row[4]) || undefined,
+    };
+
+    try {
+      // First try to find by locationId (unique field)
+      const existing = await prisma.location.findUnique({
+        where: { locationId },
+      });
+
+      if (existing) {
+        // Update existing location
+        await prisma.location.update({
+          where: { id: existing.id },
+          data: location,
+        });
+        locationCount++;
+      } else {
+        // Try to find by tenantId + name (unique constraint)
+        const existingByName = await prisma.location.findFirst({
+          where: {
+            tenantId,
+            name: locationName,
+          },
+        });
+
+        if (existingByName) {
+          // Update existing location with same name
+          await prisma.location.update({
+            where: { id: existingByName.id },
+            data: {
+              ...location,
+              locationId, // Update locationId if it's different
+            },
+          });
+          locationCount++;
+        } else {
+          // Create new location
+          await prisma.location.create({
+            data: location,
+          });
+          locationCount++;
+        }
+      }
+    } catch (error: any) {
+      // Skip duplicates silently or log if it's a different error
+      if (error?.code === 'P2002') {
+        skippedCount++;
+        if (skippedCount % 10 === 0) {
+          console.log(`   Skipped ${skippedCount} duplicate locations...`);
+        }
+      } else {
+        console.warn(
+          `⚠️  Failed to import location ${locationId}:`,
+          error.message
+        );
+      }
+    }
+  }
+  console.log(
+    `✅ Imported ${locationCount} locations (skipped ${skippedCount} duplicates)`
+  );
+
+  // ========== 3. Import Contacts ==========
+  console.log('\n📊 Importing Contacts...');
+  const contactsContent = fs.readFileSync(
+    path.join(process.cwd(), 'data', 'contacts.txt'),
+    'utf-8'
+  );
+  const contactsData = parseTSV(contactsContent);
+  let contactCount = 0;
+
+  for (const row of contactsData.rows) {
+    // Column order: Name, ContactNr, IDNumber, PictureLoaded, CountryOfOrigin, DateTimeAdded, ID, DisplayValue
+    const contactId = parseIntSafe(row[6]); // ID column
+    if (!contactId) continue;
+
+    const contact = {
+      tenantId,
+      contactId,
+      name: row[0] || '', // Name
+      contactNr: row[1] || '', // ContactNr
+      idNumber: row[2] || '', // IDNumber
+      pictureLoaded: parseBoolean(row[3]), // PictureLoaded
+      countryOfOrigin: row[4] || 'UNKNOWN', // CountryOfOrigin
+      displayValue: row[7] || row[0] || '', // DisplayValue (fallback to Name)
+      createdAt: parseDate(row[5]) || undefined, // DateTimeAdded
+      updatedAt: parseDate(row[5]) || undefined,
+    };
+
+    if (!contact.name) continue;
+
+    try {
+      await prisma.contact.upsert({
+        where: { contactId },
+        update: contact,
+        create: contact,
+      });
+      contactCount++;
+    } catch (error) {
+      console.warn(`⚠️  Failed to import contact ${contactId}:`, error);
+    }
+  }
+  console.log(`✅ Imported ${contactCount} contacts`);
+
+  // ========== 4. Import Logistics Officers ==========
+  console.log('\n📊 Importing Logistics Officers...');
+  const officersContent = fs.readFileSync(
+    path.join(process.cwd(), 'data', 'Logistics_Officers.txt'),
+    'utf-8'
+  );
+  const officersData = parseTSV(officersContent);
+  let officerCount = 0;
+
+  for (const row of officersData.rows) {
+    // Column order: Name, ContactNr, IDNumber, PictureLoaded, CountryOfOrigin, DateTimeAdded, ID, DisplayValue
+    const officerId = parseIntSafe(row[6]); // ID column
+    if (!officerId) continue;
+
+    const officer = {
+      tenantId,
+      logisticsOfficerId: officerId,
+      name: row[0] || '', // Name
+      contactNr: row[1] || undefined, // ContactNr
+      idNumber: row[2] || undefined, // IDNumber
+      pictureLoaded: parseBoolean(row[3]), // PictureLoaded
+      countryOfOrigin: row[4] || undefined, // CountryOfOrigin
+      displayValue: row[7] || row[0] || undefined, // DisplayValue (fallback to Name)
+      isActive: true,
+      createdAt: parseDate(row[5]) || undefined, // DateTimeAdded
+      updatedAt: parseDate(row[5]) || undefined,
+    };
+
+    if (!officer.name) continue;
+
+    try {
+      await prisma.logisticsOfficer.upsert({
+        where: { logisticsOfficerId: officerId },
+        update: officer,
+        create: officer,
+      });
+      officerCount++;
+    } catch (error) {
+      console.warn(
+        `⚠️  Failed to import logistics officer ${officerId}:`,
+        error
+      );
+    }
+  }
+  console.log(`✅ Imported ${officerCount} logistics officers`);
+
+  // ========== 5. Import Vehicles ==========
+  console.log('\n📊 Importing Vehicles...');
+  const vehiclesContent = fs.readFileSync(
+    path.join(process.cwd(), 'data', 'vehicles.txt'),
+    'utf-8'
+  );
+  const vehiclesData = parseTSV(vehiclesContent);
+  const CHUNK_SIZE = 50; // Reduced chunk size for SQLite compatibility
+  const totalVehicles = vehiclesData.rows.length;
+  let vehicleCount = 0;
+  let errorCount = 0;
+
+  console.log(
+    `   Processing ${totalVehicles} vehicles sequentially (SQLite optimized)...`
+  );
+
+  // Process vehicles sequentially to avoid SQLite lock contention
+  for (let i = 0; i < vehiclesData.rows.length; i++) {
+    const row = vehiclesData.rows[i];
+    const vehicleId = parseIntSafe(row[0]); // VehicleID
+
+    if (!vehicleId) {
+      errorCount++;
+      continue;
+    }
+
+    const vehicle = {
+      tenantId,
+      vehicleId,
+      vehicleTypeId: parseIntSafe(row[1]) || undefined,
+      entityTypeDescription: row[2] || 'UNKNOWN',
+      registration: row[4] || '',
+      color: row[5] || undefined,
+      countryOfOrigin: row[6] || 'UNKNOWN',
+      displayValue: row[10] || row[4] || '',
+      status: 'Active' as const,
+      createdAt: parseDate(row[7]) || undefined,
+      updatedAt: parseDate(row[7]) || undefined,
+    };
+
+    if (!vehicle.registration) {
+      errorCount++;
+      continue;
+    }
+
+    try {
+      await prisma.vehicle.upsert({
+        where: { vehicleId },
+        update: vehicle,
+        create: vehicle,
+      });
+      vehicleCount++;
+    } catch (error: any) {
+      errorCount++;
+      // Only log every 10th error to avoid spam
+      if (errorCount % 10 === 0) {
+        console.warn(
+          `⚠️  Failed to import vehicle ${vehicleId} (${errorCount} total errors):`,
+          error.message
+        );
+      }
+    }
+
+    // Progress update every CHUNK_SIZE vehicles
+    if ((i + 1) % CHUNK_SIZE === 0 || i === vehiclesData.rows.length - 1) {
+      const progress = ((i + 1) / totalVehicles) * 100;
+      console.log(
+        `   Progress: ${i + 1}/${totalVehicles} vehicles processed (${progress.toFixed(1)}% complete)`
+      );
+    }
+  }
+
+  console.log(`✅ Imported ${vehicleCount} vehicles (${errorCount} errors)`);
+
+  // ========== 6. Import Manifests (from active_manifests.txt) ==========
+  console.log('\n📊 Importing Manifests...');
+  const manifestsContent = fs.readFileSync(
+    path.join(process.cwd(), 'data', 'active_manifests.txt'),
+    'utf-8'
+  );
+  const manifestsData = parseTSV(manifestsContent);
+  let manifestCount = 0;
+  let manifestSkippedCount = 0;
+
+  // Map column indices (0-indexed from header row)
+  // ID, Client, Transporter, Officer, Driver, Horse, Tracker, WAConnected, ANPRDetect,
+  // Accuracy, LocationMethod, TrackerTime, Battery, TrackerAddress, Status, Location,
+  // Trailer1, Type1, Seal1, Weight1, Trailer2, Type2, Seal2, Weight2, Country,
+  // ForeignHorseAndDriver, Park, Route, RMN, JobNumber, Comment, Convoy, Started, Updated, Ended
+
+  for (const row of manifestsData.rows) {
+    const manifestId = parseIntSafe(row[0]); // ID
+    if (!manifestId) {
+      manifestSkippedCount++;
+      continue;
+    }
+
+    // Parse dates
+    const started = parseDate(row[31]); // Started
+    const updated = parseDate(row[32]); // Updated
+    const ended = parseDate(row[33]); // Ended
+
+    // Map status
+    let status: string = 'SCHEDULED';
+    const statusStr = (row[14] || '').toUpperCase();
+    if (statusStr.includes('ACTIVE')) status = 'IN_PROGRESS';
+    else if (statusStr.includes('COMPLETED') || statusStr.includes('ENDED'))
+      status = 'COMPLETED';
+    else if (statusStr.includes('CANCELLED')) status = 'CANCELLED';
+
+    // Find or create route if needed
+    let routeId: string | null = null;
+    const routeName = row[27]; // Route
+    if (routeName && routeName.trim() !== '' && routeName.trim() !== 'TBA') {
+      try {
+        const route = await prisma.route.upsert({
+          where: {
+            tenantId_name: {
+              tenantId,
+              name: routeName.trim(),
+            },
+          },
+          update: {},
+          create: {
+            tenantId,
+            name: routeName.trim(),
+            description: null,
+          },
+        });
+        routeId = route.id;
+      } catch (error) {
+        console.warn(`⚠️  Failed to create route "${routeName}":`, error);
+      }
+    }
+
+    // Find location by name
+    let locationId: string | null = null;
+    const locationName = row[15]; // Location
+    if (
+      locationName &&
+      locationName.trim() !== '' &&
+      locationName.trim() !== 'TBA'
+    ) {
+      try {
+        const location = await prisma.location.findFirst({
+          where: {
+            tenantId,
+            name: { contains: locationName.trim() },
+          },
+        });
+        if (location) locationId = location.id;
+      } catch (error) {
+        // Location not found, that's okay
+      }
+    }
+
+    const manifest = {
+      tenantId,
+      title: `${row[1] || 'Manifest'} - ${row[28] || manifestId}`, // Client - RMN
+      status,
+      trackingId: row[28] || undefined, // RMN
+      rmn: row[28] || undefined,
+      jobNumber: row[29] || undefined,
+      routeId: routeId || undefined,
+      locationId: locationId || undefined,
+      scheduledAt: started || undefined,
+      dateTimeAdded: started || new Date(),
+      dateTimeUpdated: updated || undefined,
+      dateTimeEnded: ended || undefined,
+    };
+
+    try {
+      await prisma.manifest.create({
+        data: manifest,
+      });
+      manifestCount++;
+    } catch (error) {
+      // If manifest exists (by trackingId), update it
+      if (manifest.trackingId) {
+        try {
+          await prisma.manifest.updateMany({
+            where: {
+              tenantId,
+              trackingId: manifest.trackingId,
+            },
+            data: manifest,
+          });
+          manifestCount++;
+        } catch (updateError) {
+          console.warn(
+            `⚠️  Failed to import/update manifest ${manifestId}:`,
+            error
+          );
+        }
+      } else {
+        console.warn(`⚠️  Failed to import manifest ${manifestId}:`, error);
+      }
+    }
+  }
+  console.log(
+    `✅ Imported ${manifestCount} manifests (skipped ${manifestSkippedCount} empty rows)`
+  );
+
+  console.log('\n✨ Database seeding completed successfully!');
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error during seeding:', e);
+    console.error('❌ Seed failed:', e);
     process.exit(1);
   })
   .finally(async () => {

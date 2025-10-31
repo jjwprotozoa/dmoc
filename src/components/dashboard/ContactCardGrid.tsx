@@ -1,25 +1,26 @@
 // src/components/dashboard/ContactCardGrid.tsx
 // Card grid view for contact directory; privacy-aware, CRUD-enabled, reuses POPIA auth and dialogs
 
-import { useMemo, useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { SensitiveDataField } from '@/components/ui/sensitive-data-field';
-import { PrivacyNotice } from '@/components/ui/privacy-notice';
 import { AuthDialog } from '@/components/ui/auth-dialog';
 import { Button } from '@/components/ui/button';
-import ContactFormDialog from './ContactFormDialog';
+import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { PrivacyNotice } from '@/components/ui/privacy-notice';
+import { SensitiveDataField } from '@/components/ui/sensitive-data-field';
 import countriesData from '@/data/countries.full.json';
-import { User, CheckCircle, XCircle, Pencil, Trash2, Plus } from 'lucide-react';
+import { CheckCircle, Pencil, Plus, Trash2, User, XCircle } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import ContactFormDialog from './ContactFormDialog';
 
 export interface Contact {
-  id: number;
+  id: string;
   name: string;
   contactNr: string;
   idNumber: string;
   pictureLoaded: boolean;
   countryOfOrigin: string;
-  dateTimeAdded: string;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
   displayValue: string;
 }
 
@@ -27,14 +28,14 @@ interface ContactCardGridProps {
   contacts: Contact[];
   onEdit?: (contact: Contact) => void;
   onDelete?: (contact: Contact) => void;
-  onCreate?: (contact: Omit<Contact, 'id' | 'dateTimeAdded' | 'displayValue'>) => void;
+  onCreate?: (contact: Omit<Contact, 'id' | 'createdAt' | 'updatedAt' | 'displayValue'>) => void;
 }
 
 export default function ContactCardGrid({ contacts, onEdit, onDelete, onCreate }: ContactCardGridProps) {
   // Role + POPIA state (same model as drivers page)
   const currentUserRole = 'operator'; // Mock role for parity with drivers page
   const canViewSensitive = ['admin', 'manager'].includes(currentUserRole);
-  const [unlockedContacts, setUnlockedContacts] = useState<Set<number>>(new Set());
+  const [unlockedContacts, setUnlockedContacts] = useState<Set<string | number>>(new Set());
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
 
@@ -63,6 +64,16 @@ export default function ContactCardGrid({ contacts, onEdit, onDelete, onCreate }
     return countryNameToFlag[key] || '🌍';
   };
 
+  const formatDate = (date: Date | string | null | undefined): string => {
+    if (!date) return 'Unknown';
+    try {
+      const d = typeof date === 'string' ? new Date(date) : date;
+      return d.toLocaleString('en-US', { hour12: true });
+    } catch {
+      return 'Invalid date';
+    }
+  };
+
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [showEdit, setShowEdit] = useState(false);
   const [editContact, setEditContact] = useState<Contact | null>(null);
@@ -79,7 +90,7 @@ export default function ContactCardGrid({ contacts, onEdit, onDelete, onCreate }
     setDeleteContact(contact);
     setShowDelete(true);
   };
-  const handleUnlockContact = (contactId: number) => {
+  const handleUnlockContact = (contactId: string | number) => {
     if (canViewSensitive) return setUnlockedContacts((prev) => new Set([...prev, contactId]));
     setPendingAction(() => () => setUnlockedContacts((prev) => new Set([...prev, contactId])));
     setShowAuthDialog(true);
@@ -144,7 +155,7 @@ export default function ContactCardGrid({ contacts, onEdit, onDelete, onCreate }
                 onUnlock={handleUnlockContact}
                 className="mt-0.5"
               />
-              <span className="block mt-3 text-xs text-gray-400">Added: {contact.dateTimeAdded}</span>
+              <span className="block mt-3 text-xs text-gray-400">Added: {formatDate(contact.createdAt)}</span>
             </CardContent>
           </Card>
         ))}
@@ -199,7 +210,7 @@ export default function ContactCardGrid({ contacts, onEdit, onDelete, onCreate }
                   <span className="text-base leading-none">{getCountryFlag(selectedContact.countryOfOrigin)}</span>
                   <span>{selectedContact.countryOfOrigin}</span>
                 </div>
-                <div className="flex text-sm text-gray-700"><span className="font-medium w-28">Added:</span><span>{selectedContact.dateTimeAdded}</span></div>
+                <div className="flex text-sm text-gray-700"><span className="font-medium w-28">Added:</span><span>{formatDate(selectedContact.createdAt)}</span></div>
               </div>
               <div className="mt-6">
                 <PrivacyNotice userRole={currentUserRole} />

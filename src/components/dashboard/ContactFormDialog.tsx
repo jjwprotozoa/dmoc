@@ -1,21 +1,21 @@
 // src/components/dashboard/ContactFormDialog.tsx
 // Reusable dialog for creating and editing contacts with validation
 
-import { useEffect, useMemo, useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import countriesData from '@/data/countries.full.json';
 import { formatAsYouTypeLocal, toE164, validateE164 } from '@/lib/phone';
+import { useEffect, useMemo, useState } from 'react';
 import type { Contact } from './ContactCardGrid';
 
 interface ContactFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initial?: Contact | null;
-  onSave: (contact: Omit<Contact, 'id' | 'dateTimeAdded' | 'displayValue'> & Partial<Pick<Contact, 'id' | 'dateTimeAdded' | 'displayValue'>>) => void;
+  onSave: (contact: Omit<Contact, 'id' | 'createdAt' | 'updatedAt' | 'displayValue'> & Partial<Pick<Contact, 'id' | 'createdAt' | 'updatedAt' | 'displayValue'>>) => void;
 }
 
 type ContactFormState = {

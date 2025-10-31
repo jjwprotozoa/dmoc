@@ -105,15 +105,17 @@ model Route {
 }
 
 model Location {
-  id          String   @id @default(cuid())
-  tenantId    String
-  name        String
-  description String?
-  latitude    Float?
-  longitude   Float?
-  address     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  tenantId      String
+  locationId    Int?     @unique // Legacy ID from Windows migration
+  countryId     Int?     // Legacy country ID reference
+  name          String
+  description   String?
+  latitude      Float?
+  longitude     Float?
+  address       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   tenant           Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   manifests        Manifest[]         @relation("Manifest_locationId")
@@ -499,6 +501,7 @@ model InvoiceState {
 model Contact {
   id              String   @id @default(cuid())
   tenantId        String
+  contactId       Int?     @unique // Legacy ID from Windows migration
   name            String
   contactNr       String
   idNumber        String
@@ -515,7 +518,7 @@ model Contact {
 }
 
 model Country {
-  id            Int       @id @default(autoincrement())
+  id            Int       @id // Uses CountryID from data, no autoincrement
   name          String
   abbreviation  String
   flag          String?
@@ -527,15 +530,21 @@ model Country {
 
 // LogisticsOfficer: Tenant-scoped model for logistics officers assignment and management
 model LogisticsOfficer {
-  id         String   @id @default(cuid())
-  tenantId   String
-  name       String
-  role       String?
-  email      String?
-  phone      String?
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id              String   @id @default(cuid()) // cuid primary key (string)
+  tenantId        String
+  logisticsOfficerId Int?  @unique // Legacy ID from Windows migration
+  name            String
+  contactNr       String?  // Legacy contact number
+  idNumber        String?  // Legacy ID number
+  pictureLoaded   Boolean  @default(false)
+  countryOfOrigin String?  // Legacy country
+  displayValue    String?  // Legacy display value
+  role            String?
+  email           String?
+  phone           String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 

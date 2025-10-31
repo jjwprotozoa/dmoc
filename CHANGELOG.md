@@ -7,11 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_(No unreleased changes yet)_
+### Added
+
+- **Admin Bypass for Multi-Tenant Access** - Admin users can now view all vehicles, contacts, and logistics officers across all tenants (matching manifests functionality)
+- **Locations Router and Page** - Complete CRUD operations for operational locations with tenant isolation
+- **Locations Management Interface** - Full-featured locations page with search, create, edit, and delete functionality
+- **Database-First Data Architecture** - All pages now use tRPC queries connected to seeded database instead of mock data
+- **Vehicle Filters Component** - Reusable filter component with quick filters, advanced filters, and filter counts (similar to manifest filters)
+- **Logistics Officers Complete Fields** - Added contactNr, idNumber, pictureLoaded, countryOfOrigin, and displayValue fields to officer cards
+
+### Changed
+
+- **Vehicles Router** - Added `list` procedure with advanced filtering (search, status, type, date range), `getFilterCounts` procedure for filter UI, and `whereTenant()` helper function for consistent admin bypass pattern across all queries
+- **Vehicles Router Default Filtering** - Removed default active-only filter to show all vehicles by default, with optional `includeInactive` parameter and smart status filtering based on search queries
+- **Vehicles Seed Script** - Changed from parallel batch processing (100 vehicles at once) to sequential processing with progress updates every 50 vehicles to prevent SQLite timeout errors
+- **Vehicles Card View Page** - Integrated VehicleFilters component replacing manual search input, switched from `getAll` to `list` endpoint for better performance, and improved filter state management with automatic page reset on filter changes
+- **Contacts Router** - Added admin bypass to allow admins to view all contacts across tenants
+- **Logistics Officers Router** - Added admin bypass and filter to exclude digiwize tenant (admin-only tenant, not a logistics tenant)
+- **OfficerCardGrid Component** - Redesigned to match drivers card style: removed tenant badges, added privacy controls, phone/email masking, and complete field display
+- **Contacts Page** - Migrated from in-memory state to tRPC API with tenant isolation from session
+- **Contacts Router** - Updated to use `protectedProcedure` with automatic tenantId from session instead of manual input
+- **Logistics Officers Router** - Migrated from `publicProcedure` to `protectedProcedure` with automatic tenant isolation from session
+- **Logistics Officers Page** - Removed manual tenant filter dropdown, now automatically filters by session tenantId
+- **Vehicle Data Model** - Updated Vehicle interface to match database schema (string IDs, createdAt field, proper date handling)
+- **Vehicle Selection** - Changed from number-based IDs to string-based IDs matching database cuid format
+- **All Pages Database Integration** - Contacts, Countries, Logistics Officers, Locations, and Vehicles now fetch from seeded database
+
+### Fixed
+
+- **SQLite Seed Script Timeout Errors** - Fixed vehicle import timeouts by switching from parallel Promise.all() processing to sequential processing, preventing SQLite lock contention during bulk imports
+- **Vehicle Query Debugging** - Added comprehensive logging to vehicles router (getAll, list, getFilterCounts) to diagnose tenantId mismatches and empty result issues
+- **Vehicle Empty State Messaging** - Enhanced empty state display to differentiate between no vehicles imported vs. no vehicles matching filters, with helpful seed script instructions
+- **Tenant Isolation** - Fixed logistics officers router to enforce tenant isolation from session instead of optional input parameter
+- **Data Persistence** - All CRUD operations now persist to database instead of in-memory state
+- **Type Safety** - Updated all vehicle-related interfaces to match Prisma schema with proper date handling
+- **Loading States** - Added proper loading indicators for all database queries
+- **Error Handling** - Improved error handling and retry functionality for failed database queries
+
+### Security
+
+- **Admin Tenant Bypass** - Implemented consistent admin bypass pattern across vehicles, contacts, logistics officers, and manifests routers using `whereTenant()` helper function
+- **Enhanced Tenant Isolation** - All routers now enforce tenant isolation at the procedure level using session tenantId
+- **Session-Based Authentication** - Removed manual tenantId inputs in favor of automatic extraction from authenticated session
+- **Protected Procedures** - Migrated public procedures to protected procedures where tenant isolation is required
 
 ## [1.1.0] - 2025-10-30
 
 ### Added
+
 - Contacts: Card/grid page using reusable POPIA components (`SensitiveDataField`, `PrivacyNotice`, `AuthDialog`)
 - Contacts: CRUD UI (Add/Edit/Delete) with reusable `ContactFormDialog`
 - Contacts: Country dropdown with flag in Add/Edit dialog (reusing countries data)
@@ -20,11 +63,14 @@ _(No unreleased changes yet)_
 - Contacts: Phone input with country dialing code prefix and international formatting on save
 
 - Align dev+prod schemas, add Contact/LogisticsOfficer/Country, normalize core fields & tables [Database Schema Alignment]
+
 ### Changed
+
 - Sensitive fields: improved responsive wrapping in `SensitiveDataField` so long IDs/contacts always fit on cards (mobile-friendly)
 - Contacts: POPIA unlock behavior aligned to Drivers page (per-record unlock set + pending auth flow)
 
 ### Added
+
 - Contacts: Card/grid page using reusable POPIA components (`SensitiveDataField`, `PrivacyNotice`, `AuthDialog`)
 - Contacts: CRUD UI (Add/Edit/Delete) with reusable `ContactFormDialog`
 - Contacts: Country dropdown with flag in Add/Edit dialog (reusing countries data)
@@ -37,11 +83,13 @@ _(No unreleased changes yet)_
 - Dynamic filter options sourced from `tenants.getAll` and `countries.list`
 
 ### Changed
+
 - Officers dashboard wired to live data; replaced placeholders with full data flow (server pagination + filters)
 - Sensitive fields: improved responsive wrapping in `SensitiveDataField` so long IDs/contacts always fit on cards (mobile-friendly)
 - Contacts: POPIA unlock behavior aligned to Drivers page (per-record unlock set + pending auth flow)
 
 ### Fixed
+
 - Seed: robust, case-insensitive parsing of `PictureLoaded` → `isActive`; re-seeded officers with correct status
 - Officers search input no longer triggers errors or unwanted submits; Enter key suppressed
 
@@ -88,6 +136,7 @@ _(No unreleased changes yet)_
 - Align dev and production Prisma schemas - Synchronized all model definitions to eliminate database-related errors on Vercel - Fixed passwordHash null handling in auth.ts for production schema compatibility - Aligned Client, Driver, Vehicle, Location models between dev and production - Added missing models (VehicleCombination, FuelEntry, UserProfile) to production schema - Removed duplicate Offense and InvoiceState models - Ensured DATABASE_URL environment variable mapping runs before Prisma initialization
 
 - Countries Add modal: now requires official country pick via dropdown, autofills all fields; Add button avoids mobile bottom nav
+
 ### Changed
 
 - **Production Schema Migration** - Updated schema-prod.prisma with proper relations for Country and ManifestLocation models to support production deployments
@@ -106,6 +155,7 @@ _(No unreleased changes yet)_
 
 - Countries: removed edit functionality - countries can only be added from official list or deleted for data integrity
 - Country cards: improved long-name wrapping, never splits words; auto-adjust font size for better fit; redundant values hidden
+
 ### Fixed
 
 - **Fullscreen Navigation Overlap** - Fixed issue where top navigation and sidebar covered dashboard content in fullscreen mode

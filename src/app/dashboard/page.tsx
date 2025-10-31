@@ -35,11 +35,13 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Manifests */}
         <div className="lg:col-span-1">
-          <ManifestsList
-            manifests={manifests || []}
-            selectedManifest={selectedManifest}
-            onSelectManifest={setSelectedManifest}
-          />
+          <div className="h-[600px]">
+            <ManifestsList
+              manifests={manifests || []}
+              selectedManifest={selectedManifest}
+              onSelectManifest={setSelectedManifest}
+            />
+          </div>
         </div>
 
         {/* Center Column - Map */}

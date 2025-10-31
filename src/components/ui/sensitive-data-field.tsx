@@ -9,8 +9,8 @@ interface SensitiveDataFieldProps {
   value: string;
   type: 'contact' | 'id' | 'email' | 'address';
   config: PrivacyConfig;
-  itemId?: number;
-  onUnlock?: (itemId: number) => void;
+  itemId?: string | number;
+  onUnlock?: (itemId: string | number) => void;
   onCall?: (value: string) => void;
   className?: string;
 }

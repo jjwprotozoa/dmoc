@@ -11,29 +11,21 @@ const PAGE_SIZE = 24;
 
 export default function LogisticsOfficersPage() {
   const [search, setSearch] = useState('');
-  const [tenantId, setTenantId] = useState('');
   const [country, setCountry] = useState('');
   const [isActive, setIsActive] = useState(''); // '', 'true', 'false'
   const [page, setPage] = useState(1);
 
-  // Get officers (paged, filtered)
+  // Get officers (paged, filtered) - tenantId now comes from session automatically
   const { data, isLoading, error } = trpc.logisticsOfficers.list.useQuery({
     take: PAGE_SIZE,
     skip: (page - 1) * PAGE_SIZE,
     search: search.trim().length > 0 ? search.trim() : undefined,
-    tenantId: tenantId || undefined,
     country: country || undefined,
     isActive: isActive === '' ? undefined : isActive === 'true',
   });
-  // Get tenant (org) options
-  const { data: tenantData, isLoading: tenantsLoading } = trpc.tenants.getAll.useQuery();
   // Get country options
   const { data: countryData, isLoading: countryLoading } = trpc.countries.list.useQuery();
 
-  const tenantOptions = [
-    { value: '', label: 'All Tenants' },
-    ...(tenantData || []).map(t => ({ value: t.id, label: t.name }))
-  ];
   const countryOptions = [
     { value: '', label: 'All Countries' },
     ...(countryData || []).map(c => ({ value: c.name, label: c.name }))
@@ -66,21 +58,6 @@ export default function LogisticsOfficersPage() {
               type="text"
               autoComplete="off"
             />
-          </div>
-          {/* Tenant filter */}
-          <div>
-            <label htmlFor="tenantFilter" className="block text-xs text-gray-500 mb-1">Tenant</label>
-            <select
-              id="tenantFilter"
-              value={tenantId}
-              onChange={e => { setTenantId(e.target.value); setPage(1); }}
-              className="border p-2 rounded w-full md:w-40"
-              disabled={tenantsLoading}
-            >
-              {tenantOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
           </div>
           {/* Country filter */}
           <div>

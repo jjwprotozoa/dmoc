@@ -46,12 +46,12 @@ export function ManifestsList({
   onSelectManifest,
 }: ManifestsListProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border h-full">
-      <div className="p-4 border-b">
+    <div className="bg-white rounded-lg shadow-sm border h-full flex flex-col">
+      <div className="p-4 border-b flex-shrink-0">
         <h2 className="text-lg font-semibold">Manifests</h2>
       </div>
 
-      <div className="overflow-y-auto h-[calc(100%-4rem)]">
+      <div className="flex-1 overflow-y-auto">
         {manifests.length === 0 ? (
           <div className="p-4 text-center text-gray-500">
             <AlertCircle className="h-8 w-8 mx-auto mb-2" />

@@ -11,6 +11,7 @@ import { vehiclesRouter } from './routers/vehicles';
 import { countriesRouter } from './routers/countries';
 import { logisticsOfficersRouter } from './routers/logistics-officers';
 import { contactsRouter } from './routers/contacts';
+import { locationsRouter } from './routers/locations';
 import { router } from './trpc';
 
 export const appRouter = router({
@@ -26,6 +27,7 @@ export const appRouter = router({
   countries: countriesRouter,
   logisticsOfficers: logisticsOfficersRouter,
   contacts: contactsRouter,
+  locations: locationsRouter,
 });
 
 export type AppRouter = typeof appRouter;
