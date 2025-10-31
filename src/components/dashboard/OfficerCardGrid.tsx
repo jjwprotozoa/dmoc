@@ -2,6 +2,7 @@
 // OfficerCardGrid: Privacy-aware cards similar to drivers, without tenant badges
 import { useState } from 'react';
 import { 
+  Mail,
   Phone, 
   User, 
   Lock, 
@@ -200,6 +201,18 @@ export default function OfficerCardGrid({ officers }: OfficerCardGridProps) {
                       >
                         {emailInfo.display}
                       </span>
+                      {!emailInfo.masked && (
+                        <a
+                          href={`mailto:${officer.email}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                          }}
+                          className="text-amber-600 hover:text-amber-700"
+                          title="Send email to officer"
+                        >
+                          <Mail className="w-3 h-3" />
+                        </a>
+                      )}
                       {emailInfo.masked && (
                         <button
                           onClick={(e) => {
