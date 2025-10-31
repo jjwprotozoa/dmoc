@@ -14,7 +14,7 @@ async function main() {
     create: {
       name: 'Digiwize',
       slug: 'digiwize',
-      settings: {
+      settings: JSON.stringify({
         theme: 'amber',
         features: {
           fuelTracking: true,
@@ -22,7 +22,7 @@ async function main() {
           biometrics: true,
           anpr: true,
         },
-      },
+      }),
     },
   });
 
@@ -44,34 +44,42 @@ async function main() {
 
   console.log('✅ Created admin user:', adminUser.email);
 
-  // Create some sample companies
+  // Create an organization for the tenant
+  const organization = await prisma.organization.upsert({
+    where: { id: tenant.id },
+    update: {},
+    create: {
+      id: tenant.id,
+      tenantId: tenant.id,
+      name: 'Digiwize Organization',
+    },
+  });
+
+  console.log('✅ Created organization:', organization.name);
+
+  // Create some sample companies (Company model uses orgId, not tenantId)
   const companies = [
     {
       name: 'DELTA',
-      description: 'Delta Logistics',
     },
     {
       name: 'RELOAD',
-      description: 'Reload Transport',
     },
     {
       name: 'TEST CLIENT',
-      description: 'Test Client Company',
     },
   ];
 
   for (const companyData of companies) {
     await prisma.company.upsert({
       where: { 
-        tenantId_name: {
-          tenantId: tenant.id,
-          name: companyData.name,
-        }
+        id: `${organization.id}-${companyData.name}`,
       },
       update: {},
       create: {
-        tenantId: tenant.id,
-        ...companyData,
+        id: `${organization.id}-${companyData.name}`,
+        orgId: organization.id,
+        name: companyData.name,
       },
     });
   }
@@ -150,7 +158,7 @@ async function main() {
 
   console.log('✅ Created', locations.length, 'locations');
 
-  // Create some sample invoice states
+  // Create some sample invoice states (InvoiceState uses code as unique, not tenantId_code)
   const invoiceStates = [
     {
       name: 'Pending',
@@ -169,14 +177,10 @@ async function main() {
   for (const stateData of invoiceStates) {
     await prisma.invoiceState.upsert({
       where: { 
-        tenantId_code: {
-          tenantId: tenant.id,
-          code: stateData.code,
-        }
+        code: stateData.code,
       },
       update: {},
       create: {
-        tenantId: tenant.id,
         ...stateData,
       },
     });
