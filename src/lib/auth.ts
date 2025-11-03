@@ -205,8 +205,8 @@ export const authOptions: NextAuthOptions = {
         token.role = roleValue && validRoles.includes(roleValue as typeof validRoles[number])
           ? (roleValue as typeof validRoles[number])
           : "VIEWER";
-        token.tenantId = userWithExtras.tenantId ?? (token.tenantId as string | null) ?? null;
-        token.tenantSlug = userWithExtras.tenantSlug ?? (token.tenantSlug as string | null) ?? null;
+        token.tenantId = userWithExtras.tenantId ?? (token.tenantId as string | undefined) ?? undefined;
+        token.tenantSlug = userWithExtras.tenantSlug ?? (token.tenantSlug as string | undefined) ?? undefined;
         token.driverId = userWithExtras.driverId ?? (token.driverId as string | null) ?? null;
       }
       return token;
@@ -214,16 +214,23 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (token && session.user) {
         const tokenWithExtras = token as {
-          role?: string;
+          role?: "ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER";
           tenantId?: string;
           tenantSlug?: string;
           driverId?: string | null;
         };
-        session.user.id = token.sub!;
-        session.user.role = tokenWithExtras.role;
-        session.user.tenantId = tokenWithExtras.tenantId;
-        session.user.tenantSlug = tokenWithExtras.tenantSlug;
-        session.user.driverId = tokenWithExtras.driverId ?? null;
+        const user = session.user as {
+          id?: string;
+          role?: "ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER";
+          tenantId?: string;
+          tenantSlug?: string;
+          driverId?: string | null;
+        };
+        user.id = token.sub!;
+        user.role = tokenWithExtras.role;
+        user.tenantId = tokenWithExtras.tenantId;
+        user.tenantSlug = tokenWithExtras.tenantSlug;
+        user.driverId = tokenWithExtras.driverId ?? null;
       }
       return session;
     },
