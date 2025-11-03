@@ -188,20 +188,32 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       // First login: copy role/tenant/driverId from your user model
       if (user) {
-        token.role = (user as any).role ?? token.role ?? "VIEWER";
-        token.tenantId = (user as any).tenantId ?? token.tenantId ?? null;
-        token.tenantSlug = (user as any).tenantSlug ?? token.tenantSlug ?? null;
-        token.driverId = (user as any).driverId ?? token.driverId ?? null;
+        const userWithExtras = user as {
+          role?: string;
+          tenantId?: string;
+          tenantSlug?: string;
+          driverId?: string | null;
+        };
+        token.role = userWithExtras.role ?? (token.role as string) ?? "VIEWER";
+        token.tenantId = userWithExtras.tenantId ?? (token.tenantId as string | null) ?? null;
+        token.tenantSlug = userWithExtras.tenantSlug ?? (token.tenantSlug as string | null) ?? null;
+        token.driverId = userWithExtras.driverId ?? (token.driverId as string | null) ?? null;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
+        const tokenWithExtras = token as {
+          role?: string;
+          tenantId?: string;
+          tenantSlug?: string;
+          driverId?: string | null;
+        };
         session.user.id = token.sub!;
-        session.user.role = (token as any).role;
-        session.user.tenantId = (token as any).tenantId;
-        session.user.tenantSlug = (token as any).tenantSlug;
-        session.user.driverId = (token as any).driverId ?? null;
+        session.user.role = tokenWithExtras.role;
+        session.user.tenantId = tokenWithExtras.tenantId;
+        session.user.tenantSlug = tokenWithExtras.tenantSlug;
+        session.user.driverId = tokenWithExtras.driverId ?? null;
       }
       return session;
     },

@@ -5,7 +5,7 @@ import { AsYouType, parsePhoneNumberFromString, isValidPhoneNumber } from 'libph
 
 export function formatAsYouTypeLocal(input: string, countryIso2?: string) {
   try {
-    const typer = new AsYouType(countryIso2 as any);
+    const typer = new AsYouType(countryIso2);
     return typer.input(input);
   } catch {
     return input;

@@ -192,7 +192,15 @@ export const driverRouter = router({
       }
 
       // Find manifests for these vehicles
-      const whereClause: any = {
+      const whereClause: {
+        tenantId: string;
+        horseId: { in: string[] };
+        status?: string;
+        scheduledAt?: {
+          gte?: Date;
+          lte?: Date;
+        };
+      } = {
         tenantId: ctx.session.user.tenantId,
         horseId: { in: horseIds },
       };

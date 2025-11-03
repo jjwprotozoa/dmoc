@@ -88,7 +88,7 @@ export const vehiclesRouter = router({
 
         console.log(`✅ [Vehicles Router] Found ${vehicles.length} vehicles`);
         return vehicles;
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('❌ [Vehicles Router] Database error:', error);
         throw error;
       }
