@@ -13,9 +13,25 @@ export const createTRPCContext = async () => {
     console.warn('Failed to get session during build:', error);
   }
 
+  // Ensure database connection is available
+  let dbConnection = null;
+  try {
+    dbConnection = db;
+    // Test the connection
+    await db.$queryRaw`SELECT 1`;
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    // In Vercel, we might not have a database connection during build
+    if (process.env.VERCEL && process.env.NODE_ENV === 'production') {
+      console.warn('Database not available in Vercel build environment');
+    } else {
+      throw error;
+    }
+  }
+
   return {
     session,
-    db,
+    db: dbConnection,
   };
 };
 
@@ -37,12 +53,7 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   }
   return next({
     ctx: {
-      session: {
-        ...ctx.session,
-        user: ctx.session.user as typeof ctx.session.user & {
-          driverId?: string | null;
-        },
-      },
+      session: { ...ctx.session, user: ctx.session.user },
     },
   });
 });
