@@ -1,10 +1,11 @@
 // src/server/api/routers/tracking.ts
 import { z } from 'zod';
+import { db } from '@/lib/db';
 import { protectedProcedure, router } from '../trpc';
 
 export const trackingRouter = router({
   getDevices: protectedProcedure.query(async ({ ctx }) => {
-    const devices = await ctx.db.device.findMany({
+    const devices = await db.device.findMany({
       where: {
         tenantId: ctx.session.user.tenantId,
       },
@@ -29,7 +30,7 @@ export const trackingRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const pings = await ctx.db.locationPing.findMany({
+      const pings = await db.locationPing.findMany({
         where: {
           deviceId: input.deviceId,
           timestamp: {
@@ -51,7 +52,7 @@ export const trackingRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const pings = await ctx.db.locationPing.findMany({
+      const pings = await db.locationPing.findMany({
         where: {
           device: {
             tenantId: ctx.session.user.tenantId,

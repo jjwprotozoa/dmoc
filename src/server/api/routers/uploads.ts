@@ -1,6 +1,7 @@
 // src/server/api/routers/uploads.ts
 import { uploadFile } from '@/lib/s3';
 import { z } from 'zod';
+import { db } from '@/lib/db';
 import { protectedProcedure, router } from '../trpc';
 
 export const uploadsRouter = router({
@@ -20,7 +21,7 @@ export const uploadsRouter = router({
 
       const url = await uploadFile(key, buffer, input.mimeType);
 
-      const attachment = await ctx.db.attachment.create({
+      const attachment = await db.attachment.create({
         data: {
           entityType: input.entityType,
           entityId: input.entityId,
@@ -44,7 +45,7 @@ export const uploadsRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const attachments = await ctx.db.attachment.findMany({
+      const attachments = await db.attachment.findMany({
         where: {
           entityType: input.entityType,
           entityId: input.entityId,

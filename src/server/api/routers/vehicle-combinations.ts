@@ -1,5 +1,6 @@
 // src/server/api/routers/vehicle-combinations.ts
 import { z } from 'zod';
+import { db } from '@/lib/db';
 import { protectedProcedure, router } from '../trpc';
 
 export const vehicleCombinationsRouter = router({
@@ -12,7 +13,7 @@ export const vehicleCombinationsRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const combinations = await ctx.db.vehicleCombination.findMany({
+      const combinations = await db.vehicleCombination.findMany({
         where: {
           tenantId: ctx.session.user.tenantId,
           ...(input.status && { status: input.status }),
@@ -36,7 +37,7 @@ export const vehicleCombinationsRouter = router({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const combination = await ctx.db.vehicleCombination.findFirst({
+      const combination = await db.vehicleCombination.findFirst({
         where: {
           id: input.id,
           tenantId: ctx.session.user.tenantId,
@@ -79,7 +80,7 @@ export const vehicleCombinationsRouter = router({
       }
 
       // Verify all vehicles belong to the tenant
-      const vehicles = await ctx.db.vehicle.findMany({
+      const vehicles = await db.vehicle.findMany({
         where: {
           id: { in: [input.horseId, ...input.trailerIds] },
           tenantId,
@@ -101,7 +102,7 @@ export const vehicleCombinationsRouter = router({
       }
 
       // Create the combination
-      const combination = await ctx.db.vehicleCombination.create({
+      const combination = await db.vehicleCombination.create({
         data: {
           tenantId,
           horseId: input.horseId,
@@ -138,7 +139,7 @@ export const vehicleCombinationsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const combination = await ctx.db.vehicleCombination.updateMany({
+      const combination = await db.vehicleCombination.updateMany({
         where: {
           id: input.id,
           tenantId: ctx.session.user.tenantId,
@@ -156,7 +157,7 @@ export const vehicleCombinationsRouter = router({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       // Remove all trailer connections
-      await ctx.db.vehicleCombinationTrailer.deleteMany({
+      await db.vehicleCombinationTrailer.deleteMany({
         where: {
           combinationId: input.id,
           combination: {
@@ -166,7 +167,7 @@ export const vehicleCombinationsRouter = router({
       });
 
       // Update combination status
-      const combination = await ctx.db.vehicleCombination.updateMany({
+      const combination = await db.vehicleCombination.updateMany({
         where: {
           id: input.id,
           tenantId: ctx.session.user.tenantId,
@@ -184,7 +185,7 @@ export const vehicleCombinationsRouter = router({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       // Delete trailer connections first
-      await ctx.db.vehicleCombinationTrailer.deleteMany({
+      await db.vehicleCombinationTrailer.deleteMany({
         where: {
           combinationId: input.id,
           combination: {
@@ -194,7 +195,7 @@ export const vehicleCombinationsRouter = router({
       });
 
       // Delete the combination
-      const combination = await ctx.db.vehicleCombination.deleteMany({
+      const combination = await db.vehicleCombination.deleteMany({
         where: {
           id: input.id,
           tenantId: ctx.session.user.tenantId,
@@ -212,22 +213,22 @@ export const vehicleCombinationsRouter = router({
       inTransitCombinations,
       loadingCombinations,
     ] = await Promise.all([
-      ctx.db.vehicleCombination.count({
+      db.vehicleCombination.count({
         where: { tenantId: ctx.session.user.tenantId },
       }),
-      ctx.db.vehicleCombination.count({
+      db.vehicleCombination.count({
         where: {
           tenantId: ctx.session.user.tenantId,
           status: 'Active',
         },
       }),
-      ctx.db.vehicleCombination.count({
+      db.vehicleCombination.count({
         where: {
           tenantId: ctx.session.user.tenantId,
           status: 'In Transit',
         },
       }),
-      ctx.db.vehicleCombination.count({
+      db.vehicleCombination.count({
         where: {
           tenantId: ctx.session.user.tenantId,
           status: 'Loading',
