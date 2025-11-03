@@ -41,7 +41,7 @@ export const driverRouter = router({
         console.warn(`[Driver Router] Driver record not found for driverId: ${driverId}, returning mock data for testing`);
         
         // Return mock data for testing - in production this should return empty
-        const { mockTrips } = await import("@/features/driver/mock");
+        const { mockTrips } = await import("../../../../features/driver/mock");
         
         // Filter mock data by status if provided
         let filteredTrips = mockTrips;
@@ -119,7 +119,7 @@ export const driverRouter = router({
       // If no vehicle combinations found, return mock data for testing
       if (horseIds.length === 0) {
         console.warn(`[Driver Router] No vehicle combinations found for driver ${driver.name}, returning mock data for testing`);
-        const { mockTrips } = await import("@/features/driver/mock");
+        const { mockTrips } = await import("../../../../features/driver/mock");
         let filteredTrips = mockTrips;
         if (input.status) {
           filteredTrips = mockTrips.filter(t => {
@@ -201,7 +201,7 @@ export const driverRouter = router({
       // If no real manifests found, return mock data for testing
       if (manifests.length === 0) {
         console.warn(`[Driver Router] No manifests found for driver ${driver.name}, returning mock data for testing`);
-        const { mockTrips } = await import("@/features/driver/mock");
+        const { mockTrips } = await import("../../../../features/driver/mock");
         let filteredTrips = mockTrips;
         if (input.status) {
           filteredTrips = mockTrips.filter(t => {
@@ -267,7 +267,7 @@ export const driverRouter = router({
         console.warn(`[Driver Router] Driver record not found for driverId: ${driverId}, checking mock data for manifest ${input.manifestId}`);
         
         // Check if it's a mock trip ID
-        const { mockTrips } = await import("@/features/driver/mock");
+        const { mockTrips } = await import("../../../../features/driver/mock");
         const mockTrip = mockTrips.find(t => t.id === input.manifestId);
         
         if (mockTrip) {
@@ -468,7 +468,7 @@ export const driverRouter = router({
         console.warn(`[Driver Router] Driver record not found for driverId: ${driverId}, allowing event creation for testing`);
         
         // Check if it's a mock trip ID (for testing with mock data)
-        const { mockTrips } = await import("@/features/driver/mock");
+        const { mockTrips } = await import("../../../../features/driver/mock");
         const isMockTrip = mockTrips.some(t => t.id === input.manifestId);
         
         if (isMockTrip) {
@@ -520,7 +520,7 @@ export const driverRouter = router({
       const horseIds = driverCombinations.map((vc) => vc.horseId);
 
       // Check if it's a mock trip ID first (for testing)
-      const { mockTrips } = await import("@/features/driver/mock");
+      const { mockTrips } = await import("../../../../features/driver/mock");
       const isMockTrip = mockTrips.some(t => t.id === input.manifestId);
       
       if (isMockTrip) {
