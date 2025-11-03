@@ -29,7 +29,7 @@ export const trackingRouter = router({
         limit: z.number().default(100),
       })
     )
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const pings = await db.locationPing.findMany({
         where: {
           deviceId: input.deviceId,

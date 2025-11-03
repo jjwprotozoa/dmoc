@@ -15,7 +15,7 @@ export const uploadsRouter = router({
         data: z.string(), // base64 encoded data
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const buffer = Buffer.from(input.data, 'base64');
       const key = `${input.entityType}/${input.entityId}/${Date.now()}-${input.fileName}`;
 
@@ -44,7 +44,7 @@ export const uploadsRouter = router({
         entityId: z.string(),
       })
     )
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const attachments = await db.attachment.findMany({
         where: {
           entityType: input.entityType,

@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 import { adminProcedure, router } from '../trpc';
 
 export const tenantsRouter = router({
-  getAll: adminProcedure.query(async ({ ctx }) => {
+  getAll: adminProcedure.query(async () => {
     const tenants = await db.tenant.findMany({
       include: {
         organizations: {
@@ -27,7 +27,7 @@ export const tenantsRouter = router({
 
   getById: adminProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .query(async ({ input }) => {
       const tenant = await db.tenant.findUnique({
         where: { id: input.id },
         include: {
@@ -64,7 +64,7 @@ export const tenantsRouter = router({
         settings: z.record(z.any()).optional(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const tenant = await db.tenant.create({
         data: {
           name: input.name,
@@ -85,7 +85,7 @@ export const tenantsRouter = router({
         settings: z.record(z.any()).optional(),
       })
     )
-    .mutation(async ({ ctx, input }) => {
+    .mutation(async ({ input }) => {
       const { id, ...inputData } = input;
 
       // Prepare data with proper type conversion
