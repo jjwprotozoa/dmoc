@@ -109,10 +109,10 @@ export function DriverIncidentsList() {
                   <div>
                     <p>
                       <span className="font-medium">Severity:</span>{" "}
-                      {event.payload.severity || "N/A"}
+                      {String(event.payload.severity || "N/A")}
                     </p>
                     {event.payload.description && (
-                      <p className="mt-1">{event.payload.description}</p>
+                      <p className="mt-1">{String(event.payload.description)}</p>
                     )}
                   </div>
                 )}
@@ -120,12 +120,12 @@ export function DriverIncidentsList() {
                   <div>
                     <p>
                       <span className="font-medium">Liters:</span>{" "}
-                      {event.payload.liters || "N/A"}
+                      {event.payload.liters ? String(event.payload.liters) : "N/A"}
                     </p>
                     <p>
                       <span className="font-medium">Amount:</span>{" "}
                       {event.payload.amount
-                        ? `R${event.payload.amount}`
+                        ? `R${String(event.payload.amount)}`
                         : "N/A"}
                     </p>
                   </div>
@@ -134,16 +134,16 @@ export function DriverIncidentsList() {
                   <div>
                     <p>
                       <span className="font-medium">Recipient:</span>{" "}
-                      {event.payload.recipient || "N/A"}
+                      {String(event.payload.recipient || "N/A")}
                     </p>
                   </div>
                 )}
                 {event.type === "note" && (
                   <div>
                     {event.payload.note && (
-                      <p>{event.payload.note}</p>
+                      <p>{String(event.payload.note)}</p>
                     )}
-                    {event.payload.files && event.payload.files.length > 0 && (
+                    {Array.isArray(event.payload.files) && event.payload.files.length > 0 && (
                       <p className="mt-1 text-xs text-gray-500">
                         {event.payload.files.length} file(s) attached
                       </p>
