@@ -5,6 +5,62 @@ All notable changes to the DMOC Web (PWA) project will be documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2025-01-XX
+
+### Added
+
+- **Driver App Module** - Complete driver-facing mobile application with dedicated routes, components, and functionality
+- **Driver-Specific Routes** - New `/driver/**` route structure with role-based access control (RBAC) enforcement
+- **Driver tRPC Router** - Server-side router (`driverRouter`) with strict access control ensuring drivers can only access their own data
+- **Driver Authentication Flow** - Enhanced NextAuth configuration to include `driverId` in session, with automatic role-based redirection after sign-in
+- **Driver Header Component** - Mobile-optimized header with user menu, theme-aware avatar, and sign-out functionality
+- **Driver Bottom Navigation** - Mobile-first bottom nav with Home, Active Trips, Completed Trips, and Reports sections
+- **Trip Organization by Route** - Trips are automatically grouped by preassigned route, then sorted by scheduled date/time within each route
+- **Trip List Views** - Separate pages for active trips (`/driver/trips/active`) and completed trips (`/driver/trips/completed`)
+- **Trip Detail View** - Full trip details page with real-time map integration, Socket.IO live tracking, location history, and quick actions
+- **Driver Forms** - Complete form components for:
+  - Incident reporting (severity, description)
+  - Fuel logging (liters, amount, odometer)
+  - Media uploads (photos/videos with notes)
+  - Proof of Delivery (recipient name, PIN/OTP)
+- **Real-Time Location Tracking** - Integration with Socket.IO for live GPS updates and location history queries
+- **Map Component Integration** - Replaced placeholder with real Map component showing trip locations, stops, and live tracking data
+- **Driver Incidents/Reports Page** - Centralized view (`/driver/incidents`) for all driver-submitted events (incidents, fuel logs, PODs, media)
+- **Driver-Scoped Data Access** - All queries enforce strict tenant isolation and driver-specific filtering via vehicle combinations
+- **Mock Data Fallback** - Graceful fallback to mock data for testing scenarios when driver records aren't found in database
+- **Theme Integration** - Driver app respects tenant-specific themes (blue, red, amber) consistent with main dashboard
+- **PWA Features** - Install prompt component integrated into driver home page
+- **Access Control Documentation** - Created `DRIVER_ROUTES_ANALYSIS.md` documenting driver-route relationships and multi-route support
+
+### Changed
+
+- **NextAuth Session Structure** - Augmented session to include `role`, `tenantId`, `tenantSlug`, and `driverId` fields
+- **Authentication Middleware** - Enhanced edge middleware to enforce RBAC:
+  - Drivers redirected from `/dashboard/**` to `/driver`
+  - Non-drivers blocked from `/driver/**` (except admin masquerade)
+  - Post-login routing via `/post-login` page for role-based redirection
+- **Trip Data Organization** - Trips now organized by route first (preassigned in manifests), then by scheduled date/time, with active routes prioritized
+- **Driver Query Logic** - Driver-to-manifest relationships use VehicleCombination → Vehicle → Manifest chain instead of direct links
+- **Date Handling** - Implemented `z.coerce.date()` in driver router for proper ISO string to Date conversion in tRPC
+- **Form Error Handling** - All driver forms now include validation, error messages, and loading states during tRPC mutations
+
+### Fixed
+
+- **Driver Routing Bug** - Fixed hardcoded redirect to `/dashboard` after sign-in, now uses role-based routing via `/post-login`
+- **Date Serialization** - Fixed tRPC date validation errors by using `z.coerce.date()` instead of `z.date()` for proper ISO string handling
+- **Driver Record Lookup** - Enhanced driver router to handle fallback/test drivers gracefully without throwing errors
+- **Mock Data Visibility** - Test drivers can now see mock data when real driver records aren't found, enabling development/testing workflows
+- **Vehicle Combination Queries** - Fixed driver-to-manifest relationship queries to correctly traverse VehicleCombination → Vehicle → Manifest relationship chain
+- **404 Route Errors** - Added missing `/driver/incidents` page that was referenced in bottom navigation but didn't exist
+- **Manifest-Horse Relation** - Added missing `horse` relation to Manifest model in Prisma schema, fixed `driver.getMyLocationHistory` endpoint that was referencing non-existent `vehicleCombinations` field on Manifest
+
+### Security
+
+- **Driver Data Isolation** - Strict access control ensures drivers can only see manifests assigned to their active vehicle combinations
+- **Tenant Isolation Enforcement** - All driver queries enforce tenant isolation, even for fallback/test scenarios
+- **Role-Based Route Protection** - Middleware and layout components double-check role before allowing access to driver routes
+- **Driver Event Validation** - All driver event creation (incidents, fuel, POD) verifies manifest assignment before allowing submission
+
 ## [Unreleased]
 
 ### Added

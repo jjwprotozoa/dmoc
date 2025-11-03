@@ -154,6 +154,7 @@ model Vehicle {
   offenses              Offense[]
   horseCombinations     VehicleCombination[]          @relation("HorseCombinations")
   trailerCombinations   VehicleCombinationTrailer[]   @relation("TrailerCombinations")
+  manifests             Manifest[]
 
   @@map("vehicles")
 }
@@ -240,6 +241,7 @@ model Manifest {
   invoiceState InvoiceState?  @relation(fields: [invoiceStateId], references: [id])
   location     Location?      @relation("Manifest_locationId", fields: [locationId], references: [id])
   parkLocation Location?      @relation("Manifest_parkLocationId", fields: [parkLocationId], references: [id])
+  horse        Vehicle?       @relation(fields: [horseId], references: [id], onDelete: SetNull)
 
   locations    ManifestLocation[]
   whatsapp     WhatsappData[]
