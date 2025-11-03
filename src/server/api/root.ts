@@ -1,5 +1,6 @@
 // src/server/api/root.ts
 import { clientsRouter } from './routers/clients';
+import { contactsRouter } from './routers/contacts';
 import { driversRouter } from './routers/drivers';
 import { manifestRouter } from './routers/manifest';
 import { offensesRouter } from './routers/offenses';
@@ -19,6 +20,7 @@ export const appRouter = router({
   vehicles: vehiclesRouter,
   drivers: driversRouter,
   clients: clientsRouter,
+  contacts: contactsRouter,
   vehicleCombinations: vehicleCombinationsRouter,
 });
 
