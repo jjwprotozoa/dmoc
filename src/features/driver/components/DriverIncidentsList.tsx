@@ -102,56 +102,62 @@ export function DriverIncidentsList() {
                 View Trip →
               </Link>
             )}
-            {event.payload && (
-              <div className="mt-2 text-sm text-gray-600">
-                {/* Render payload based on event type */}
-                {event.type === "incident" && (
-                  <div>
-                    <p>
-                      <span className="font-medium">Severity:</span>{" "}
-                      {String(event.payload.severity || "N/A")}
-                    </p>
-                    {event.payload.description && typeof event.payload.description === "string" && (
-                      <p className="mt-1">{event.payload.description}</p>
-                    )}
-                  </div>
-                )}
-                {event.type === "fuel" && (
-                  <div>
-                    <p>
-                      <span className="font-medium">Liters:</span>{" "}
-                      {event.payload.liters ? String(event.payload.liters) : "N/A"}
-                    </p>
-                    <p>
-                      <span className="font-medium">Amount:</span>{" "}
-                      {event.payload.amount
-                        ? `R${String(event.payload.amount)}`
-                        : "N/A"}
-                    </p>
-                  </div>
-                )}
-                {event.type === "pod" && (
-                  <div>
-                    <p>
-                      <span className="font-medium">Recipient:</span>{" "}
-                      {String(event.payload.recipient || "N/A")}
-                    </p>
-                  </div>
-                )}
-                {event.type === "note" && (
-                  <div>
-                    {event.payload.note && typeof event.payload.note === "string" && (
-                      <p>{event.payload.note}</p>
-                    )}
-                    {Array.isArray(event.payload.files) && event.payload.files.length > 0 && (
-                      <p className="mt-1 text-xs text-gray-500">
-                        {event.payload.files.length} file(s) attached
+            {event.payload && (() => {
+              const payload = event.payload;
+              const description = typeof payload.description === "string" ? payload.description : null;
+              const note = typeof payload.note === "string" ? payload.note : null;
+              
+              return (
+                <div className="mt-2 text-sm text-gray-600">
+                  {/* Render payload based on event type */}
+                  {event.type === "incident" && (
+                    <div>
+                      <p>
+                        <span className="font-medium">Severity:</span>{" "}
+                        {String(payload.severity || "N/A")}
                       </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+                      {description && (
+                        <p className="mt-1">{description}</p>
+                      )}
+                    </div>
+                  )}
+                  {event.type === "fuel" && (
+                    <div>
+                      <p>
+                        <span className="font-medium">Liters:</span>{" "}
+                        {payload.liters ? String(payload.liters) : "N/A"}
+                      </p>
+                      <p>
+                        <span className="font-medium">Amount:</span>{" "}
+                        {payload.amount
+                          ? `R${String(payload.amount)}`
+                          : "N/A"}
+                      </p>
+                    </div>
+                  )}
+                  {event.type === "pod" && (
+                    <div>
+                      <p>
+                        <span className="font-medium">Recipient:</span>{" "}
+                        {String(payload.recipient || "N/A")}
+                      </p>
+                    </div>
+                  )}
+                  {event.type === "note" && (
+                    <div>
+                      {note && (
+                        <p>{note}</p>
+                      )}
+                      {Array.isArray(payload.files) && payload.files.length > 0 && (
+                        <p className="mt-1 text-xs text-gray-500">
+                          {payload.files.length} file(s) attached
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
       ))}
