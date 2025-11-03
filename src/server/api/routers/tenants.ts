@@ -1,10 +1,11 @@
 // src/server/api/routers/tenants.ts
 import { z } from 'zod';
+import { db } from '@/lib/db';
 import { adminProcedure, router } from '../trpc';
 
 export const tenantsRouter = router({
   getAll: adminProcedure.query(async ({ ctx }) => {
-    const tenants = await ctx.db.tenant.findMany({
+    const tenants = await db.tenant.findMany({
       include: {
         organizations: {
           include: {
@@ -27,7 +28,7 @@ export const tenantsRouter = router({
   getById: adminProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const tenant = await ctx.db.tenant.findUnique({
+      const tenant = await db.tenant.findUnique({
         where: { id: input.id },
         include: {
           organizations: {
@@ -64,7 +65,7 @@ export const tenantsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const tenant = await ctx.db.tenant.create({
+      const tenant = await db.tenant.create({
         data: {
           name: input.name,
           slug: input.slug,
@@ -104,7 +105,7 @@ export const tenantsRouter = router({
         data.settings = JSON.stringify(inputData.settings);
       }
 
-      const tenant = await ctx.db.tenant.update({
+      const tenant = await db.tenant.update({
         where: { id },
         data,
       });
