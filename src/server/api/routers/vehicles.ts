@@ -5,11 +5,15 @@ import { db } from '../../../lib/db';
 import { protectedProcedure, router } from '../trpc';
 
 // Helper – ensure tenant isolation, but allow admin to see everything
-function whereTenant(tenantId: string, userRole?: string) {
+function whereTenant(tenantId: string | undefined, userRole?: string) {
   // If user is ADMIN, don't filter by tenant (can see everything)
   if (userRole === 'ADMIN') {
     console.log('🔓 [Admin] Bypassing tenant isolation - can see all vehicles');
     return {};
+  }
+  // For non-admin users, tenantId must be provided
+  if (!tenantId) {
+    throw new Error("Tenant ID is required");
   }
   return { tenantId };
 }
@@ -98,7 +102,11 @@ export const vehiclesRouter = router({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
+      // CRITICAL: Ensure tenantId exists (required for non-ADMIN users)
       const tenantId = ctx.session.user.tenantId;
+      if (!tenantId && ctx.session.user.role !== 'ADMIN') {
+        throw new Error("Tenant ID is required");
+      }
       const where: Prisma.VehicleWhereInput = {
         id: input.id,
         ...whereTenant(tenantId, ctx.session.user.role),
