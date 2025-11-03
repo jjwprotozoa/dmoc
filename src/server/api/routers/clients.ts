@@ -78,8 +78,13 @@ export const clientsRouter = router({
       
       const client = await db.client.create({
         data: {
-          tenantId,
-          ...input,
+          tenantId: tenantId as string,
+          companyId: input.companyId,
+          companyTypeId: input.companyTypeId,
+          entityTypeDescription: input.entityTypeDescription,
+          name: input.name,
+          address: input.address,
+          displayValue: input.displayValue,
         },
       });
 
