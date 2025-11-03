@@ -38,24 +38,73 @@ async function main() {
     }
 
     // Get or create the tenant
-    const tenant = await prisma.tenant.findUnique({
+    let tenant = await prisma.tenant.findUnique({
       where: { slug: 'digiwize' }
     });
 
     if (!tenant) {
-      console.error('❌ Tenant "digiwize" not found in production database');
-      console.log('💡 Please run the production seed first: npx tsx prisma/seed-production.ts');
-      return;
+      console.log('⚠️  Tenant "digiwize" not found, creating it...');
+      // Get the tenant from local database to copy it
+      const localTenant = await sqliteClient.tenant.findUnique({
+        where: { slug: 'digiwize' }
+      });
+      
+      if (localTenant) {
+        tenant = await prisma.tenant.create({
+          data: {
+            id: localTenant.id, // Use same ID to match
+            name: localTenant.name,
+            slug: localTenant.slug,
+            settings: localTenant.settings,
+          }
+        });
+        console.log(`✅ Created tenant: ${tenant.name} (${tenant.id})`);
+      } else {
+        console.error('❌ Tenant "digiwize" not found in local database either');
+        return;
+      }
+    } else {
+      console.log(`✅ Using existing tenant: ${tenant.name} (${tenant.id})`);
+      
+      // Check if we should update tenant ID to match local
+      const localTenant = await sqliteClient.tenant.findUnique({
+        where: { slug: 'digiwize' }
+      });
+      
+      if (localTenant && localTenant.id !== tenant.id) {
+        console.log(`⚠️  Tenant ID mismatch: Local=${localTenant.id}, Prod=${tenant.id}`);
+        console.log(`💡 Migrating manifests to use local tenant ID: ${localTenant.id}`);
+        // We'll use local tenant ID for migration
+      }
     }
 
-    console.log(`✅ Using tenant: ${tenant.name} (${tenant.id})`);
+    // Get local tenant to match IDs - CRITICAL for proper data sync
+    const localTenant = await sqliteClient.tenant.findUnique({
+      where: { slug: 'digiwize' }
+    });
+    
+    const targetTenantId = localTenant?.id || tenant.id;
+    
+    // If tenant IDs don't match, we need to update existing tenant or migrate data
+    if (tenant.id !== targetTenantId) {
+      console.log(`⚠️  Tenant ID mismatch detected!`);
+      console.log(`   Production tenant: ${tenant.id}`);
+      console.log(`   Local tenant: ${targetTenantId}`);
+      console.log(`   Will migrate manifests to match local tenant ID`);
+    }
 
     // Get all companies, routes, and locations from production
+    // Note: InvoiceState is global (no tenantId), Company uses orgId
+    // Use TARGET tenant ID (local) to find associated data
+    const organization = await prisma.organization.findFirst({
+      where: { tenantId: targetTenantId }
+    });
+    
     const [companies, routes, locations, invoiceStates] = await Promise.all([
-      prisma.company.findMany({ where: { tenantId: tenant.id } }),
-      prisma.route.findMany({ where: { tenantId: tenant.id } }),
-      prisma.location.findMany({ where: { tenantId: tenant.id } }),
-      prisma.invoiceState.findMany({ where: { tenantId: tenant.id } }),
+      organization ? prisma.company.findMany({ where: { orgId: organization.id } }) : [],
+      prisma.route.findMany({ where: { tenantId: targetTenantId } }),
+      prisma.location.findMany({ where: { tenantId: targetTenantId } }),
+      prisma.invoiceState.findMany(), // Global table, no tenantId
     ]);
 
     // Create maps for quick lookup
@@ -73,19 +122,45 @@ async function main() {
     let migrated = 0;
     let skipped = 0;
 
+
     for (const manifest of localManifests) {
       try {
-        // Check if manifest already exists
+        // Check if manifest already exists (by trackingId, regardless of tenant)
         const existing = await prisma.manifest.findFirst({
           where: {
-            tenantId: tenant.id,
             trackingId: manifest.trackingId,
           }
         });
 
         if (existing) {
-          console.log(`⏭️  Skipping ${manifest.trackingId} (already exists)`);
-          skipped++;
+          // Update existing manifest to match local data (especially titles!)
+          const needsUpdate = 
+            existing.title !== manifest.title ||
+            existing.status !== manifest.status ||
+            existing.tenantId !== targetTenantId;
+
+          if (needsUpdate) {
+            console.log(`🔄 Updating ${manifest.trackingId || manifest.id.slice(-8)}`);
+            await prisma.manifest.update({
+              where: { id: existing.id },
+              data: {
+                tenantId: targetTenantId,
+                title: manifest.title,
+                status: manifest.status,
+                scheduledAt: manifest.scheduledAt,
+                dateTimeAdded: manifest.dateTimeAdded,
+                dateTimeUpdated: manifest.dateTimeUpdated,
+                dateTimeEnded: manifest.dateTimeEnded,
+                tripStateId: manifest.tripStateId,
+                rmn: manifest.rmn,
+                jobNumber: manifest.jobNumber,
+                invoiceNumber: manifest.invoiceNumber,
+              }
+            });
+            migrated++; // Count as migrated since we updated it
+          } else {
+            skipped++;
+          }
           continue;
         }
 
@@ -99,11 +174,11 @@ async function main() {
         const invoiceStateId = manifest.invoiceState?.code ? 
           invoiceStateMap.get(manifest.invoiceState.code)?.id : null;
 
-        // Create manifest in production
+        // Create manifest in production (use local tenant ID to match)
         await prisma.manifest.create({
           data: {
             id: manifest.id,
-            tenantId: tenant.id,
+            tenantId: targetTenantId, // Use local tenant ID
             title: manifest.title,
             status: manifest.status,
             trackingId: manifest.trackingId,

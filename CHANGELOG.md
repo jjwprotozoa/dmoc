@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Database Migration Scripts** - Created comprehensive migration tools (`scripts/force-migrate-all-manifests.ts`, `scripts/migrate-all-data.ts`) to synchronize data from local SQLite to production PostgreSQL
+- **Production Verification Scripts** - Added `scripts/verify-production-admin.ts` to verify admin setup and data visibility in production environment
+- **Database Sync Documentation** - Created `DATABASE_SYNC_STRATEGY.md` and `DEPLOYMENT_SUMMARY.md` documenting the database architecture and migration workflow
 - **Admin Bypass for Multi-Tenant Access** - Admin users can now view all vehicles, contacts, and logistics officers across all tenants (matching manifests functionality)
 - **Locations Router and Page** - Complete CRUD operations for operational locations with tenant isolation
 - **Locations Management Interface** - Full-featured locations page with search, create, edit, and delete functionality
@@ -18,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **TypeScript Configuration** - Updated `tsconfig.json` to exclude `scripts` directory from Next.js build compilation, preventing build errors from migration scripts
+- **Migration Scripts** - Enhanced `prisma/seed-production-manifests.ts` to update existing manifests with correct tenant IDs and data from local environment
+- **Package Scripts** - Added `db:migrate:all` npm script for comprehensive data migration from local to production
 - **Vehicles Router** - Added `list` procedure with advanced filtering (search, status, type, date range), `getFilterCounts` procedure for filter UI, and `whereTenant()` helper function for consistent admin bypass pattern across all queries
 - **Vehicles Router Default Filtering** - Removed default active-only filter to show all vehicles by default, with optional `includeInactive` parameter and smart status filtering based on search queries
 - **Vehicles Seed Script** - Changed from parallel batch processing (100 vehicles at once) to sequential processing with progress updates every 50 vehicles to prevent SQLite timeout errors
@@ -35,6 +41,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Production Data Synchronization** - Resolved discrepancy between local and production data by migrating all 309 manifests from local SQLite to production PostgreSQL
+- **Tenant ID Mismatch** - Fixed tenant ID inconsistencies that prevented manifests from appearing in production by ensuring all migrated data uses correct production tenant IDs
+- **Production Deployment** - Fixed deployed version showing placeholder data instead of real manifests by implementing comprehensive data migration workflow
 - **SQLite Seed Script Timeout Errors** - Fixed vehicle import timeouts by switching from parallel Promise.all() processing to sequential processing, preventing SQLite lock contention during bulk imports
 - **Vehicle Query Debugging** - Added comprehensive logging to vehicles router (getAll, list, getFilterCounts) to diagnose tenantId mismatches and empty result issues
 - **Vehicle Empty State Messaging** - Enhanced empty state display to differentiate between no vehicles imported vs. no vehicles matching filters, with helpful seed script instructions
