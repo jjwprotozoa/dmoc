@@ -9,26 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Currency mapping by country (default to ZAR for South Africa, common African currencies)
-const COUNTRY_CURRENCIES: Record<string, string> = {
-  // South Africa
-  "South Africa": "ZAR",
-  "ZA": "ZAR",
-  // Common African currencies
-  "Zambia": "ZMW",
-  "Zimbabwe": "USD", // Zimbabwe uses USD
-  "Botswana": "BWP",
-  "Namibia": "NAD",
-  "Mozambique": "MZN",
-  "Angola": "AOA",
-  "Zambia": "ZMW",
-  "Malawi": "MWK",
-  "Tanzania": "TZS",
-  "Kenya": "KES",
-  // Default
-  "default": "ZAR",
-};
-
 // Common currencies for dropdown
 const COMMON_CURRENCIES = [
   { code: "ZAR", name: "ZAR - South African Rand" },
@@ -43,19 +23,7 @@ const COMMON_CURRENCIES = [
   { code: "TZS", name: "TZS - Tanzanian Shilling" },
 ];
 
-function getCurrencyFromCountry(countryName?: string | null, countryId?: number | null): string {
-  if (!countryName && !countryId) return "ZAR"; // Default
-  
-  // Try to match country name
-  if (countryName) {
-    const currency = COUNTRY_CURRENCIES[countryName] || COUNTRY_CURRENCIES["default"];
-    if (currency) return currency;
-  }
-  
-  return "ZAR"; // Default fallback
-}
-
-export function FuelForm({ manifestId, driverId }: { manifestId: string; driverId: string }) {
+export function FuelForm({ manifestId, driverId: _driverId }: { manifestId: string; driverId: string }) {
   const router = useRouter();
   const [liters, setLiters] = useState("");
   const [amount, setAmount] = useState("");
@@ -63,28 +31,17 @@ export function FuelForm({ manifestId, driverId }: { manifestId: string; driverI
   const [odo, setOdo] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch manifest to get country/route info for currency detection
+  // Fetch manifest to get route info (country detection removed as countryId doesn't exist on manifest)
   const { data: manifest } = trpc.driver.getMyTripById.useQuery(
     { manifestId },
     {
       enabled: !!manifestId,
       select: (data) => ({
-        countryId: data.countryId,
         location: data.location,
         route: data.route,
       }),
     }
   );
-
-  // Set currency based on manifest country when available
-  useEffect(() => {
-    if (manifest?.countryId) {
-      // TODO: Lookup country name from countryId to determine currency
-      // For now, default to ZAR (South African Rand) which is most common
-      // Can be enhanced later with country lookup
-      setCurrency("ZAR");
-    }
-  }, [manifest]);
 
   const createEvent = trpc.driver.createEvent.useMutation({
     onSuccess: () => {

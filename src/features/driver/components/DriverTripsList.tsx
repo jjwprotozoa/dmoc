@@ -48,7 +48,7 @@ export function DriverTripsList({ dateFrom, dateTo, status }: DriverTripsListPro
       : undefined,
     routeName: m.route?.name || m.title || "Untitled Route",
     vehicle: undefined, // TODO: Get from vehicle combinations
-    state: (m.status?.toLowerCase() as any) || "unstarted",
+    state: (m.status?.toLowerCase() as "unstarted" | "enroute" | "arrived" | "delayed" | "completed") || "unstarted",
     eta: m.scheduledAt || undefined,
     stops: [
       ...(m.location
@@ -146,9 +146,6 @@ export function DriverTripsList({ dateFrom, dateTo, status }: DriverTripsListPro
     <div className="space-y-6">
       {routeNames.map((routeName) => {
         const routeTrips = tripsByRoute[routeName];
-        const hasActiveTrips = routeTrips.some(
-          (t) => t.state !== "completed"
-        );
         
         return (
           <div key={routeName} className="space-y-3">

@@ -30,9 +30,24 @@ interface TripDetailViewProps {
   manifestId: string;
 }
 
+interface PingData {
+  id: string;
+  lat?: number;
+  lng?: number;
+  latitude?: number;
+  longitude?: number;
+  speed?: number;
+  heading?: number;
+  timestamp?: string;
+  device?: {
+    id?: string;
+    externalId?: string;
+  };
+}
+
 export function TripDetailView({ manifestId }: TripDetailViewProps) {
   const { socket, isConnected } = useSocket();
-  const [latestPing, setLatestPing] = useState<any>(null);
+  const [latestPing, setLatestPing] = useState<PingData | null>(null);
 
   // Fetch trip data - backend enforces driver access control
   const { data: manifest, isLoading, error } = trpc.driver.getMyTripById.useQuery({
@@ -92,29 +107,29 @@ export function TripDetailView({ manifestId }: TripDetailViewProps) {
   const pings = [
     ...(locationHistory || []).map((ping) => ({
       id: ping.id,
-      lat: ping.latitude,
-      lng: ping.longitude,
+      lat: ping.lat,
+      lng: ping.lng,
       speed: ping.speed,
       heading: ping.heading,
-      timestamp: ping.timestamp.toISOString(),
+      timestamp: typeof ping.timestamp === 'string' ? ping.timestamp : new Date(ping.timestamp).toISOString(),
       device: {
         id: ping.device.id,
         externalId: ping.device.externalId || "Tracker",
       },
     })),
     // Add latest real-time ping if available
-    ...(latestPing
+    ...(latestPing && (latestPing.lat !== undefined || latestPing.latitude !== undefined) && (latestPing.lng !== undefined || latestPing.longitude !== undefined)
       ? [
           {
             id: `realtime-${latestPing.id}`,
-            lat: latestPing.lat || latestPing.latitude,
-            lng: latestPing.lng || latestPing.longitude,
-            speed: latestPing.speed,
-            heading: latestPing.heading,
-            timestamp: latestPing.timestamp || new Date().toISOString(),
+            lat: (latestPing.lat ?? latestPing.latitude) ?? 0,
+            lng: (latestPing.lng ?? latestPing.longitude) ?? 0,
+            speed: latestPing.speed ?? null,
+            heading: latestPing.heading ?? null,
+            timestamp: latestPing.timestamp ?? new Date().toISOString(),
             device: {
-              id: latestPing.device?.id || "realtime",
-              externalId: latestPing.device?.externalId || "Live",
+              id: latestPing.device?.id ?? "realtime",
+              externalId: latestPing.device?.externalId ?? "Live",
             },
           },
         ]

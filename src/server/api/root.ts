@@ -1,7 +1,11 @@
 // src/server/api/root.ts
 import { clientsRouter } from './routers/clients';
 import { contactsRouter } from './routers/contacts';
+import { countriesRouter } from './routers/countries';
+import { driverRouter } from './routers/driver';
 import { driversRouter } from './routers/drivers';
+import { locationsRouter } from './routers/locations';
+import { logisticsOfficersRouter } from './routers/logistics-officers';
 import { manifestRouter } from './routers/manifest';
 import { offensesRouter } from './routers/offenses';
 import { tenantsRouter } from './routers/tenants';
@@ -19,8 +23,12 @@ export const appRouter = router({
   tenants: tenantsRouter,
   vehicles: vehiclesRouter,
   drivers: driversRouter,
+  driver: driverRouter,
   clients: clientsRouter,
   contacts: contactsRouter,
+  countries: countriesRouter,
+  locations: locationsRouter,
+  logisticsOfficers: logisticsOfficersRouter,
   vehicleCombinations: vehicleCombinationsRouter,
 });
 

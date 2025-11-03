@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-export function MediaForm({ manifestId, driverId }: { manifestId: string; driverId: string }) {
+export function MediaForm({ manifestId, driverId: _driverId }: { manifestId: string; driverId: string }) {
   const router = useRouter();
   const [note, setNote] = useState("");
   const [files, setFiles] = useState<File[]>([]);
