@@ -63,6 +63,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **TypeScript Build Errors** - Fixed multiple TypeScript compilation errors blocking Vercel deployment:
+  - Added tenantId validation in all router procedures (driver, manifest, vehicles, vehicle-combinations) to ensure `string | undefined` is properly handled
+  - Updated `whereTenant` helper functions to accept `string | undefined` and validate for non-ADMIN users
+  - Replaced `ctx.db` (possibly null) with direct `db` imports from `@/lib/db` in all routers (offenses, tenants, vehicle-combinations, tracking, uploads)
+  - Removed unused `ctx` parameters to resolve ESLint errors in tenants, tracking, and uploads routers
+  - Fixed type mismatches in Prisma create operations where tenantId was required but could be undefined
+- **Database Context Type Safety** - Replaced potentially null `ctx.db` references with direct database imports to prevent build-time errors when database connection isn't available
+- **Tenant Isolation Type Safety** - Enhanced tenant isolation validation across all routers to ensure proper type checking and error handling for ADMIN vs non-ADMIN user scenarios
+
 ### Added
 
 - **Database Migration Scripts** - Created comprehensive migration tools (`scripts/force-migrate-all-manifests.ts`, `scripts/migrate-all-data.ts`) to synchronize data from local SQLite to production PostgreSQL
