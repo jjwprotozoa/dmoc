@@ -72,11 +72,17 @@ export const vehicleCombinationsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // CRITICAL: Ensure tenantId exists (required for all mutations)
+      const tenantId = ctx.session.user.tenantId;
+      if (!tenantId) {
+        throw new Error("Tenant ID is required");
+      }
+
       // Verify all vehicles belong to the tenant
       const vehicles = await ctx.db.vehicle.findMany({
         where: {
           id: { in: [input.horseId, ...input.trailerIds] },
-          tenantId: ctx.session.user.tenantId,
+          tenantId,
         },
       });
 
@@ -97,7 +103,7 @@ export const vehicleCombinationsRouter = router({
       // Create the combination
       const combination = await ctx.db.vehicleCombination.create({
         data: {
-          tenantId: ctx.session.user.tenantId,
+          tenantId,
           horseId: input.horseId,
           driver: input.driver,
           status: input.status,
