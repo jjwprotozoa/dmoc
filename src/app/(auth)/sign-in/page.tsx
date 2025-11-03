@@ -4,21 +4,52 @@
 import { Lock, LogIn, Mail } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function SignInPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [credentialsFilled, setCredentialsFilled] = useState(false);
+  const [credentialsFilled, setCredentialsFilled] = useState<'admin' | 'driver' | false>(false);
   const router = useRouter();
 
+  // Debug logging
+  useEffect(() => {
+    console.log('📧 Email changed to:', email);
+  }, [email]);
+
+  useEffect(() => {
+    console.log('🔑 Password changed to:', password);
+  }, [password]);
+
   const fillDemoCredentials = () => {
+    console.log('🔐 Filling demo credentials...');
+    console.log('📧 Current email:', email);
+    console.log('🔑 Current password:', password);
+    
     setEmail('admin@digiwize.com');
     setPassword('admin123');
     setError(''); // Clear any existing errors
-    setCredentialsFilled(true);
+    setCredentialsFilled('admin');
+
+    console.log('✅ Credentials set to admin@digiwize.com / admin123');
+
+    // Reset the visual feedback after 2 seconds
+    setTimeout(() => setCredentialsFilled(false), 2000);
+  };
+
+  const fillDriverCredentials = () => {
+    console.log('🔐 Filling driver credentials...');
+    console.log('📧 Current email:', email);
+    console.log('🔑 Current password:', password);
+    
+    setEmail('driver@test.com');
+    setPassword('driver123');
+    setError(''); // Clear any existing errors
+    setCredentialsFilled('driver');
+
+    console.log('✅ Credentials set to driver@test.com / driver123');
 
     // Reset the visual feedback after 2 seconds
     setTimeout(() => setCredentialsFilled(false), 2000);
@@ -39,7 +70,9 @@ export default function SignInPage() {
       if (result?.error) {
         setError('Invalid email or password');
       } else {
-        router.push('/dashboard');
+        // Redirect to post-login which handles role-based routing
+        router.push('/post-login');
+        router.refresh();
       }
     } catch {
       setError('An error occurred. Please try again.');
@@ -126,27 +159,54 @@ export default function SignInPage() {
             </button>
           </div>
 
-          <div className="text-center">
+          <div className="text-center space-y-3">
             <p className="text-sm text-gray-600 mb-3">Demo credentials:</p>
-            <button
-              type="button"
-              onClick={fillDemoCredentials}
-              className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium transition-all duration-200 ${
-                credentialsFilled
-                  ? 'border-green-300 bg-green-50 text-green-700'
-                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
-            >
-              <Mail
-                className={`h-4 w-4 mr-2 ${credentialsFilled ? 'text-green-500' : 'text-gray-400'}`}
-              />
-              admin@digiwize.com
-              <span className="mx-2 text-gray-400">/</span>
-              <Lock
-                className={`h-4 w-4 mr-2 ${credentialsFilled ? 'text-green-500' : 'text-gray-400'}`}
-              />
-              admin123
-            </button>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  console.log('🖱️ Admin button clicked!', e);
+                  fillDemoCredentials();
+                }}
+                className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium transition-all duration-200 w-full justify-center ${
+                  credentialsFilled === 'admin'
+                    ? 'border-green-300 bg-green-50 text-green-700'
+                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+              >
+                <Mail
+                  className={`h-4 w-4 mr-2 ${credentialsFilled === 'admin' ? 'text-green-500' : 'text-gray-400'}`}
+                />
+                admin@digiwize.com
+                <span className="mx-2 text-gray-400">/</span>
+                <Lock
+                  className={`h-4 w-4 mr-2 ${credentialsFilled === 'admin' ? 'text-green-500' : 'text-gray-400'}`}
+                />
+                admin123
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  console.log('🖱️ Driver button clicked!', e);
+                  fillDriverCredentials();
+                }}
+                className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium transition-all duration-200 w-full justify-center ${
+                  credentialsFilled === 'driver'
+                    ? 'border-green-300 bg-green-50 text-green-700'
+                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+              >
+                <Mail
+                  className={`h-4 w-4 mr-2 ${credentialsFilled === 'driver' ? 'text-green-500' : 'text-gray-400'}`}
+                />
+                driver@test.com
+                <span className="mx-2 text-gray-400">/</span>
+                <Lock
+                  className={`h-4 w-4 mr-2 ${credentialsFilled === 'driver' ? 'text-green-500' : 'text-gray-400'}`}
+                />
+                driver123
+              </button>
+            </div>
             <p
               className={`text-xs mt-2 transition-colors duration-200 ${
                 credentialsFilled ? 'text-green-600' : 'text-gray-500'
