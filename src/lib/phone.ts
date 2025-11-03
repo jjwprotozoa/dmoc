@@ -1,11 +1,13 @@
 // src/lib/phone.ts
 // Phone number helpers using libphonenumber-js for validation and formatting
 
-import { AsYouType, parsePhoneNumberFromString, isValidPhoneNumber } from 'libphonenumber-js';
+import { AsYouType, parsePhoneNumberFromString, isValidPhoneNumber, type CountryCode } from 'libphonenumber-js';
 
 export function formatAsYouTypeLocal(input: string, countryIso2?: string) {
   try {
-    const typer = new AsYouType(countryIso2);
+    // AsYouType constructor accepts CountryCode (specific string literal union) or undefined
+    // Type cast the string to CountryCode if provided, otherwise pass undefined
+    const typer = countryIso2 ? new AsYouType(countryIso2 as CountryCode) : new AsYouType();
     return typer.input(input);
   } catch {
     return input;
