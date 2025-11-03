@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function PodForm({ manifestId, driverId: _driverId }: { manifestId: string; driverId: string }) {
+export function PodForm({ manifestId }: { manifestId: string; driverId: string }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [pin, setPin] = useState("");

@@ -66,7 +66,7 @@ const REASONS_FOR_INCIDENT = [
   "WRECKLESS DRIVING",
 ] as const;
 
-export function IncidentForm({ manifestId, driverId: _driverId }: { manifestId: string; driverId: string }) {
+export function IncidentForm({ manifestId }: { manifestId: string; driverId: string }) {
   const router = useRouter();
   const [causedBy, setCausedBy] = useState<string>("");
   const [severity, setSeverity] = useState<string>("");

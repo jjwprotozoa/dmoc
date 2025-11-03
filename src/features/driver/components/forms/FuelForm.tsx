@@ -1,7 +1,7 @@
 // src/features/driver/components/forms/FuelForm.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ const COMMON_CURRENCIES = [
   { code: "TZS", name: "TZS - Tanzanian Shilling" },
 ];
 
-export function FuelForm({ manifestId, driverId: _driverId }: { manifestId: string; driverId: string }) {
+export function FuelForm({ manifestId }: { manifestId: string; driverId: string }) {
   const router = useRouter();
   const [liters, setLiters] = useState("");
   const [amount, setAmount] = useState("");
