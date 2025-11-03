@@ -22,7 +22,7 @@ export const driverRouter = router({
       }
 
       // CRITICAL: Get driverId from session (must be set during login)
-      const driverId = ctx.session.user.driverId;
+      const driverId = (ctx.session.user as { driverId?: string | null }).driverId;
       if (!driverId) {
         // Return empty results if no driverId (for testing scenarios)
         return [];
@@ -250,7 +250,7 @@ export const driverRouter = router({
         throw new Error("Access denied: Driver role required");
       }
 
-      const driverId = ctx.session.user.driverId;
+      const driverId = (ctx.session.user as { driverId?: string | null }).driverId;
       if (!driverId) {
         throw new Error("Driver ID not found in session");
       }
@@ -375,7 +375,7 @@ export const driverRouter = router({
         throw new Error("Access denied: Driver role required");
       }
 
-      const driverId = ctx.session.user.driverId;
+      const driverId = (ctx.session.user as { driverId?: string | null }).driverId;
       if (!driverId) {
         throw new Error("Driver ID not found in session");
       }
@@ -449,7 +449,7 @@ export const driverRouter = router({
         throw new Error("Access denied: Driver role required");
       }
 
-      const driverId = ctx.session.user.driverId;
+      const driverId = (ctx.session.user as { driverId?: string | null }).driverId;
       if (!driverId) {
         throw new Error("Driver ID not found in session");
       }
