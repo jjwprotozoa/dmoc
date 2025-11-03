@@ -5,6 +5,43 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { protectedProcedure, router } from "../trpc";
 
+// Inline mock data for testing (when driver records don't exist in DB)
+const MOCK_TRIPS = [
+  {
+    id: "M-1001",
+    jobNumber: "J-8842",
+    clientName: "C****",
+    routeName: "Cape Town → Paarl",
+    vehicle: { id: "V-12", name: "Horse 12", plate: "CA 123-456" },
+    state: "unstarted" as const,
+    eta: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+    lastSignal: {
+      trackerId: "T-7938",
+      source: "traccar" as const,
+      lat: -33.9249,
+      lng: 18.4241,
+      fixTime: new Date().toISOString(),
+    },
+    stops: [
+      { id: "S-1", name: "Depot", lat: -33.93, lng: 18.42, reached: false },
+      { id: "S-2", name: "Client A", lat: -33.72, lng: 18.96, reached: false },
+    ],
+  },
+  {
+    id: "M-1002",
+    jobNumber: "J-8843",
+    clientName: "D****",
+    routeName: "CT → Malmesbury",
+    vehicle: { id: "V-18", name: "Horse 18", plate: "CA 987-654" },
+    state: "enroute" as const,
+    eta: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+    stops: [
+      { id: "S-3", name: "Depot", lat: -33.93, lng: 18.42, reached: true },
+      { id: "S-4", name: "Client B", lat: -33.46, lng: 18.73, reached: false },
+    ],
+  },
+];
+
 export const driverRouter = router({
   // Get trips assigned to the current driver only
   getMyTrips: protectedProcedure
@@ -41,10 +78,8 @@ export const driverRouter = router({
         console.warn(`[Driver Router] Driver record not found for driverId: ${driverId}, returning mock data for testing`);
         
         // Return mock data for testing - in production this should return empty
-        const { mockTrips } = await import("../../../../features/driver/mock");
-        
         // Filter mock data by status if provided
-        let filteredTrips = mockTrips;
+        let filteredTrips = MOCK_TRIPS;
         if (input.status) {
           filteredTrips = mockTrips.filter(t => {
             const statusMap: Record<string, string> = {
@@ -119,7 +154,7 @@ export const driverRouter = router({
       // If no vehicle combinations found, return mock data for testing
       if (horseIds.length === 0) {
         console.warn(`[Driver Router] No vehicle combinations found for driver ${driver.name}, returning mock data for testing`);
-        const { mockTrips } = await import("../../../../features/driver/mock");
+        const mockTrips = MOCK_TRIPS;
         let filteredTrips = mockTrips;
         if (input.status) {
           filteredTrips = mockTrips.filter(t => {
@@ -201,7 +236,7 @@ export const driverRouter = router({
       // If no real manifests found, return mock data for testing
       if (manifests.length === 0) {
         console.warn(`[Driver Router] No manifests found for driver ${driver.name}, returning mock data for testing`);
-        const { mockTrips } = await import("../../../../features/driver/mock");
+        const mockTrips = MOCK_TRIPS;
         let filteredTrips = mockTrips;
         if (input.status) {
           filteredTrips = mockTrips.filter(t => {
@@ -267,7 +302,7 @@ export const driverRouter = router({
         console.warn(`[Driver Router] Driver record not found for driverId: ${driverId}, checking mock data for manifest ${input.manifestId}`);
         
         // Check if it's a mock trip ID
-        const { mockTrips } = await import("../../../../features/driver/mock");
+        const mockTrips = MOCK_TRIPS;
         const mockTrip = mockTrips.find(t => t.id === input.manifestId);
         
         if (mockTrip) {
@@ -468,7 +503,7 @@ export const driverRouter = router({
         console.warn(`[Driver Router] Driver record not found for driverId: ${driverId}, allowing event creation for testing`);
         
         // Check if it's a mock trip ID (for testing with mock data)
-        const { mockTrips } = await import("../../../../features/driver/mock");
+        const mockTrips = MOCK_TRIPS;
         const isMockTrip = mockTrips.some(t => t.id === input.manifestId);
         
         if (isMockTrip) {
@@ -520,7 +555,7 @@ export const driverRouter = router({
       const horseIds = driverCombinations.map((vc) => vc.horseId);
 
       // Check if it's a mock trip ID first (for testing)
-      const { mockTrips } = await import("../../../../features/driver/mock");
+      const mockTrips = MOCK_TRIPS;
       const isMockTrip = mockTrips.some(t => t.id === input.manifestId);
       
       if (isMockTrip) {
