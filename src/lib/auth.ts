@@ -189,12 +189,22 @@ export const authOptions: NextAuthOptions = {
       // First login: copy role/tenant/driverId from your user model
       if (user) {
         const userWithExtras = user as {
-          role?: string;
+          role?: "ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER";
           tenantId?: string;
           tenantSlug?: string;
           driverId?: string | null;
         };
-        token.role = userWithExtras.role ?? (token.role as string) ?? "VIEWER";
+        const validRoles: Array<"ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER"> = [
+          "ADMIN",
+          "MANAGER",
+          "DISPATCH",
+          "DRIVER",
+          "VIEWER",
+        ];
+        const roleValue = userWithExtras.role ?? (token.role as string | undefined);
+        token.role = roleValue && validRoles.includes(roleValue as typeof validRoles[number])
+          ? (roleValue as typeof validRoles[number])
+          : "VIEWER";
         token.tenantId = userWithExtras.tenantId ?? (token.tenantId as string | null) ?? null;
         token.tenantSlug = userWithExtras.tenantSlug ?? (token.tenantSlug as string | null) ?? null;
         token.driverId = userWithExtras.driverId ?? (token.driverId as string | null) ?? null;
