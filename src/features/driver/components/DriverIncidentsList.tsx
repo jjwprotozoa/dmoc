@@ -111,8 +111,8 @@ export function DriverIncidentsList() {
                       <span className="font-medium">Severity:</span>{" "}
                       {String(event.payload.severity || "N/A")}
                     </p>
-                    {event.payload.description && (
-                      <p className="mt-1">{String(event.payload.description)}</p>
+                    {event.payload.description && typeof event.payload.description === "string" && (
+                      <p className="mt-1">{event.payload.description}</p>
                     )}
                   </div>
                 )}
@@ -140,8 +140,8 @@ export function DriverIncidentsList() {
                 )}
                 {event.type === "note" && (
                   <div>
-                    {event.payload.note && (
-                      <p>{String(event.payload.note)}</p>
+                    {event.payload.note && typeof event.payload.note === "string" && (
+                      <p>{event.payload.note}</p>
                     )}
                     {Array.isArray(event.payload.files) && event.payload.files.length > 0 && (
                       <p className="mt-1 text-xs text-gray-500">
