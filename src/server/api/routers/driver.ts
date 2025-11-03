@@ -81,7 +81,7 @@ export const driverRouter = router({
         // Filter mock data by status if provided
         let filteredTrips = MOCK_TRIPS;
         if (input.status) {
-          filteredTrips = mockTrips.filter(t => {
+          filteredTrips = MOCK_TRIPS.filter(t => {
             const statusMap: Record<string, string> = {
               "unstarted": "unstarted",
               "enroute": "enroute",
