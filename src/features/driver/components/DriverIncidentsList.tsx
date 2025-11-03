@@ -3,7 +3,6 @@
 
 "use client";
 
-import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, Fuel, FileText, CheckCircle, Camera } from "lucide-react";
 import Link from "next/link";
@@ -26,7 +25,14 @@ function formatRelativeTime(date: Date | string): string {
 export function DriverIncidentsList() {
   // TODO: Add getMyEvents query to driver router
   // For now, show a placeholder message since event storage isn't fully implemented
-  const events: any[] = []; // Will be populated when backend is ready
+  interface DriverEvent {
+    id: string;
+    type: string;
+    manifestId?: string;
+    createdAt?: string | Date;
+    payload?: Record<string, unknown>;
+  }
+  const events: DriverEvent[] = []; // Will be populated when backend is ready
 
   if (events.length === 0) {
     return (

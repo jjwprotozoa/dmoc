@@ -10,7 +10,7 @@ import { ManifestTrip, TrackerSignal } from "./types";
 // import { trpc } from "@/lib/trpc";
 // const trips = await trpc.driver.getMyTrips.query({});
 
-export async function listTodayTrips(driverId: string): Promise<ManifestTrip[]> {
+export async function listTodayTrips(): Promise<ManifestTrip[]> {
   // TODO: Replace with tRPC call when used in client component
   // For now, use mock data (server-side will use tRPC directly)
   const { mockTrips } = await import("./mock");

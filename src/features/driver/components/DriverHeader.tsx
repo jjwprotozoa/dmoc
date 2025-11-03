@@ -4,19 +4,16 @@
 import { LogOut, User } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTheme } from "@/contexts/ThemeContext";
 
 export function DriverHeader({ 
   name, 
   email, 
-  tenantSlug,
-  avatarUrl 
+  tenantSlug
 }: { 
   name: string; 
   email?: string;
   tenantSlug?: string;
-  avatarUrl?: string;
 }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { theme } = useTheme();

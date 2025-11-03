@@ -3,10 +3,9 @@
 
 "use client";
 
-import { Home, FileText, CheckCircle, AlertCircle, User } from "lucide-react";
+import { Home, FileText, CheckCircle, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface NavItem {
@@ -46,7 +45,6 @@ const driverNavItems: NavItem[] = [
 export function DriverBottomNav() {
   const pathname = usePathname();
   const { theme } = useTheme();
-  const [activeItem, setActiveItem] = useState(pathname);
 
   // Get primary color class based on theme
   const primaryColorClass = 
@@ -65,7 +63,6 @@ export function DriverBottomNav() {
             <Link
               key={item.id}
               href={item.href}
-              onClick={() => setActiveItem(item.href)}
               className={`
                 flex flex-col items-center p-2 rounded-lg transition-all duration-200
                 ${
