@@ -71,9 +71,14 @@ export const clientsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const tenantId = ctx.session.user.tenantId;
+      if (!tenantId) {
+        throw new Error('Tenant ID is required');
+      }
+      
       const client = await db.client.create({
         data: {
-          tenantId: ctx.session.user.tenantId,
+          tenantId,
           ...input,
         },
       });
