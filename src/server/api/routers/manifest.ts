@@ -6,11 +6,15 @@ import { getSignedPutUrl, objectUri } from "@/server/lib/storage";
 import { z } from "zod";
 
 // Helper – ensure tenant isolation, but allow admin to see everything
-function whereTenant(tenantId: string, userRole?: string) {
+function whereTenant(tenantId: string | undefined, userRole?: string) {
   // If user is ADMIN, don't filter by tenant (can see everything)
   if (userRole === 'ADMIN') {
     console.log('🔓 [Admin] Bypassing tenant isolation - can see all manifests');
     return {};
+  }
+  // For non-admin users, tenantId must be provided
+  if (!tenantId) {
+    throw new Error("Tenant ID is required");
   }
   return { tenantId };
 }
@@ -27,7 +31,11 @@ export const manifestRouter = router({
         role: ctx.session.user.role
       });
       
+      // CRITICAL: Ensure tenantId exists (required for non-ADMIN users)
       const tenantId = ctx.session.user.tenantId;
+      if (!tenantId && ctx.session.user.role !== 'ADMIN') {
+        throw new Error("Tenant ID is required");
+      }
       console.log('🏢 Using tenantId:', tenantId);
       console.log('👑 User role:', ctx.session.user.role);
       
@@ -123,7 +131,11 @@ export const manifestRouter = router({
         role: ctx.session.user.role
       });
       
+      // CRITICAL: Ensure tenantId exists (required for non-ADMIN users)
       const tenantId = ctx.session.user.tenantId;
+      if (!tenantId && ctx.session.user.role !== 'ADMIN') {
+        throw new Error("Tenant ID is required");
+      }
       console.log('🏢 Using tenantId:', tenantId);
       console.log('👑 User role:', ctx.session.user.role);
       
@@ -360,10 +372,14 @@ export const manifestRouter = router({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
+      // CRITICAL: Ensure tenantId exists (required for non-ADMIN users)
       const tenantId = ctx.session.user.tenantId;
+      if (!tenantId && ctx.session.user.role !== 'ADMIN') {
+        throw new Error("Tenant ID is required");
+      }
 
       const row = await db.manifest.findFirst({
-        where: { id: input.id, tenantId },
+        where: tenantId ? { id: input.id, tenantId } : { id: input.id },
         include: {
           route: true,
           invoiceState: true,
@@ -408,7 +424,11 @@ export const manifestRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // CRITICAL: Ensure tenantId exists (required for all mutations)
       const tenantId = ctx.session.user.tenantId;
+      if (!tenantId) {
+        throw new Error("Tenant ID is required");
+      }
 
       const created = await db.manifest.create({
         data: {
@@ -456,7 +476,11 @@ export const manifestRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // CRITICAL: Ensure tenantId exists (required for all mutations)
       const tenantId = ctx.session.user.tenantId;
+      if (!tenantId) {
+        throw new Error("Tenant ID is required");
+      }
       const existing = await db.manifest.findFirst({
         where: { id: input.id, tenantId },
       });
@@ -494,7 +518,11 @@ export const manifestRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // CRITICAL: Ensure tenantId exists (required for all mutations)
       const tenantId = ctx.session.user.tenantId;
+      if (!tenantId) {
+        throw new Error("Tenant ID is required");
+      }
 
       // assert ownership
       const exists = await db.manifest.findFirst({
@@ -527,7 +555,11 @@ export const manifestRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // CRITICAL: Ensure tenantId exists (required for all mutations)
       const tenantId = ctx.session.user.tenantId;
+      if (!tenantId) {
+        throw new Error("Tenant ID is required");
+      }
       const { manifestId, filename, contentType, kind } = input;
 
       const manifest = await db.manifest.findFirst({
@@ -557,7 +589,11 @@ export const manifestRouter = router({
       }),
     )
     .mutation(async ({ ctx, input }) => {
+      // CRITICAL: Ensure tenantId exists (required for all mutations)
       const tenantId = ctx.session.user.tenantId;
+      if (!tenantId) {
+        throw new Error("Tenant ID is required");
+      }
       const { manifestId } = input;
 
       const manifest = await db.manifest.findFirst({
@@ -622,18 +658,22 @@ export const manifestRouter = router({
   timeline: protectedProcedure
     .input(z.object({ manifestId: z.string() }))
     .query(async ({ ctx, input }) => {
+      // CRITICAL: Ensure tenantId exists (required for non-ADMIN users)
       const tenantId = ctx.session.user.tenantId;
+      if (!tenantId && ctx.session.user.role !== 'ADMIN') {
+        throw new Error("Tenant ID is required");
+      }
       const [m, locs, media] = await Promise.all([
         db.manifest.findFirst({
-          where: { id: input.manifestId, tenantId },
+          where: tenantId ? { id: input.manifestId, tenantId } : { id: input.manifestId },
           select: { id: true },
         }),
         db.manifestLocation.findMany({
-          where: { tenantId, manifestId: input.manifestId },
+          where: tenantId ? { tenantId, manifestId: input.manifestId } : { manifestId: input.manifestId },
           orderBy: { recordedAt: "asc" },
         }),
         db.whatsappData.findMany({
-          where: { tenantId, manifestId: input.manifestId },
+          where: tenantId ? { tenantId, manifestId: input.manifestId } : { manifestId: input.manifestId },
           include: { files: true, media: true, locations: true },
         }),
       ]);
@@ -649,9 +689,13 @@ export const manifestRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
+      // CRITICAL: Ensure tenantId exists (required for non-ADMIN users)
       const tenantId = ctx.session.user.tenantId;
+      if (!tenantId && ctx.session.user.role !== 'ADMIN') {
+        throw new Error("Tenant ID is required");
+      }
       return db.manifestAudit.findMany({
-        where: { tenantId, manifestId: input.manifestId },
+        where: tenantId ? { tenantId, manifestId: input.manifestId } : { manifestId: input.manifestId },
         take: input.limit,
         orderBy: { createdAt: "desc" },
       });
@@ -660,6 +704,7 @@ export const manifestRouter = router({
   // Get filter counts for the filter component
   getFilterCounts: protectedProcedure
     .query(async ({ ctx }) => {
+      // CRITICAL: Ensure tenantId exists (whereTenant will validate for non-ADMIN users)
       const tenantId = ctx.session.user.tenantId;
       const baseWhere = whereTenant(tenantId, ctx.session.user.role);
       
@@ -772,6 +817,7 @@ export const manifestRouter = router({
       }).optional()
     )
     .query(async ({ ctx, input }) => {
+      // CRITICAL: Ensure tenantId exists (whereTenant will validate for non-ADMIN users)
       const tenantId = ctx.session.user.tenantId;
       const baseWhere = whereTenant(tenantId, ctx.session.user.role);
       
