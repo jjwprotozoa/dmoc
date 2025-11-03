@@ -58,6 +58,12 @@ export const driverRouter = router({
         throw new Error("Access denied: Driver role required");
       }
 
+      // CRITICAL: Ensure tenantId exists
+      const tenantId = ctx.session.user.tenantId;
+      if (!tenantId) {
+        throw new Error("Tenant ID is required");
+      }
+
       // CRITICAL: Get driverId from session (must be set during login)
       const driverId = (ctx.session.user as { driverId?: string | null }).driverId;
       if (!driverId) {
@@ -69,7 +75,7 @@ export const driverRouter = router({
       const driver = await db.driver.findFirst({
         where: {
           id: driverId,
-          tenantId: ctx.session.user.tenantId,
+          tenantId,
         },
       });
 
@@ -142,7 +148,7 @@ export const driverRouter = router({
       // First, find vehicle combinations for this driver
       const driverCombinations = await db.vehicleCombination.findMany({
         where: {
-          tenantId: ctx.session.user.tenantId,
+          tenantId,
           driver: driver.name,
           status: { in: ["Active", "In Transit"] }, // Only active combinations
         },
@@ -201,7 +207,7 @@ export const driverRouter = router({
           lte?: Date;
         };
       } = {
-        tenantId: ctx.session.user.tenantId,
+        tenantId,
         horseId: { in: horseIds },
       };
 
@@ -293,6 +299,12 @@ export const driverRouter = router({
         throw new Error("Access denied: Driver role required");
       }
 
+      // CRITICAL: Ensure tenantId exists
+      const tenantId = ctx.session.user.tenantId;
+      if (!tenantId) {
+        throw new Error("Tenant ID is required");
+      }
+
       const driverId = (ctx.session.user as { driverId?: string | null }).driverId;
       if (!driverId) {
         throw new Error("Driver ID not found in session");
@@ -301,7 +313,7 @@ export const driverRouter = router({
       const driver = await db.driver.findFirst({
         where: {
           id: driverId,
-          tenantId: ctx.session.user.tenantId,
+          tenantId,
         },
       });
 
@@ -350,7 +362,7 @@ export const driverRouter = router({
         const manifest = await db.manifest.findFirst({
           where: {
             id: input.manifestId,
-            tenantId: ctx.session.user.tenantId,
+            tenantId,
           },
           include: {
             route: true,
@@ -371,7 +383,7 @@ export const driverRouter = router({
       // Check if manifest's horseId matches a vehicle combination for this driver
       const driverCombinations = await db.vehicleCombination.findMany({
         where: {
-          tenantId: ctx.session.user.tenantId,
+          tenantId,
           driver: driver.name,
           status: { in: ["Active", "In Transit"] },
         },
@@ -387,7 +399,7 @@ export const driverRouter = router({
       const manifest = await db.manifest.findFirst({
         where: {
           id: input.manifestId,
-          tenantId: ctx.session.user.tenantId,
+          tenantId,
           horseId: { in: horseIds },
         },
         include: {
@@ -418,6 +430,12 @@ export const driverRouter = router({
         throw new Error("Access denied: Driver role required");
       }
 
+      // CRITICAL: Ensure tenantId exists
+      const tenantId = ctx.session.user.tenantId;
+      if (!tenantId) {
+        throw new Error("Tenant ID is required");
+      }
+
       const driverId = (ctx.session.user as { driverId?: string | null }).driverId;
       if (!driverId) {
         throw new Error("Driver ID not found in session");
@@ -427,7 +445,7 @@ export const driverRouter = router({
       const manifest = await db.manifest.findFirst({
         where: {
           id: input.manifestId,
-          tenantId: ctx.session.user.tenantId,
+          tenantId,
         },
         include: {
           horse: {
@@ -492,6 +510,12 @@ export const driverRouter = router({
         throw new Error("Access denied: Driver role required");
       }
 
+      // CRITICAL: Ensure tenantId exists
+      const tenantId = ctx.session.user.tenantId;
+      if (!tenantId) {
+        throw new Error("Tenant ID is required");
+      }
+
       const driverId = (ctx.session.user as { driverId?: string | null }).driverId;
       if (!driverId) {
         throw new Error("Driver ID not found in session");
@@ -501,7 +525,7 @@ export const driverRouter = router({
       const driver = await db.driver.findFirst({
         where: {
           id: driverId,
-          tenantId: ctx.session.user.tenantId,
+          tenantId,
         },
       });
 
@@ -531,7 +555,7 @@ export const driverRouter = router({
         const manifest = await db.manifest.findFirst({
           where: {
             id: input.manifestId,
-            tenantId: ctx.session.user.tenantId,
+            tenantId,
           },
         });
 
@@ -553,7 +577,7 @@ export const driverRouter = router({
       // Check if manifest's horseId matches a vehicle combination for this driver
       const driverCombinations = await db.vehicleCombination.findMany({
         where: {
-          tenantId: ctx.session.user.tenantId,
+          tenantId,
           driver: driver.name,
           status: { in: ["Active", "In Transit"] },
         },
@@ -582,7 +606,7 @@ export const driverRouter = router({
       const manifest = await db.manifest.findFirst({
         where: {
           id: input.manifestId,
-          tenantId: ctx.session.user.tenantId,
+          tenantId,
           ...(horseIds.length > 0 && { horseId: { in: horseIds } }),
         },
       });
