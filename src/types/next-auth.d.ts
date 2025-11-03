@@ -1,8 +1,6 @@
 // src/types/next-auth.d.ts
 // NextAuth type augmentation for role-based access control
 
-import NextAuth from "next-auth";
-
 declare module "next-auth" {
   interface Session {
     user: {
