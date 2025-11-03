@@ -24,7 +24,7 @@ const publicRoutes = [
 ];
 
 // Define protected routes that require authentication
-const protectedRoutes = ['/dashboard', '/api/trpc'];
+const protectedRoutes = ['/dashboard', '/api/trpc', '/driver'];
 
 // Define admin-only routes (Digiwize admins can access all tenants)
 const adminRoutes = ['/admin', '/api/admin'];
@@ -145,7 +145,7 @@ export async function middleware(request: NextRequest) {
 
     // If no valid token, redirect to sign-in for protected routes
     if (!token) {
-      if (isProtectedRoute(pathname) || isAdminRoute(pathname)) {
+      if (isProtectedRoute(pathname) || isAdminRoute(pathname) || pathname.startsWith('/driver')) {
         const signInUrl = new URL('/sign-in', request.url);
         signInUrl.searchParams.set('callbackUrl', pathname);
         return NextResponse.redirect(signInUrl);
@@ -155,9 +155,24 @@ export async function middleware(request: NextRequest) {
     }
 
     // Extract user information from token
-    const userRole = token.role || 'VIEWER';
-    const userTenantId = token.tenantId;
-    const userTenantSlug = token.tenantSlug;
+    const userRole = (token.role as string) || 'VIEWER';
+    const userTenantId = token.tenantId as string | undefined;
+    const userTenantSlug = token.tenantSlug as string | undefined;
+
+    // Drivers cannot access /dashboard
+    if (userRole === 'DRIVER' && pathname.startsWith('/dashboard')) {
+      const driverUrl = new URL('/driver', request.url);
+      return NextResponse.redirect(driverUrl);
+    }
+
+    // Non-drivers cannot access /driver (except admin masquerade ?impersonate=driver)
+    const masquerade = request.nextUrl.searchParams.get('impersonate') === 'driver';
+    if (userRole !== 'DRIVER' && pathname.startsWith('/driver')) {
+      if (!(userRole === 'ADMIN' && masquerade)) {
+        const dashboardUrl = new URL('/dashboard', request.url);
+        return NextResponse.redirect(dashboardUrl);
+      }
+    }
 
     // Check admin route access
     if (isAdminRoute(pathname)) {
@@ -170,20 +185,24 @@ export async function middleware(request: NextRequest) {
 
     // Check role-based permissions for protected routes
     if (isProtectedRoute(pathname)) {
-      if (!hasPermission(userRole, pathname)) {
+      // Skip permission check for /driver routes (handled above)
+      if (!pathname.startsWith('/driver') && !hasPermission(userRole, pathname)) {
         // User doesn't have permission for this route
         return NextResponse.redirect(new URL('/dashboard', request.url));
       }
 
-      // Validate tenant access
-      if (!validateTenantAccess(userTenantId, userRole, pathname)) {
+      // Validate tenant access (skip for /driver routes)
+      if (!pathname.startsWith('/driver') && !validateTenantAccess(userTenantId || '', userRole, pathname)) {
         // User doesn't have access to this tenant's data
         return NextResponse.redirect(new URL('/dashboard', request.url));
       }
     }
 
-    // If user is authenticated and trying to access root, redirect to dashboard
+    // If user is authenticated and trying to access root, redirect based on role
     if (pathname === '/') {
+      if (userRole === 'DRIVER') {
+        return NextResponse.redirect(new URL('/driver', request.url));
+      }
       return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 

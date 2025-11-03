@@ -1,37 +1,9 @@
 // src/lib/auth.ts
+// NextAuth configuration with driverId lookup and role-based routing
 import * as bcrypt from 'bcrypt';
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { db } from './db';
-
-// Extend the built-in session types
-declare module 'next-auth' {
-  interface Session {
-    user: {
-      id: string;
-      email: string;
-      role: string;
-      tenantId: string;
-      tenantSlug: string;
-    };
-  }
-
-  interface User {
-    id: string;
-    email: string;
-    role: string;
-    tenantId: string;
-    tenantSlug: string;
-  }
-}
-
-declare module 'next-auth/jwt' {
-  interface JWT {
-    role: string;
-    tenantId: string;
-    tenantSlug: string;
-  }
-}
 
 export const authOptions: NextAuthOptions = {
   // adapter: PrismaAdapter(db), // Using JWT strategy instead
@@ -79,9 +51,26 @@ export const authOptions: NextAuthOptions = {
           return {
             id: 'fallback-admin-id',
             email: 'admin@digiwize.com',
-            role: 'ADMIN',
+            role: 'ADMIN' as const,
             tenantId: 'fallback-tenant-id',
             tenantSlug: 'digiwize',
+            driverId: null,
+          };
+        }
+
+        // Fallback driver for testing
+        if (
+          credentials.email === 'driver@test.com' &&
+          credentials.password === 'driver123'
+        ) {
+          console.log('🎉 Fallback driver authentication successful');
+          return {
+            id: 'fallback-driver-id',
+            email: 'driver@test.com',
+            role: 'DRIVER' as const,
+            tenantId: 'fallback-tenant-id',
+            tenantSlug: 'digiwize',
+            driverId: 'fallback-driver-db-id',
           };
         }
 
@@ -131,12 +120,37 @@ export const authOptions: NextAuthOptions = {
 
           console.log('🎉 [Auth] Authentication successful for:', credentials.email);
 
+          // If user is a DRIVER, look up their driverId
+          let driverId: string | null = null;
+          if (user.role === 'DRIVER') {
+            try {
+              // Find driver by email or name matching
+              const driver = await db.driver.findFirst({
+                where: {
+                  tenantId: user.tenantId,
+                  OR: [
+                    { name: user.email },
+                    { name: user.name || '' },
+                  ],
+                },
+                select: { id: true },
+              });
+              driverId = driver?.id ?? null;
+              if (driverId) {
+                console.log('✅ [Auth] Driver ID found:', driverId);
+              }
+            } catch (error) {
+              console.warn('⚠️ [Auth] Could not lookup driverId:', error);
+            }
+          }
+
           return {
             id: user.id,
             email: user.email,
-            role: user.role,
+            role: user.role as "ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER",
             tenantId: user.tenantId,
             tenantSlug: user.tenant.slug,
+            driverId,
           };
         } catch (error) {
           console.error('❌ [Auth] Database authentication error:', error);
@@ -158,9 +172,10 @@ export const authOptions: NextAuthOptions = {
             return {
               id: 'fallback-admin-id',
               email: 'admin@digiwize.com',
-              role: 'ADMIN',
+              role: 'ADMIN' as const,
               tenantId: 'fallback-tenant-id',
               tenantSlug: 'digiwize',
+              driverId: null,
             };
           }
 
@@ -171,37 +186,36 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
+      // First login: copy role/tenant/driverId from your user model
       if (user) {
-        token.role = user.role;
-        token.tenantId = user.tenantId;
-        token.tenantSlug = user.tenantSlug;
+        token.role = (user as any).role ?? token.role ?? "VIEWER";
+        token.tenantId = (user as any).tenantId ?? token.tenantId ?? null;
+        token.tenantSlug = (user as any).tenantSlug ?? token.tenantSlug ?? null;
+        token.driverId = (user as any).driverId ?? token.driverId ?? null;
       }
       return token;
     },
     async session({ session, token }) {
-      console.log('🔍 [Auth] Session callback called');
-      console.log('🔍 [Auth] Token:', {
-        sub: token.sub,
-        role: token.role,
-        tenantId: token.tenantId,
-        tenantSlug: token.tenantSlug
-      });
-      
       if (token && session.user) {
         session.user.id = token.sub!;
-        session.user.role = token.role;
-        session.user.tenantId = token.tenantId;
-        session.user.tenantSlug = token.tenantSlug;
-        
-        console.log('✅ [Auth] Session updated:', {
-          id: session.user.id,
-          email: session.user.email,
-          role: session.user.role,
-          tenantId: session.user.tenantId,
-          tenantSlug: session.user.tenantSlug
-        });
+        session.user.role = (token as any).role;
+        session.user.tenantId = (token as any).tenantId;
+        session.user.tenantSlug = (token as any).tenantSlug;
+        session.user.driverId = (token as any).driverId ?? null;
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // After sign-in: drivers go to /driver, staff/admin go to /dashboard
+      try {
+        const u = new URL(url, baseUrl);
+        if (u.pathname === "/") return `${baseUrl}/post-login`;
+        // allow provider redirects etc.
+        if (u.origin === baseUrl) return u.toString();
+        return baseUrl;
+      } catch {
+        return baseUrl;
+      }
     },
   },
 };

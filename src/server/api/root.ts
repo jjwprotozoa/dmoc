@@ -1,6 +1,7 @@
 // src/server/api/root.ts
 import { clientsRouter } from './routers/clients';
 import { driversRouter } from './routers/drivers';
+import { driverRouter } from './routers/driver';
 import { manifestRouter } from './routers/manifest';
 import { offensesRouter } from './routers/offenses';
 import { tenantsRouter } from './routers/tenants';
@@ -22,6 +23,7 @@ export const appRouter = router({
   tenants: tenantsRouter,
   vehicles: vehiclesRouter,
   drivers: driversRouter,
+  driver: driverRouter, // Driver-specific router with strict access control
   clients: clientsRouter,
   vehicleCombinations: vehicleCombinationsRouter,
   countries: countriesRouter,

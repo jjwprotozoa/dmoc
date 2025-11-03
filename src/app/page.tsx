@@ -7,7 +7,8 @@ export default async function HomePage() {
   const session = await getServerSession(authOptions);
 
   if (session) {
-    redirect('/dashboard');
+    // Use post-login to route based on role
+    redirect('/post-login');
   } else {
     redirect('/sign-in');
   }
