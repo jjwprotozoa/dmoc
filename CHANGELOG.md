@@ -63,6 +63,73 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Admin User Management System** - Complete user management interface for Digiwize platform administrators:
+  - New admin users router (`adminUsersRouter`) with full CRUD operations (list, create, update, deactivate)
+  - Admin users page (`/dashboard/admin/users`) with filtering, sorting, and user details modal
+  - User image management (photo, ID, passport) with MinIO/S3 upload support
+  - Company/client access assignment for users
+  - Password reset functionality with temporary password generation
+  - Role and tenant management for all users across tenants
+- **Tenant Isolation Utilities** - Centralized tenant isolation system:
+  - New `buildTenantWhere()` utility function for consistent tenant filtering across all routers
+  - `getTenantId()` helper for validated tenant ID extraction
+  - Admin bypass logic: Digiwize admins can view all tenants automatically
+  - Applied to all routers (clients, contacts, drivers, locations, logistics-officers, manifest, offenses, tracking, vehicle-combinations, vehicles)
+- **Enhanced Authentication System** - Improved sign-in and authentication flow:
+  - New `authRouter` with `lookupByEmailOrUsername` endpoint for 2-step tenant-aware authentication
+  - Support for both email and username lookup (username stored in `name` field)
+  - Enhanced sign-in page with improved UX and error handling
+  - Better JWT and session callbacks with improved role validation
+- **User Management Utility Scripts** - Database administration tools:
+  - `prisma/seed-users.ts` - Seeds all users from legacy Windows system (~70 Delta, 9 Kobra, 1 Inara, 2 Digiwize)
+  - `prisma/seed-clients.ts` - Seeds client/company data
+  - `prisma/create-admin-user.ts` - Creates admin users
+  - `prisma/reset-user-password.ts` - Resets user passwords to temporary password
+  - `prisma/check-user.ts` - Checks user existence
+  - `prisma/verify-password.ts` - Verifies password hashes
+- **Documentation Reorganization** - Improved documentation structure:
+  - Moved all documentation files to `docs/` directory with organized subdirectories
+  - Created `docs/USER_SEED_INSTRUCTIONS.md` with comprehensive user seeding guide
+  - Organized config files in `docs/config/`, database docs in `docs/database/`, migration docs in `docs/migration/`
+- **Debug Router** - Development-only debugging endpoint:
+  - `debugRouter` with `tenantView` procedure for multi-tenant debugging
+  - Shows tenant filter application and admin bypass status
+  - Only available in development environment
+- **Enhanced tRPC Infrastructure**:
+  - Added `digiwizeAdminProcedure` for admin-only endpoints
+  - Improved context typing and error handling
+  - Better session validation across all procedures
+- **New Test Files**:
+  - `tests/tenant-isolation.test.ts` - Tests tenant isolation enforcement
+  - `tests/offenses-cross-tenant.test.ts` - Tests cross-tenant security
+- **Verification Scripts**:
+  - `scripts/check-manifests.ts` - Checks manifest data integrity
+  - `scripts/check-manifests-detailed.ts` - Detailed manifest checking
+
+### Changed
+
+- **All Routers Updated** - Migrated to use centralized tenant isolation utilities:
+  - Replaced manual tenant filtering with `buildTenantWhere()` utility
+  - Consistent admin bypass pattern across all routers
+  - Improved type safety with proper tenant validation
+- **Sign-In Page** - Enhanced authentication flow:
+  - 2-step authentication (email/username → password)
+  - Tenant-aware user lookup
+  - Improved error messages and user feedback
+- **Auth Library** - Improved authentication handling:
+  - Enhanced JWT callback with better role validation
+  - Improved session structure with tenant information
+  - Better type safety for role assignments
+- **Database Schema** - Schema improvements:
+  - Added `isActive` field to User model
+  - Enhanced seed script with better user seeding logic
+  - Improved tenant handling in seed data
+- **Navigation** - Added admin users link to sidebar navigation
+- **Manifest Components** - Enhanced table and card view functionality
+- **TypeScript Configuration** - Improved type definitions and error handling
+
 ### Fixed
 
 - **TypeScript Build Errors** - Fixed multiple TypeScript compilation errors blocking Vercel deployment:
@@ -71,24 +138,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Replaced `ctx.db` (possibly null) with direct `db` imports from `@/lib/db` in all routers (offenses, tenants, vehicle-combinations, tracking, uploads)
   - Removed unused `ctx` parameters to resolve ESLint errors in tenants, tracking, and uploads routers
   - Fixed type mismatches in Prisma create operations where tenantId was required but could be undefined
+  - Fixed AsYouType constructor type error in phone.ts
+  - Fixed all type errors in auth.ts JWT and session callbacks
+  - Added type guards for payload properties in conditional rendering
+  - Converted unknown payload values to strings in DriverIncidentsList
 - **Database Context Type Safety** - Replaced potentially null `ctx.db` references with direct database imports to prevent build-time errors when database connection isn't available
 - **Tenant Isolation Type Safety** - Enhanced tenant isolation validation across all routers to ensure proper type checking and error handling for ADMIN vs non-ADMIN user scenarios
-
-### Added
-
-- **Database Migration Scripts** - Created comprehensive migration tools (`scripts/force-migrate-all-manifests.ts`, `scripts/migrate-all-data.ts`) to synchronize data from local SQLite to production PostgreSQL
-- **Production Verification Scripts** - Added `scripts/verify-production-admin.ts` to verify admin setup and data visibility in production environment
-- **Database Sync Documentation** - Created `DATABASE_SYNC_STRATEGY.md` and `DEPLOYMENT_SUMMARY.md` documenting the database architecture and migration workflow
-- **Admin Bypass for Multi-Tenant Access** - Admin users can now view all vehicles, contacts, and logistics officers across all tenants (matching manifests functionality)
-- **Locations Router and Page** - Complete CRUD operations for operational locations with tenant isolation
-- **Locations Management Interface** - Full-featured locations page with search, create, edit, and delete functionality
-- **Database-First Data Architecture** - All pages now use tRPC queries connected to seeded database instead of mock data
-- **Vehicle Filters Component** - Reusable filter component with quick filters, advanced filters, and filter counts (similar to manifest filters)
-- **Logistics Officers Complete Fields** - Added contactNr, idNumber, pictureLoaded, countryOfOrigin, and displayValue fields to officer cards
+- **ESLint Errors** - Removed unused imports and variables across driver components and routers
+- **Authentication Type Errors** - Fixed role assignment type issues in JWT callback
+- **Payload Type Safety** - Added proper type checking for conditional rendering in components
 
 ### Changed
 
-- **TypeScript Configuration** - Updated `tsconfig.json` to exclude `scripts` directory from Next.js build compilation, preventing build errors from migration scripts
+- **All Routers Updated** - Migrated to use centralized tenant isolation utilities:
+  - Replaced manual tenant filtering with `buildTenantWhere()` utility
+  - Consistent admin bypass pattern across all routers
+  - Improved type safety with proper tenant validation
+- **Sign-In Page** - Enhanced authentication flow:
+  - 2-step authentication (email/username → password)
+  - Tenant-aware user lookup
+  - Improved error messages and user feedback
+- **Auth Library** - Improved authentication handling:
+  - Enhanced JWT callback with better role validation
+  - Improved session structure with tenant information
+  - Better type safety for role assignments
+- **Database Schema** - Schema improvements:
+  - Added `isActive` field to User model
+  - Enhanced seed script with better user seeding logic
+  - Improved tenant handling in seed data
+- **Navigation** - Added admin users link to sidebar navigation
+- **Manifest Components** - Enhanced table and card view functionality
+- **TypeScript Configuration** - Updated `tsconfig.json` to exclude `scripts` directory from Next.js build compilation, preventing build errors from migration scripts; improved type definitions and error handling
 - **Migration Scripts** - Enhanced `prisma/seed-production-manifests.ts` to update existing manifests with correct tenant IDs and data from local environment
 - **Package Scripts** - Added `db:migrate:all` npm script for comprehensive data migration from local to production
 - **Vehicles Router** - Added `list` procedure with advanced filtering (search, status, type, date range), `getFilterCounts` procedure for filter UI, and `whereTenant()` helper function for consistent admin bypass pattern across all queries
@@ -108,6 +188,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **TypeScript Build Errors** - Fixed multiple TypeScript compilation errors blocking Vercel deployment:
+  - Added tenantId validation in all router procedures (driver, manifest, vehicles, vehicle-combinations) to ensure `string | undefined` is properly handled
+  - Updated `whereTenant` helper functions to accept `string | undefined` and validate for non-ADMIN users
+  - Replaced `ctx.db` (possibly null) with direct `db` imports from `@/lib/db` in all routers (offenses, tenants, vehicle-combinations, tracking, uploads)
+  - Removed unused `ctx` parameters to resolve ESLint errors in tenants, tracking, and uploads routers
+  - Fixed type mismatches in Prisma create operations where tenantId was required but could be undefined
+  - Fixed AsYouType constructor type error in phone.ts
+  - Fixed all type errors in auth.ts JWT and session callbacks
+  - Added type guards for payload properties in conditional rendering
+  - Converted unknown payload values to strings in DriverIncidentsList
+- **Database Context Type Safety** - Replaced potentially null `ctx.db` references with direct database imports to prevent build-time errors when database connection isn't available
+- **Tenant Isolation Type Safety** - Enhanced tenant isolation validation across all routers to ensure proper type checking and error handling for ADMIN vs non-ADMIN user scenarios
+- **ESLint Errors** - Removed unused imports and variables across driver components and routers
+- **Authentication Type Errors** - Fixed role assignment type issues in JWT callback
+- **Payload Type Safety** - Added proper type checking for conditional rendering in components
 - **Production Data Synchronization** - Resolved discrepancy between local and production data by migrating all 309 manifests from local SQLite to production PostgreSQL
 - **Tenant ID Mismatch** - Fixed tenant ID inconsistencies that prevented manifests from appearing in production by ensuring all migrated data uses correct production tenant IDs
 - **Production Deployment** - Fixed deployed version showing placeholder data instead of real manifests by implementing comprehensive data migration workflow
@@ -122,9 +217,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- **Centralized Tenant Isolation** - All routers now use `buildTenantWhere()` utility ensuring consistent tenant isolation enforcement
+- **Admin Bypass Pattern** - Consistent admin bypass logic: Digiwize admins (tenantSlug === 'digiwize' OR role in ['ADMIN', 'ADMINISTRATOR', 'SUPER_ADMIN', 'DIGIWIZE_ADMIN']) can view all tenants
+- **Enhanced Tenant Validation** - All mutations validate tenantId before allowing data modifications
+- **Session-Based Authentication** - Removed manual tenantId inputs in favor of automatic extraction from authenticated session
+- **Protected Admin Endpoints** - Admin user management endpoints protected with `digiwizeAdminProcedure` requiring proper admin role
 - **Admin Tenant Bypass** - Implemented consistent admin bypass pattern across vehicles, contacts, logistics officers, and manifests routers using `whereTenant()` helper function
 - **Enhanced Tenant Isolation** - All routers now enforce tenant isolation at the procedure level using session tenantId
-- **Session-Based Authentication** - Removed manual tenantId inputs in favor of automatic extraction from authenticated session
 - **Protected Procedures** - Migrated public procedures to protected procedures where tenant isolation is required
 
 ## [1.1.0] - 2025-10-30

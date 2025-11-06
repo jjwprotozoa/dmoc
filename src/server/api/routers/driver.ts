@@ -1,8 +1,10 @@
 // src/server/api/routers/driver.ts
 // Driver-specific router with strict access control - drivers can only see their own data
+// NOTE: tenant filtering standardized via buildTenantWhere(...).
 
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { buildTenantWhere } from "../utils/tenant";
 import { protectedProcedure, router } from "../trpc";
 
 // Inline mock data for testing (when driver records don't exist in DB)
@@ -73,10 +75,7 @@ export const driverRouter = router({
 
       // Find driver record to verify access
       const driver = await db.driver.findFirst({
-        where: {
-          id: driverId,
-          tenantId,
-        },
+        where: buildTenantWhere(ctx, { id: driverId }),
       });
 
       // For fallback/test drivers without DB records, return mock data
@@ -147,11 +146,10 @@ export const driverRouter = router({
       // Drivers are linked via VehicleCombination -> Vehicle -> Manifest.horseId
       // First, find vehicle combinations for this driver
       const driverCombinations = await db.vehicleCombination.findMany({
-        where: {
-          tenantId,
+        where: buildTenantWhere(ctx, {
           driver: driver.name,
           status: { in: ["Active", "In Transit"] }, // Only active combinations
-        },
+        }),
         select: { horseId: true },
       });
 
@@ -199,7 +197,6 @@ export const driverRouter = router({
 
       // Find manifests for these vehicles
       const whereClause: {
-        tenantId: string;
         horseId: { in: string[] };
         status?: string;
         scheduledAt?: {
@@ -207,7 +204,6 @@ export const driverRouter = router({
           lte?: Date;
         };
       } = {
-        tenantId,
         horseId: { in: horseIds },
       };
 
@@ -228,7 +224,7 @@ export const driverRouter = router({
       }
 
       const manifests = await db.manifest.findMany({
-        where: whereClause,
+        where: buildTenantWhere(ctx, whereClause),
         include: {
           route: {
             select: { id: true, name: true },
@@ -311,10 +307,7 @@ export const driverRouter = router({
       }
 
       const driver = await db.driver.findFirst({
-        where: {
-          id: driverId,
-          tenantId,
-        },
+        where: buildTenantWhere(ctx, { id: driverId }),
       });
 
       if (!driver) {
@@ -360,10 +353,7 @@ export const driverRouter = router({
         
         // If not mock data, try relaxed DB lookup (still check tenant isolation)
         const manifest = await db.manifest.findFirst({
-          where: {
-            id: input.manifestId,
-            tenantId,
-          },
+          where: buildTenantWhere(ctx, { id: input.manifestId }),
           include: {
             route: true,
             company: true,
@@ -382,11 +372,10 @@ export const driverRouter = router({
       // Get manifest and verify it's assigned to this driver
       // Check if manifest's horseId matches a vehicle combination for this driver
       const driverCombinations = await db.vehicleCombination.findMany({
-        where: {
-          tenantId,
+        where: buildTenantWhere(ctx, {
           driver: driver.name,
           status: { in: ["Active", "In Transit"] },
-        },
+        }),
         select: { horseId: true },
       });
 
@@ -397,11 +386,10 @@ export const driverRouter = router({
       }
 
       const manifest = await db.manifest.findFirst({
-        where: {
+        where: buildTenantWhere(ctx, {
           id: input.manifestId,
-          tenantId,
           horseId: { in: horseIds },
-        },
+        }),
         include: {
           route: true,
           company: true,
@@ -443,10 +431,7 @@ export const driverRouter = router({
 
       // Get manifest to find associated vehicle/tracker
       const manifest = await db.manifest.findFirst({
-        where: {
-          id: input.manifestId,
-          tenantId,
-        },
+        where: buildTenantWhere(ctx, { id: input.manifestId }),
         include: {
           horse: {
             select: { trackerDeviceId: true },
@@ -523,10 +508,7 @@ export const driverRouter = router({
 
       // Verify manifest is assigned to this driver
       const driver = await db.driver.findFirst({
-        where: {
-          id: driverId,
-          tenantId,
-        },
+        where: buildTenantWhere(ctx, { id: driverId }),
       });
 
       // For fallback/test drivers, allow event creation with relaxed validation
@@ -553,10 +535,7 @@ export const driverRouter = router({
         
         // Verify manifest exists and belongs to tenant (real database lookup)
         const manifest = await db.manifest.findFirst({
-          where: {
-            id: input.manifestId,
-            tenantId,
-          },
+          where: buildTenantWhere(ctx, { id: input.manifestId }),
         });
 
         if (!manifest) {
@@ -576,11 +555,10 @@ export const driverRouter = router({
 
       // Check if manifest's horseId matches a vehicle combination for this driver
       const driverCombinations = await db.vehicleCombination.findMany({
-        where: {
-          tenantId,
+        where: buildTenantWhere(ctx, {
           driver: driver.name,
           status: { in: ["Active", "In Transit"] },
-        },
+        }),
         select: { horseId: true },
       });
 
@@ -604,11 +582,10 @@ export const driverRouter = router({
       }
 
       const manifest = await db.manifest.findFirst({
-        where: {
+        where: buildTenantWhere(ctx, {
           id: input.manifestId,
-          tenantId,
           ...(horseIds.length > 0 && { horseId: { in: horseIds } }),
-        },
+        }),
       });
 
       if (!manifest) {

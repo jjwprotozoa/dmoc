@@ -1,21 +1,13 @@
 // src/server/api/routers/contacts.ts
 // Contacts router: tenant-scoped CRUD with E.164 phone storage
+// NOTE: tenant filtering standardized via buildTenantWhere(...).
 
 import { Prisma } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { db } from '../../../lib/db';
+import { buildTenantWhere, getTenantId } from '../utils/tenant';
 import { createTRPCRouter, protectedProcedure } from '../trpc';
-
-// Helper – ensure tenant isolation, but allow admin to see everything
-function whereTenant(tenantId: string, userRole?: string) {
-  // If user is ADMIN, don't filter by tenant (can see everything)
-  if (userRole === 'ADMIN') {
-    console.log('🔓 [Admin] Bypassing tenant isolation - can see all contacts');
-    return {};
-  }
-  return { tenantId };
-}
 
 // Contact input schema (without tenantId - derived from session)
 const contactInput = z.object({
@@ -37,16 +29,8 @@ export const contactsRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'Tenant ID not found in session',
-        });
-      }
-
       const where: Prisma.ContactWhereInput = {
-        ...whereTenant(tenantId, ctx.session.user.role),
+        ...buildTenantWhere(ctx),
       };
 
       if (input.search) {
@@ -94,13 +78,7 @@ export const contactsRouter = createTRPCRouter({
   create: protectedProcedure
     .input(contactInput)
     .mutation(async ({ ctx, input }) => {
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'Tenant ID not found in session',
-        });
-      }
+      const tenantId = getTenantId(ctx);
 
       try {
         const contact = await db.contact.create({
@@ -127,18 +105,9 @@ export const contactsRouter = createTRPCRouter({
   update: protectedProcedure
     .input(contactInput.extend({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'Tenant ID not found in session',
-        });
-      }
-
       const { id, ...data } = input;
-      const whereBase = whereTenant(tenantId, ctx.session.user.role);
       const existing = await db.contact.findFirst({
-        where: { id, ...whereBase },
+        where: buildTenantWhere(ctx, { id }),
       });
       if (!existing) {
         throw new TRPCError({
@@ -159,17 +128,8 @@ export const contactsRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'Tenant ID not found in session',
-        });
-      }
-
-      const whereBase = whereTenant(tenantId, ctx.session.user.role);
       const existing = await db.contact.findFirst({
-        where: { id: input.id, ...whereBase },
+        where: buildTenantWhere(ctx, { id: input.id }),
       });
       if (!existing) {
         throw new TRPCError({

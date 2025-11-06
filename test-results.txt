@@ -1,0 +1,558 @@
+npm warn Unknown cli config "--run". This will stop working in the next major version of npm.
+
+> dmoc-web@2.0.0 test
+> vitest
+
+The CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.
+
+ DEV  v1.6.1 C:/Users/DevBox/dmoc-web
+
+ Γ£ô tests/worker.test.ts  (7 tests) 140ms
+stdout | tests/parseActiveManifests.test.ts > parseActiveManifests > should parse a simple manifest row correctly
+Found headers: ID, Client, Transporter, Officer, Driver, Horse, Tracker, WAConnected, Location, Route...
+
+stdout | tests/parseActiveManifests.test.ts > parseActiveManifests > should handle multi-line narrative blocks correctly
+Found headers: ID, Client, Transporter, Officer, Driver, Horse, Tracker, WAConnected, Location, Route...
+
+stdout | tests/parseActiveManifests.test.ts > parseActiveManifests > should handle multiple manifest rows
+Found headers: ID, Client, Transporter, Officer, Driver, Horse, Tracker, WAConnected, Location, Route...
+
+stdout | tests/parseActiveManifests.test.ts > parseActiveManifests > should handle boolean parsing correctly
+Found headers: ID, Client, Transporter, Officer, Driver, Horse, Tracker, WAConnected, Location, Route...
+
+stdout | tests/parseActiveManifests.test.ts > parseActiveManifests > should handle empty and invalid data gracefully
+Found headers: ID, Client, Transporter, Officer, Driver, Horse, Tracker, WAConnected, Location, Route...
+
+ Γ£ô tests/parseActiveManifests.test.ts  (5 tests) 61ms
+stderr | tests/manifest.router.test.ts > Manifest Router > should list manifests
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at C:\Users\DevBox\dmoc-web\tests\manifest.router.test.ts:90:23
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+stdout | tests/manifest.router.test.ts > Manifest Router > should list manifests
+≡ƒöì [Manifest Router] list called with input: { take: 10, skip: 0 }
+≡ƒæñ User session: {
+  userId: 'test-user',
+  email: undefined,
+  tenantId: 'cmhlw14vk0000xlnwn1srosm3',
+  tenantSlug: undefined,
+  role: undefined
+}
+≡ƒææ User role: undefined
+≡ƒùä∩╕Å [Database] Testing connection...
+Γ£à [Database] Connection successful
+≡ƒöì [Database] Base where clause: { tenantId: 'cmhlw14vk0000xlnwn1srosm3' }
+≡ƒöì [Database] Final where clause: {
+  "tenantId": "cmhlw14vk0000xlnwn1srosm3"
+}
+≡ƒöì [Database] Querying manifests with pagination...
+
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/manifest.router.test.ts > Manifest Router > should list manifests
+<empty line>
+stderr | tests/manifest.router.test.ts > Manifest Router > should list manifests
+<empty line>
+stdout | tests/manifest.router.test.ts > Manifest Router > should list manifests
+≡ƒôè [Database] Query result: {
+  rowsCount: 1,
+  totalCount: 1,
+  pagination: { take: 10, skip: 0 },
+  rows: [
+    {
+      id: '5ofo6sym',
+      title: null,
+      status: 'SCHEDULED',
+      trackingId: 'TEST-TRK-001',
+      company: undefined,
+      dateTimeUpdated: 2025-11-05T11:01:40.370Z
+    }
+  ]
+}
+Γ£à [Manifest Router] list returning: { itemsCount: 1, total: 1, hasMore: false }
+
+stderr | tests/manifest.router.test.ts > Manifest Router > should get manifest by id
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at C:\Users\DevBox\dmoc-web\tests\manifest.router.test.ts:112:23
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/manifest.router.test.ts > Manifest Router > should create a new manifest
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at C:\Users\DevBox\dmoc-web\tests\manifest.router.test.ts:132:23
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+ Γ¥» tests/offenses-cross-tenant.test.ts  (5 tests) 599ms
+stderr | tests/manifest.router.test.ts > Manifest Router > should add location to manifest
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at C:\Users\DevBox\dmoc-web\tests\manifest.router.test.ts:165:23
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/manifest.router.test.ts > Manifest Router > should get timeline for manifest
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at C:\Users\DevBox\dmoc-web\tests\manifest.router.test.ts:196:23
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/manifest.router.test.ts > Manifest Router > should get audit trail for manifest
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at C:\Users\DevBox\dmoc-web\tests\manifest.router.test.ts:216:23
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+ Γ£ô tests/manifest.router.test.ts  (6 tests) 1105ms
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Clients Router > should filter clients by tenantId for regular users
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:273:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Clients Router > should show all clients for admin
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:291:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Drivers Router > should filter drivers by tenantId for regular users
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:310:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Drivers Router > should show all drivers for admin
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:327:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stdout | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Vehicles Router > should filter vehicles by tenantId for regular users
+≡ƒöì [Vehicles Router] getAll called
+≡ƒæñ User session: {
+  userId: 'cmhlw14yp000axlnwvvwcwbms',
+  email: 'user-a@test.com',
+  tenantId: 'cmhlw14vm0002xlnw4a8szsh5',
+  tenantSlug: 'tenant-a-test-1762340500183-vhtmgpo',
+  role: 'USER'
+}
+≡ƒöì [Vehicles Router] Query where clause: {
+  "tenantId": "cmhlw14vm0002xlnw4a8szsh5",
+  "status": "Active"
+}
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Vehicles Router > should filter vehicles by tenantId for regular users
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:345:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Vehicles Router > should filter vehicles by tenantId for regular users
+<empty line>
+stdout | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Vehicles Router > should filter vehicles by tenantId for regular users
+Γ£à [Vehicles Router] Found 1 vehicles
+
+stdout | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Vehicles Router > should show all vehicles for admin
+≡ƒöì [Vehicles Router] getAll called
+≡ƒæñ User session: {
+  userId: 'cmhlw14xs0006xlnw5t2w6ri2',
+  email: 'admin@test.com',
+  tenantId: 'cmhlw14vm0002xlnw4a8szsh5',
+  tenantSlug: 'tenant-a-test-1762340500183-vhtmgpo',
+  role: 'ADMIN'
+}
+≡ƒöì [Vehicles Router] Query where clause: {
+  "status": "Active"
+}
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Vehicles Router > should show all vehicles for admin
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:362:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Vehicles Router > should show all vehicles for admin
+<empty line>
+stdout | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Vehicles Router > should show all vehicles for admin
+Γ£à [Vehicles Router] Found 37166 vehicles
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Locations Router > should filter locations by tenantId for regular users
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:380:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Locations Router > should show all locations for admin
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:397:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Contacts Router > should filter contacts by tenantId for regular users
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:415:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Contacts Router > should show all contacts for admin
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:432:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Logistics Officers Router > should filter logistics officers by tenantId for regular users
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:450:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Logistics Officers Router > should show all logistics officers for admin
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:467:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Vehicle Combinations Router > should filter vehicle combinations by tenantId for regular users
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:485:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Vehicle Combinations Router > should show all vehicle combinations for admin
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:500:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stdout | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Manifest Router > should filter manifests by tenantId for regular users
+≡ƒöì [Manifest Router] getAll called
+≡ƒæñ User session: {
+  userId: 'cmhlw14yp000axlnwvvwcwbms',
+  email: 'user-a@test.com',
+  tenantId: 'cmhlw14vm0002xlnw4a8szsh5',
+  tenantSlug: 'tenant-a-test-1762340500183-vhtmgpo',
+  role: 'USER'
+}
+≡ƒææ User role: USER
+≡ƒùä∩╕Å [Database] Testing connection...
+Γ£à [Database] Connection successful
+≡ƒöì [Database] Querying manifests...
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Manifest Router > should filter manifests by tenantId for regular users
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:517:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Manifest Router > should filter manifests by tenantId for regular users
+<empty line>
+stdout | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Manifest Router > should filter manifests by tenantId for regular users
+≡ƒôè [Database] Query result: { count: 0, manifests: [] }
+Γ£à [Manifest Router] getAll returning 0 manifests
+
+stdout | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Manifest Router > should show all manifests for admin
+≡ƒöì [Manifest Router] getAll called
+≡ƒæñ User session: {
+  userId: 'cmhlw14xs0006xlnw5t2w6ri2',
+  email: 'admin@test.com',
+  tenantId: 'cmhlw14vm0002xlnw4a8szsh5',
+  tenantSlug: 'tenant-a-test-1762340500183-vhtmgpo',
+  role: 'ADMIN'
+}
+≡ƒææ User role: ADMIN
+≡ƒùä∩╕Å [Database] Testing connection...
+Γ£à [Database] Connection successful
+≡ƒöì [Database] Querying manifests...
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Manifest Router > should show all manifests for admin
+Failed to get session during build: Error: `headers` was called outside a request scope. Read more: https://nextjs.org/docs/messages/next-dynamic-api-wrong-context
+    at getExpectedRequestStore (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\request-async-storage.external.ts:31:9)
+    at headers (C:\Users\DevBox\dmoc-web\node_modules\next\src\client\components\headers.ts:36:33)
+    at Proxy.getServerSession (C:\Users\DevBox\dmoc-web\node_modules\next-auth\next\index.js:113:41)
+    at Module.createTRPCContext (C:\Users\DevBox\dmoc-web\src\server\api\trpc.ts:11:21)
+    at createContextWithSession (C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:257:17)
+    at C:\Users\DevBox\dmoc-web\tests\tenant-isolation.test.ts:533:19
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:135:14
+    at file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:60:26
+    at runTest (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:781:17)
+    at runSuite (file:///C:/Users/DevBox/dmoc-web/node_modules/@vitest/runner/dist/index.js:909:15)
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Manifest Router > should show all manifests for admin
+<empty line>
+stdout | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Manifest Router > should show all manifests for admin
+≡ƒôè [Database] Query result: { count: 0, manifests: [] }
+Γ£à [Manifest Router] getAll returning 0 manifests
+
+stderr | tests/tenant-isolation.test.ts > Tenant Isolation - All Routers
+Could not delete offenses by tenantId, will cascade with tenant deletion
+
+ Γ¥» tests/tenant-isolation.test.ts  (16 tests | 6 failed) 5735ms
+   Γ¥» tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Locations Router > should filter locations by tenantId for regular users
+     ΓåÆ result.every is not a function
+   Γ¥» tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Locations Router > should show all locations for admin
+     ΓåÆ result.some is not a function
+   Γ¥» tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Contacts Router > should filter contacts by tenantId for regular users
+     ΓåÆ result.every is not a function
+   Γ¥» tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Contacts Router > should show all contacts for admin
+     ΓåÆ result.some is not a function
+   Γ¥» tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Logistics Officers Router > should filter logistics officers by tenantId for regular users
+     ΓåÆ result.every is not a function
+   Γ¥» tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Logistics Officers Router > should show all logistics officers for admin
+     ΓåÆ result.some is not a function
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Suites 1 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  tests/offenses-cross-tenant.test.ts > Offenses Cross-Tenant Visibility
+PrismaClientKnownRequestError: 
+Invalid `prisma.offense.create()` invocation in
+C:\Users\DevBox\dmoc-web\tests\offenses-cross-tenant.test.ts:82:42
+
+  79 driverId = driver.id;
+  80 
+  81 // Create an offense tied to that driver in Tenant A
+ΓåÆ 82 const offense = await prisma.offense.create(
+The column `tenantId` does not exist in the current database.
+ Γ¥» $n.handleRequestError node_modules/@prisma/client/runtime/library.js:121:7315
+ Γ¥» $n.handleAndLogRequestError node_modules/@prisma/client/runtime/library.js:121:6623
+ Γ¥» $n.request node_modules/@prisma/client/runtime/library.js:121:6307
+ Γ¥» l node_modules/@prisma/client/runtime/library.js:130:9633
+ Γ¥» tests/offenses-cross-tenant.test.ts:82:21
+     80| 
+     81|     // Create an offense tied to that driver in Tenant A
+     82|     const offense = await prisma.offense.create({
+       |                     ^
+     83|       data: {
+     84|         tenantId: tenantAId, // Created in Tenant A
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+Serialized Error: { code: 'P2022', clientVersion: '5.22.0', meta: { modelName: 'Offense', column: 'tenantId' }, batchRequestIdx: undefined }
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/7]ΓÄ»
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 6 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Locations Router > should filter locations by tenantId for regular users
+TypeError: result.every is not a function
+ Γ¥» tests/tenant-isolation.test.ts:391:21
+    389|       const result = await caller.locations.list({});
+    390| 
+    391|       expect(result.every((l) => l.tenantId === tenantAId)).toBe(true);
+       |                     ^
+    392|       expect(result.some((l) => l.name === 'Location A')).toBe(true);
+    393|       expect(result.some((l) => l.name === 'Location B')).toBe(false);
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[2/7]ΓÄ»
+
+ FAIL  tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Locations Router > should show all locations for admin
+TypeError: result.some is not a function
+ Γ¥» tests/tenant-isolation.test.ts:408:21
+    406|       const result = await caller.locations.list({});
+    407| 
+    408|       expect(result.some((l) => l.name === 'Location A')).toBe(true);
+       |                     ^
+    409|       expect(result.some((l) => l.name === 'Location B')).toBe(true);
+    410|     });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[3/7]ΓÄ»
+
+ FAIL  tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Contacts Router > should filter contacts by tenantId for regular users
+TypeError: result.every is not a function
+ Γ¥» tests/tenant-isolation.test.ts:426:21
+    424|       const result = await caller.contacts.list({});
+    425| 
+    426|       expect(result.every((c) => c.tenantId === tenantAId)).toBe(true);
+       |                     ^
+    427|       expect(result.some((c) => c.name === 'Contact A')).toBe(true);
+    428|       expect(result.some((c) => c.name === 'Contact B')).toBe(false);
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[4/7]ΓÄ»
+
+ FAIL  tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Contacts Router > should show all contacts for admin
+TypeError: result.some is not a function
+ Γ¥» tests/tenant-isolation.test.ts:443:21
+    441|       const result = await caller.contacts.list({});
+    442| 
+    443|       expect(result.some((c) => c.name === 'Contact A')).toBe(true);
+       |                     ^
+    444|       expect(result.some((c) => c.name === 'Contact B')).toBe(true);
+    445|     });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[5/7]ΓÄ»
+
+ FAIL  tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Logistics Officers Router > should filter logistics officers by tenantId for regular users
+TypeError: result.every is not a function
+ Γ¥» tests/tenant-isolation.test.ts:461:21
+    459|       const result = await caller.logisticsOfficers.list({});
+    460| 
+    461|       expect(result.every((o) => o.tenantId === tenantAId)).toBe(true);
+       |                     ^
+    462|       expect(result.some((o) => o.name === 'Officer A')).toBe(true);
+    463|       expect(result.some((o) => o.name === 'Officer B')).toBe(false);
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[6/7]ΓÄ»
+
+ FAIL  tests/tenant-isolation.test.ts > Tenant Isolation - All Routers > Logistics Officers Router > should show all logistics officers for admin
+TypeError: result.some is not a function
+ Γ¥» tests/tenant-isolation.test.ts:478:21
+    476|       const result = await caller.logisticsOfficers.list({});
+    477| 
+    478|       expect(result.some((o) => o.name === 'Officer A')).toBe(true);
+       |                     ^
+    479|       expect(result.some((o) => o.name === 'Officer B')).toBe(true);
+    480|     });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[7/7]ΓÄ»
+
+ Test Files  2 failed | 3 passed (5)
+      Tests  6 failed | 28 passed (39)
+   Start at  13:01:30
+   Duration  15.27s (transform 3.61s, setup 2ms, collect 15.44s, tests 7.64s, environment 4ms, prepare 7.70s)
+
+
+ FAIL  Tests failed. Watching for file changes...
+       press h to show help, press q to quit

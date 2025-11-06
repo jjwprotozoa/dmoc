@@ -233,6 +233,17 @@ const navigationGroups: NavGroup[] = [
   },
 ];
 
+/**
+ * Check if user is a Digiwize admin
+ */
+function isDigiwizeAdmin(user: { tenantSlug?: string; role?: string }): boolean {
+  const tenantSlug = user.tenantSlug?.toLowerCase();
+  const role = user.role?.toUpperCase();
+  const isDigiwizeTenant = tenantSlug === 'digiwize';
+  const isAdminRole = ['ADMIN', 'SUPER_ADMIN', 'DIGIWIZE_ADMIN'].includes(role || '');
+  return isDigiwizeTenant || isAdminRole;
+}
+
 interface SidebarNavProps {
   user: {
     id: string;
@@ -348,6 +359,39 @@ export function SidebarNav({ user }: SidebarNavProps) {
         {/* Navigation Items */}
         <nav className="flex-1 overflow-y-auto py-4">
           <div className="px-2 space-y-2">
+            {/* Admin-only User Management link */}
+            {isDigiwizeAdmin(user) && (
+              <Link
+                href="/dashboard/admin/users"
+                onClick={() => setIsMobileOpen(false)}
+                className={`
+                  flex items-center px-3 py-2 text-sm font-medium rounded-lg
+                  transition-all duration-200 ease-in-out transform
+                  ${
+                    pathname === '/dashboard/admin/users'
+                      ? `bg-${theme.primary}-600 text-white shadow-lg`
+                      : `text-gray-200 hover:bg-gray-700 hover:text-white`
+                  }
+                `}
+              >
+                <Users
+                  className={`
+                    flex-shrink-0 w-4 h-4 transition-all duration-200
+                    ${pathname === '/dashboard/admin/users' ? `text-white` : `text-gray-300`}
+                  `}
+                />
+                <div className="ml-3 flex-1">
+                  <div className="text-sm font-medium">User Management</div>
+                  <div className="text-xs text-gray-400 mt-0.5 transition-opacity duration-200">
+                    Manage all users
+                  </div>
+                </div>
+                {pathname === '/dashboard/admin/users' && (
+                  <div className="ml-auto w-2 h-2 bg-white rounded-full" />
+                )}
+              </Link>
+            )}
+
             {navigationGroups.map((group) => {
               const GroupIcon = group.icon;
               const isExpanded = isGroupExpanded(group.id);

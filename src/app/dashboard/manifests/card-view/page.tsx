@@ -104,6 +104,8 @@ export default function ManifestsCardViewPage() {
   const [unlockedManifests, setUnlockedManifests] = useState<Set<number>>(
     new Set()
   );
+  const [page, setPage] = useState(0);
+  const [pageSize] = useState(50);
   // Removed unused callContact state - fixed linting errors
 
   // Privacy controls - in real app this would come from auth system
@@ -128,22 +130,31 @@ export default function ManifestsCardViewPage() {
     staleness: filters.staleness !== 'all' ? filters.staleness : undefined,
     quickFilter:
       filters.quickFilter !== 'all' ? filters.quickFilter : undefined,
-    take: 50,
-    skip: 0,
+    take: pageSize,
+    skip: page * pageSize,
   });
 
   const manifests = data?.items || [];
-  
+  const total = data?.total || 0;
+  const hasMore = data?.hasMore || false;
+
   // Debug logging
-  console.log('🔍 Manifests query:', { 
-    isLoading, 
-    error: error?.message, 
+  console.log('🔍 Manifests query:', {
+    isLoading,
+    error: error?.message,
     count: manifests.length,
-    total: data?.total 
+    total: data?.total,
   });
 
   const handleFiltersChange = (newFilters: FilterState) => {
     setFilters(newFilters);
+    setPage(0); // Reset to first page on filter change
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    // Scroll to top of cards when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSelectManifest = (manifestId: string) => {
@@ -338,26 +349,55 @@ export default function ManifestsCardViewPage() {
         isLoading={isLoading}
       />
 
-      {/* Actions */}
+      {/* Actions and Pagination */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="text-sm text-gray-600">
-            Showing {manifests.length} manifests
-            {selectedManifests.length > 0 && (
-              <span className="ml-2 text-amber-600">
-                • {selectedManifests.length} selected
-              </span>
-            )}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="text-sm text-gray-600">
+              Showing {manifests.length} of {total} manifests
+              {selectedManifests.length > 0 && (
+                <span className="ml-2 text-amber-600">
+                  • {selectedManifests.length} selected
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleManifestAction('add', {} as ManifestItem)}
+                className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-2 w-full sm:w-auto"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Manifest</span>
+              </button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => handleManifestAction('add', {} as ManifestItem)}
-              className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-2 w-full sm:w-auto"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Manifest</span>
-            </button>
-          </div>
+
+          {/* Pagination Above Cards */}
+          {total > pageSize && (
+            <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+              <div className="text-sm text-gray-600">
+                Page {page + 1} of {Math.ceil(total / pageSize)}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={page === 0}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={!hasMore}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -385,8 +425,8 @@ export default function ManifestsCardViewPage() {
                   : ''
               }`}
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center space-x-2">
+              <div className="flex items-start justify-between mb-3 gap-2">
+                <div className="flex items-center space-x-2 flex-1 min-w-0">
                   <input
                     type="checkbox"
                     checked={selectedManifests.includes(manifest.id)}
@@ -394,15 +434,20 @@ export default function ManifestsCardViewPage() {
                       e.stopPropagation();
                       handleSelectManifest(manifest.id);
                     }}
-                    className="rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+                    className="rounded border-gray-300 text-amber-600 focus:ring-amber-500 flex-shrink-0"
                   />
-                  <div className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4 text-amber-600" />
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-sm leading-tight">
+                  <div className="flex items-center space-x-2 flex-1 min-w-0">
+                    <FileText className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <h3
+                        className="font-semibold text-gray-900 text-sm leading-tight truncate"
+                        title={
+                          manifest.title || manifest.trackingId || 'Untitled'
+                        }
+                      >
                         {manifest.title || manifest.trackingId || 'Untitled'}
                       </h3>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 truncate">
                         {manifest.trackingId
                           ? `ID: ${manifest.trackingId}`
                           : 'No tracking ID'}
@@ -414,7 +459,7 @@ export default function ManifestsCardViewPage() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="h-6 w-6 p-0"
+                      className="h-6 w-6 p-0 flex-shrink-0"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <MoreHorizontal className="h-3 w-3" />
@@ -864,6 +909,33 @@ export default function ManifestsCardViewPage() {
           );
         })}
       </div>
+
+      {/* Pagination Below Cards */}
+      {total > pageSize && (
+        <div className="flex items-center justify-between mt-6 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="text-sm text-gray-600">
+            Page {page + 1} of {Math.ceil(total / pageSize)}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 0}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(page + 1)}
+              disabled={!hasMore}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
 
       {manifests.length === 0 && !isLoading && (
         <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">

@@ -297,8 +297,39 @@ async function main() {
     'utf-8'
   );
   const vehiclesData = parseTSV(vehiclesContent);
+
+  // Limit for testing (default 100, set SEED_TEST_LIMIT=null to process all)
+  const VEHICLE_TEST_LIMIT =
+    process.env.SEED_TEST_LIMIT === 'null' || process.env.SEED_TEST_LIMIT === ''
+      ? null
+      : process.env.SEED_TEST_LIMIT
+        ? parseInt(process.env.SEED_TEST_LIMIT, 10)
+        : 100;
+  const vehiclesToProcess = VEHICLE_TEST_LIMIT
+    ? vehiclesData.rows.slice(0, VEHICLE_TEST_LIMIT)
+    : vehiclesData.rows;
+
+  if (VEHICLE_TEST_LIMIT) {
+    console.log(
+      `   ⚠️  TEST MODE: Processing only first ${VEHICLE_TEST_LIMIT} vehicles (set SEED_TEST_LIMIT=null to process all)`
+    );
+  } else {
+    console.log(`   📊 Processing all ${vehiclesData.rows.length} vehicles`);
+  }
+
+  // Pre-check existing vehicles by vehicleId for efficiency
+  console.log('   🔍 Checking existing vehicles...');
+  const existingVehicles = await prisma.vehicle.findMany({
+    where: { tenantId },
+    select: { vehicleId: true },
+  });
+  const existingVehicleIds = new Set(existingVehicles.map((v) => v.vehicleId));
+  console.log(
+    `   ✅ Found ${existingVehicleIds.size} existing vehicles in database`
+  );
+
   const CHUNK_SIZE = 50; // Reduced chunk size for SQLite compatibility
-  const totalVehicles = vehiclesData.rows.length;
+  const totalVehicles = vehiclesToProcess.length;
   let vehicleCount = 0;
   let errorCount = 0;
 
@@ -307,8 +338,8 @@ async function main() {
   );
 
   // Process vehicles sequentially to avoid SQLite lock contention
-  for (let i = 0; i < vehiclesData.rows.length; i++) {
-    const row = vehiclesData.rows[i];
+  for (let i = 0; i < vehiclesToProcess.length; i++) {
+    const row = vehiclesToProcess[i];
     const vehicleId = parseIntSafe(row[0]); // VehicleID
 
     if (!vehicleId) {
@@ -335,26 +366,75 @@ async function main() {
       continue;
     }
 
-    try {
-      await prisma.vehicle.upsert({
-        where: { vehicleId },
-        update: vehicle,
-        create: vehicle,
-      });
-      vehicleCount++;
-    } catch (error: any) {
-      errorCount++;
-      // Only log every 10th error to avoid spam
-      if (errorCount % 10 === 0) {
-        console.warn(
-          `⚠️  Failed to import vehicle ${vehicleId} (${errorCount} total errors):`,
-          error.message
-        );
+    // Check if vehicle already exists
+    const exists = existingVehicleIds.has(vehicleId);
+
+    if (exists) {
+      // Update existing vehicle
+      try {
+        await prisma.vehicle.updateMany({
+          where: {
+            tenantId,
+            vehicleId,
+          },
+          data: vehicle,
+        });
+        vehicleCount++;
+      } catch (updateError: any) {
+        errorCount++;
+        if (errorCount % 10 === 0) {
+          console.warn(
+            `⚠️  Failed to update vehicle ${vehicleId} (${errorCount} total errors):`,
+            updateError.message
+          );
+        }
+      }
+    } else {
+      // Create new vehicle
+      try {
+        await prisma.vehicle.create({
+          data: vehicle,
+        });
+        vehicleCount++;
+        // Add to existing set to avoid duplicate checks
+        existingVehicleIds.add(vehicleId);
+      } catch (error: any) {
+        // If error is due to unique constraint (vehicleId), try update instead
+        if (error?.code === 'P2002') {
+          try {
+            await prisma.vehicle.updateMany({
+              where: {
+                tenantId,
+                vehicleId,
+              },
+              data: vehicle,
+            });
+            vehicleCount++;
+            existingVehicleIds.add(vehicleId);
+          } catch (updateError: any) {
+            errorCount++;
+            if (errorCount % 10 === 0) {
+              console.warn(
+                `⚠️  Failed to import/update vehicle ${vehicleId} (${errorCount} total errors):`,
+                updateError.message
+              );
+            }
+          }
+        } else {
+          errorCount++;
+          // Only log every 10th error to avoid spam
+          if (errorCount % 10 === 0) {
+            console.warn(
+              `⚠️  Failed to import vehicle ${vehicleId} (${errorCount} total errors):`,
+              error.message
+            );
+          }
+        }
       }
     }
 
     // Progress update every CHUNK_SIZE vehicles
-    if ((i + 1) % CHUNK_SIZE === 0 || i === vehiclesData.rows.length - 1) {
+    if ((i + 1) % CHUNK_SIZE === 0 || i === vehiclesToProcess.length - 1) {
       const progress = ((i + 1) / totalVehicles) * 100;
       console.log(
         `   Progress: ${i + 1}/${totalVehicles} vehicles processed (${progress.toFixed(1)}% complete)`
@@ -362,7 +442,14 @@ async function main() {
     }
   }
 
-  console.log(`✅ Imported ${vehicleCount} vehicles (${errorCount} errors)`);
+  console.log(
+    `✅ Processed ${vehicleCount} vehicles (created/updated), ${errorCount} errors`
+  );
+  if (VEHICLE_TEST_LIMIT) {
+    console.log(
+      `   ℹ️  Test mode: Only processed first ${VEHICLE_TEST_LIMIT} vehicles. Set SEED_TEST_LIMIT=null to process all ${vehiclesData.rows.length} vehicles.`
+    );
+  }
 
   // ========== 6. Import Manifests (from active_manifests.txt) ==========
   console.log('\n📊 Importing Manifests...');
@@ -371,26 +458,110 @@ async function main() {
     'utf-8'
   );
   const manifestsData = parseTSV(manifestsContent);
+
+  // Filter out narrative lines (lines that don't start with a numeric ID)
+  // The file has narrative text between manifest rows that we need to skip
+  const validManifestRows = manifestsData.rows.filter((row) => {
+    const firstCell = row[0]?.trim();
+    // Check if first cell is a valid number (manifest ID)
+    return firstCell && !isNaN(Number(firstCell)) && Number(firstCell) > 0;
+  });
+
+  console.log(
+    `   📋 Found ${manifestsData.rows.length} total rows, ${validManifestRows.length} valid manifest rows (filtered out ${manifestsData.rows.length - validManifestRows.length} narrative/empty lines)`
+  );
+
   let manifestCount = 0;
   let manifestSkippedCount = 0;
 
-  // Map column indices (0-indexed from header row)
-  // ID, Client, Transporter, Officer, Driver, Horse, Tracker, WAConnected, ANPRDetect,
-  // Accuracy, LocationMethod, TrackerTime, Battery, TrackerAddress, Status, Location,
-  // Trailer1, Type1, Seal1, Weight1, Trailer2, Type2, Seal2, Weight2, Country,
-  // ForeignHorseAndDriver, Park, Route, RMN, JobNumber, Comment, Convoy, Started, Updated, Ended
+  // Get or create organization for tenant (needed for companies)
+  let organization = await prisma.organization.findFirst({
+    where: { tenantId },
+  });
+  if (!organization) {
+    organization = await prisma.organization.create({
+      data: {
+        tenantId,
+        name: `${tenant.name} Organization`,
+      },
+    });
+  }
 
-  for (const row of manifestsData.rows) {
+  // Pre-load lookup maps for performance
+  const [companies, vehicles, countries, allClients] = await Promise.all([
+    prisma.company.findMany({ where: { orgId: organization.id } }),
+    prisma.vehicle.findMany({ where: { tenantId } }),
+    prisma.country.findMany(),
+    prisma.client.findMany({ where: { tenantId } }),
+  ]);
+
+  const companyMap = new Map(companies.map((c) => [c.name.toUpperCase(), c]));
+  const vehicleMap = new Map(
+    vehicles.map((v) => [v.registration?.toUpperCase() || '', v])
+  );
+  const countryNameMap = new Map(
+    countries.map((c) => [c.name.toUpperCase(), c])
+  );
+  const clientMap = new Map(allClients.map((c) => [c.name.toUpperCase(), c]));
+
+  console.log(
+    `   Loaded ${companies.length} companies, ${vehicles.length} vehicles, ${countries.length} countries, ${allClients.length} clients for lookups`
+  );
+
+  // Map column indices (0-indexed from header row)
+  // 0: ID, 1: Client, 2: Transporter, 3: Officer, 4: Driver, 5: Horse, 6: Tracker,
+  // 7: WAConnected, 8: ANPRDetect, 9: Accuracy, 10: LocationMethod, 11: TrackerTime,
+  // 12: Battery, 13: TrackerAddress, 14: Status, 15: Location, 16: Trailer1,
+  // 17: Type1, 18: Seal1, 19: Weight1, 20: Trailer2, 21: Type2, 22: Seal2,
+  // 23: Weight2, 24: Country, 25: ForeignHorseAndDriver, 26: Park, 27: Route,
+  // 28: RMN, 29: JobNumber, 30: Comment, 31: Convoy, 32: Started, 33: Updated,
+  // 34: Ended, 35: SinceLastUpdate, 36: TripDuration, 37: Controller
+
+  // Limit for testing (default 100, set SEED_TEST_LIMIT=null to process all)
+  const TEST_LIMIT =
+    process.env.SEED_TEST_LIMIT === 'null' || process.env.SEED_TEST_LIMIT === ''
+      ? null
+      : process.env.SEED_TEST_LIMIT
+        ? parseInt(process.env.SEED_TEST_LIMIT, 10)
+        : 100;
+  const rowsToProcess = TEST_LIMIT
+    ? validManifestRows.slice(0, TEST_LIMIT)
+    : validManifestRows;
+
+  if (TEST_LIMIT) {
+    console.log(
+      `   ⚠️  TEST MODE: Processing only first ${TEST_LIMIT} manifests (set SEED_TEST_LIMIT=null to process all)`
+    );
+  } else {
+    console.log(`   📊 Processing all ${manifestsData.rows.length} manifests`);
+  }
+
+  // Pre-check existing manifests by trackingId for efficiency
+  console.log('   🔍 Checking existing manifests...');
+  const existingManifests = await prisma.manifest.findMany({
+    where: { tenantId },
+    select: { trackingId: true },
+  });
+  const existingTrackingIds = new Set(
+    existingManifests
+      .map((m) => m.trackingId)
+      .filter((id): id is string => id !== null)
+  );
+  console.log(
+    `   ✅ Found ${existingTrackingIds.size} existing manifests in database`
+  );
+
+  for (const row of rowsToProcess) {
     const manifestId = parseIntSafe(row[0]); // ID
     if (!manifestId) {
       manifestSkippedCount++;
       continue;
     }
 
-    // Parse dates
-    const started = parseDate(row[31]); // Started
-    const updated = parseDate(row[32]); // Updated
-    const ended = parseDate(row[33]); // Ended
+    // Parse dates (corrected indices)
+    const started = parseDate(row[32]); // Started (was row[31] - Convoy)
+    const updated = parseDate(row[33]); // Updated (was row[32] - Started)
+    const ended = parseDate(row[34]); // Ended (was row[33] - Updated)
 
     // Map status
     let status: string = 'SCHEDULED';
@@ -399,6 +570,91 @@ async function main() {
     else if (statusStr.includes('COMPLETED') || statusStr.includes('ENDED'))
       status = 'COMPLETED';
     else if (statusStr.includes('CANCELLED')) status = 'CANCELLED';
+
+    // Find or create company by Client name (column 1)
+    let companyId: string | null = null;
+    const clientName = row[1]; // Client
+    if (clientName && clientName.trim() !== '' && clientName.trim() !== 'TBA') {
+      const clientNameUpper = clientName.trim().toUpperCase();
+      let company = companyMap.get(clientNameUpper);
+
+      if (!company) {
+        // Try to find by partial match
+        company = companies.find(
+          (c) =>
+            c.name.toUpperCase().includes(clientNameUpper) ||
+            clientNameUpper.includes(c.name.toUpperCase())
+        );
+      }
+
+      if (!company) {
+        // Create company if not found
+        try {
+          company = await prisma.company.create({
+            data: {
+              orgId: organization.id,
+              name: clientName.trim(),
+            },
+          });
+          companyMap.set(clientNameUpper, company);
+          companies.push(company);
+        } catch (error) {
+          console.warn(`⚠️  Failed to create company "${clientName}":`, error);
+        }
+      }
+
+      if (company) companyId = company.id;
+    }
+
+    // Find vehicle (horse) by registration (column 5: Horse, format: "T944DLJ(TZ)")
+    let horseId: string | null = null;
+    const horseStr = row[5]; // Horse
+    if (horseStr && horseStr.trim() !== '' && horseStr.trim() !== 'TBA') {
+      // Extract registration (e.g., "T944DLJ" from "T944DLJ(TZ)")
+      const registrationMatch = horseStr.match(/^([A-Z0-9]+)/);
+      if (registrationMatch) {
+        const registration = registrationMatch[1].toUpperCase();
+        const vehicle = vehicleMap.get(registration);
+        if (vehicle) {
+          horseId = vehicle.id;
+        } else {
+          // Try to find by partial match
+          const foundVehicle = vehicles.find(
+            (v) => v.registration?.toUpperCase() === registration
+          );
+          if (foundVehicle) {
+            horseId = foundVehicle.id;
+            vehicleMap.set(registration, foundVehicle);
+          }
+        }
+      }
+    }
+
+    // Find country by name (column 24: Country - was incorrectly row[23] which is Weight2)
+    let countryId: number | null = null;
+    const countryName = row[24]; // Country (corrected from row[23])
+    if (
+      countryName &&
+      countryName.trim() !== '' &&
+      countryName.trim() !== 'TBA'
+    ) {
+      const countryNameUpper = countryName.trim().toUpperCase();
+      const country = countryNameMap.get(countryNameUpper);
+      if (country) {
+        countryId = country.id;
+      } else {
+        // Try to find by partial match
+        const foundCountry = countries.find(
+          (c) =>
+            c.name.toUpperCase().includes(countryNameUpper) ||
+            countryNameUpper.includes(c.name.toUpperCase())
+        );
+        if (foundCountry) {
+          countryId = foundCountry.id;
+          countryNameMap.set(countryNameUpper, foundCountry);
+        }
+      }
+    }
 
     // Find or create route if needed
     let routeId: string | null = null;
@@ -446,52 +702,195 @@ async function main() {
       }
     }
 
+    // Find park location by name (column 26: Park)
+    let parkLocationId: string | null = null;
+    const parkName = row[26]; // Park
+    if (parkName && parkName.trim() !== '' && parkName.trim() !== 'TBA') {
+      try {
+        const parkLocation = await prisma.location.findFirst({
+          where: {
+            tenantId,
+            name: { contains: parkName.trim() },
+          },
+        });
+        if (parkLocation) parkLocationId = parkLocation.id;
+      } catch (error) {
+        // Park location not found, that's okay
+      }
+    }
+
+    // Find trailer1 by registration (column 16: Trailer1, format: "T873BEP")
+    let trailerId1: string | null = null;
+    const trailer1Str = row[16]; // Trailer1
+    if (
+      trailer1Str &&
+      trailer1Str.trim() !== '' &&
+      trailer1Str.trim() !== 'TBA'
+    ) {
+      const registrationMatch = trailer1Str.match(/^([A-Z0-9]+)/);
+      if (registrationMatch) {
+        const registration = registrationMatch[1].toUpperCase();
+        const vehicle = vehicleMap.get(registration);
+        if (vehicle) {
+          trailerId1 = vehicle.id;
+        } else {
+          const foundVehicle = vehicles.find(
+            (v) => v.registration?.toUpperCase() === registration
+          );
+          if (foundVehicle) {
+            trailerId1 = foundVehicle.id;
+            vehicleMap.set(registration, foundVehicle);
+          }
+        }
+      }
+    }
+
+    // Find trailer2 by registration (column 20: Trailer2, format: "T397DVA")
+    let trailerId2: string | null = null;
+    const trailer2Str = row[20]; // Trailer2
+    if (
+      trailer2Str &&
+      trailer2Str.trim() !== '' &&
+      trailer2Str.trim() !== 'TBA'
+    ) {
+      const registrationMatch = trailer2Str.match(/^([A-Z0-9]+)/);
+      if (registrationMatch) {
+        const registration = registrationMatch[1].toUpperCase();
+        const vehicle = vehicleMap.get(registration);
+        if (vehicle) {
+          trailerId2 = vehicle.id;
+        } else {
+          const foundVehicle = vehicles.find(
+            (v) => v.registration?.toUpperCase() === registration
+          );
+          if (foundVehicle) {
+            trailerId2 = foundVehicle.id;
+            vehicleMap.set(registration, foundVehicle);
+          }
+        }
+      }
+    }
+
+    // Find transporter (column 2) - map to Client if it exists, or store as string
+    // For now, we'll try to find it as a Client, otherwise skip (transporterId field exists but may need Client lookup)
+    let transporterId: string | null = null;
+    const transporterName = row[2]; // Transporter
+    if (
+      transporterName &&
+      transporterName.trim() !== '' &&
+      transporterName.trim() !== 'TBA'
+    ) {
+      // Try to find transporter as a Client (some transporters might be clients)
+      const transporterNameUpper = transporterName.trim().toUpperCase();
+      // Try to find transporter as a Client (use pre-loaded client map)
+      let transporterClient = clientMap.get(transporterNameUpper);
+      if (!transporterClient) {
+        // Try partial match
+        transporterClient = allClients.find(
+          (c) =>
+            c.name.toUpperCase().includes(transporterNameUpper) ||
+            transporterNameUpper.includes(c.name.toUpperCase())
+        );
+        if (transporterClient) {
+          clientMap.set(transporterNameUpper, transporterClient);
+        }
+      }
+      if (transporterClient) {
+        transporterId = transporterClient.id;
+      }
+      // Note: If transporterId field in Manifest is for Client ID, this works
+      // Otherwise, we might need a separate Transporter model
+    }
+
+    const trackingId = row[28] || undefined; // RMN
     const manifest = {
       tenantId,
-      title: `${row[1] || 'Manifest'} - ${row[28] || manifestId}`, // Client - RMN
+      title: `${row[1] || 'Manifest'} - ${trackingId || manifestId}`, // Client - RMN
       status,
-      trackingId: row[28] || undefined, // RMN
-      rmn: row[28] || undefined,
+      trackingId,
+      rmn: trackingId,
       jobNumber: row[29] || undefined,
+      companyId: companyId || undefined,
+      transporterId: transporterId || undefined,
+      horseId: horseId || undefined,
+      trailerId1: trailerId1 || undefined,
+      trailerId2: trailerId2 || undefined,
+      countryId: countryId || undefined,
       routeId: routeId || undefined,
       locationId: locationId || undefined,
+      parkLocationId: parkLocationId || undefined,
       scheduledAt: started || undefined,
       dateTimeAdded: started || new Date(),
       dateTimeUpdated: updated || undefined,
       dateTimeEnded: ended || undefined,
     };
 
-    try {
-      await prisma.manifest.create({
-        data: manifest,
-      });
-      manifestCount++;
-    } catch (error) {
-      // If manifest exists (by trackingId), update it
-      if (manifest.trackingId) {
-        try {
+    // Check if manifest already exists (by trackingId if available, or by title)
+    const exists = trackingId ? existingTrackingIds.has(trackingId) : false;
+
+    if (exists) {
+      // Update existing manifest
+      try {
+        if (trackingId) {
           await prisma.manifest.updateMany({
             where: {
               tenantId,
-              trackingId: manifest.trackingId,
+              trackingId,
             },
             data: manifest,
           });
           manifestCount++;
-        } catch (updateError) {
-          console.warn(
-            `⚠️  Failed to import/update manifest ${manifestId}:`,
-            error
-          );
         }
-      } else {
-        console.warn(`⚠️  Failed to import manifest ${manifestId}:`, error);
+      } catch (updateError) {
+        console.warn(
+          `⚠️  Failed to update manifest ${manifestId} (${trackingId}):`,
+          updateError
+        );
+      }
+    } else {
+      // Create new manifest
+      try {
+        await prisma.manifest.create({
+          data: manifest,
+        });
+        manifestCount++;
+        // Add to existing set to avoid duplicate checks
+        if (trackingId) {
+          existingTrackingIds.add(trackingId);
+        }
+      } catch (error: any) {
+        // If error is due to unique constraint (trackingId), try update instead
+        if (error?.code === 'P2002' && trackingId) {
+          try {
+            await prisma.manifest.updateMany({
+              where: {
+                tenantId,
+                trackingId,
+              },
+              data: manifest,
+            });
+            manifestCount++;
+            existingTrackingIds.add(trackingId);
+          } catch (updateError) {
+            console.warn(
+              `⚠️  Failed to import/update manifest ${manifestId} (${trackingId}):`,
+              updateError
+            );
+          }
+        } else {
+          console.warn(`⚠️  Failed to import manifest ${manifestId}:`, error);
+        }
       }
     }
   }
   console.log(
-    `✅ Imported ${manifestCount} manifests (skipped ${manifestSkippedCount} empty rows)`
+    `✅ Processed ${manifestCount} manifests (created/updated), skipped ${manifestSkippedCount} empty rows`
   );
+  if (TEST_LIMIT) {
+    console.log(
+      `   ℹ️  Test mode: Only processed first ${TEST_LIMIT} valid manifests. Set SEED_TEST_LIMIT=null to process all ${validManifestRows.length} valid manifests.`
+    );
+  }
 
   console.log('\n✨ Database seeding completed successfully!');
 }

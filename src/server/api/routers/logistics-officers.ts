@@ -1,22 +1,11 @@
 // src/server/api/routers/logistics-officers.ts
 // Logistics Officers tRPC router: listing, filtering, active/inactive search
+// NOTE: tenant filtering standardized via buildTenantWhere(...).
 import { Prisma } from '@prisma/client';
-import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { db } from '../../../lib/db';
+import { buildTenantWhere } from '../utils/tenant';
 import { protectedProcedure, router } from '../trpc';
-
-// Helper – ensure tenant isolation, but allow admin to see everything
-function whereTenant(tenantId: string, userRole?: string) {
-  // If user is ADMIN, don't filter by tenant (can see everything)
-  if (userRole === 'ADMIN') {
-    console.log(
-      '🔓 [Admin] Bypassing tenant isolation - can see all logistics officers'
-    );
-    return {};
-  }
-  return { tenantId };
-}
 
 export const logisticsOfficersRouter = router({
   // List officers with all fields and count/paging, now with isActive filter
@@ -31,23 +20,24 @@ export const logisticsOfficersRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new TRPCError({
-          code: 'UNAUTHORIZED',
-          message: 'Tenant ID not found in session',
-        });
-      }
+      const baseWhere = buildTenantWhere(ctx);
 
-      const baseWhere = whereTenant(tenantId, ctx.session.user.role);
-
-      // Always exclude digiwize tenant (it's admin-only, not a logistics tenant)
+      // Build where clause - only exclude digiwize tenant for non-admin users
+      // Admins should be able to see all logistics officers including digiwize
       const where: Prisma.LogisticsOfficerWhereInput = {
         ...baseWhere,
-        tenant: {
-          slug: { not: 'digiwize' },
-        },
       };
+
+      // Only exclude digiwize tenant for non-admin users
+      // (digiwize is admin-only tenant, but admins should still see its officers)
+      // Normalize role to uppercase to match buildTenantWhere behavior
+      const userRole = ctx.session.user.role;
+      const normalizedRole = typeof userRole === 'string' ? userRole.toUpperCase() : userRole;
+      if (normalizedRole !== 'ADMIN') {
+        where.tenant = {
+          slug: { not: 'digiwize' },
+        };
+      }
 
       if (input.search) {
         // Use type assertion for mode property (PostgreSQL supports it, SQLite ignores it)

@@ -176,7 +176,12 @@ export async function middleware(request: NextRequest) {
 
     // Check admin route access
     if (isAdminRoute(pathname)) {
-      if (userRole !== 'ADMIN') {
+      // Check if user is Digiwize admin
+      const tenantSlug = userTenantSlug?.toLowerCase();
+      const isDigiwizeTenant = tenantSlug === 'digiwize';
+      const isAdminRole = ['ADMIN', 'SUPER_ADMIN', 'DIGIWIZE_ADMIN'].includes(userRole);
+      
+      if (!isDigiwizeTenant && !isAdminRole) {
         // Non-admin users trying to access admin routes get redirected to dashboard
         return NextResponse.redirect(new URL('/dashboard', request.url));
       }

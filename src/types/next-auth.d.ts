@@ -12,6 +12,7 @@ declare module "next-auth" {
       role?: "ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER";
       tenantId?: string;
       tenantSlug?: string;
+      clientId?: string | null; // selected client/company for this session
       driverId?: string | null; // if role=DRIVER
     };
   }
@@ -20,6 +21,7 @@ declare module "next-auth" {
     role?: "ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER";
     tenantId?: string;
     tenantSlug?: string;
+    clientId?: string | null;
     driverId?: string | null;
   }
 
@@ -35,6 +37,7 @@ declare module "next-auth/jwt" {
     role?: "ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER";
     tenantId?: string;
     tenantSlug?: string;
+    clientId?: string | null;
     driverId?: string | null;
   }
 }

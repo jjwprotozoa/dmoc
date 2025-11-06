@@ -1,9 +1,11 @@
 // src/server/api/routers/locations.ts
 // Locations router: tenant-scoped CRUD for operational locations
+// NOTE: tenant filtering standardized via buildTenantWhere(...).
 
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
 import { db } from '../../../lib/db';
+import { buildTenantWhere, getTenantId } from '../utils/tenant';
 import { createTRPCRouter, protectedProcedure } from '../trpc';
 import { TRPCError } from '@trpc/server';
 
@@ -27,13 +29,8 @@ export const locationsRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Tenant ID not found in session' });
-      }
-
       const where: Prisma.LocationWhereInput = {
-        tenantId,
+        ...buildTenantWhere(ctx),
       };
 
       if (input.search) {
@@ -70,13 +67,8 @@ export const locationsRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.object({ id: z.string().min(1) }))
     .query(async ({ ctx, input }) => {
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Tenant ID not found in session' });
-      }
-
       const location = await db.location.findFirst({
-        where: { id: input.id, tenantId },
+        where: buildTenantWhere(ctx, { id: input.id }),
       });
 
       if (!location) {
@@ -87,10 +79,7 @@ export const locationsRouter = createTRPCRouter({
     }),
 
   create: protectedProcedure.input(locationInput).mutation(async ({ ctx, input }) => {
-    const tenantId = ctx.session.user.tenantId;
-    if (!tenantId) {
-      throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Tenant ID not found in session' });
-    }
+    const tenantId = getTenantId(ctx);
 
     try {
       const location = await db.location.create({
@@ -116,13 +105,8 @@ export const locationsRouter = createTRPCRouter({
       locationInput.extend({ id: z.string().min(1) })
     )
     .mutation(async ({ ctx, input }) => {
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Tenant ID not found in session' });
-      }
-
       const { id, ...data } = input;
-      const existing = await db.location.findFirst({ where: { id, tenantId } });
+      const existing = await db.location.findFirst({ where: buildTenantWhere(ctx, { id }) });
       if (!existing) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Location not found' });
       }
@@ -136,12 +120,7 @@ export const locationsRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ id: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Tenant ID not found in session' });
-      }
-
-      const existing = await db.location.findFirst({ where: { id: input.id, tenantId } });
+      const existing = await db.location.findFirst({ where: buildTenantWhere(ctx, { id: input.id }) });
       if (!existing) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Location not found' });
       }

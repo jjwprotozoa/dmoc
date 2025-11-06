@@ -25,51 +25,53 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
+        tenantId: { label: 'Tenant ID', type: 'text' },
+        tenantSlug: { label: 'Tenant Slug', type: 'text' },
+        clientId: { label: 'Client ID', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          console.log('❌ Missing credentials');
+          console.log('❌ [Auth] Missing credentials');
           return null;
         }
 
-        console.log('🔐 Attempting authentication for:', credentials.email);
-        console.log('🌍 Environment:', process.env.NODE_ENV);
+        const { email, password, tenantId, tenantSlug, clientId } = credentials;
+
+        console.log('🔐 [Auth] Attempting authentication');
+        console.log('   Email:', email);
+        console.log('   Tenant ID:', tenantId || 'not provided');
+        console.log('   Tenant Slug:', tenantSlug || 'not provided');
+        console.log('   Client ID:', clientId || 'not provided');
+        console.log('   Environment:', process.env.NODE_ENV);
         console.log(
           '🗄️ Database URL:',
           process.env.DATABASE_URL ? 'Set' : 'Not set'
         );
 
         // Fallback authentication for production when database is not available
-        if (
-          credentials.email === 'admin@digiwize.com' &&
-          credentials.password === 'admin123'
-        ) {
-          console.log(
-            '🎉 Fallback authentication successful for:',
-            credentials.email
-          );
+        if (email === 'admin@digiwize.com' && password === 'admin123') {
+          console.log('🎉 Fallback authentication successful for:', email);
           return {
             id: 'fallback-admin-id',
             email: 'admin@digiwize.com',
             role: 'ADMIN' as const,
-            tenantId: 'fallback-tenant-id',
-            tenantSlug: 'digiwize',
+            tenantId: tenantId || 'fallback-tenant-id',
+            tenantSlug: tenantSlug || 'digiwize',
+            clientId: clientId || null,
             driverId: null,
           };
         }
 
         // Fallback driver for testing
-        if (
-          credentials.email === 'driver@test.com' &&
-          credentials.password === 'driver123'
-        ) {
+        if (email === 'driver@test.com' && password === 'driver123') {
           console.log('🎉 Fallback driver authentication successful');
           return {
             id: 'fallback-driver-id',
             email: 'driver@test.com',
             role: 'DRIVER' as const,
-            tenantId: 'fallback-tenant-id',
-            tenantSlug: 'digiwize',
+            tenantId: tenantId || 'fallback-tenant-id',
+            tenantSlug: tenantSlug || 'digiwize',
+            clientId: clientId || null,
             driverId: 'fallback-driver-db-id',
           };
         }
@@ -79,13 +81,29 @@ export const authOptions: NextAuthOptions = {
           await db.$connect();
           console.log('✅ [Auth] Database connection successful');
 
+          // Normalize email to lowercase for case-insensitive lookup
+          const normalizedEmail = email.toLowerCase();
+          console.log('🔍 [Auth] Looking up user with email:', normalizedEmail);
+
           const user = await db.user.findUnique({
-            where: { email: credentials.email },
-            include: { tenant: true },
+            where: { email: normalizedEmail },
+            include: {
+              tenant: true,
+              clientAccess: {
+                include: {
+                  client: true,
+                },
+              },
+            },
           });
 
           if (!user) {
-            console.log('❌ [Auth] User not found:', credentials.email);
+            console.log('❌ [Auth] User not found with email:', normalizedEmail);
+            return null;
+          }
+
+          if (!user.isActive) {
+            console.log('❌ [Auth] User account is inactive:', normalizedEmail);
             return null;
           }
 
@@ -93,32 +111,55 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             role: user.role,
             tenantId: user.tenantId,
-            tenantSlug: user.tenant.slug
+            tenantSlug: user.tenant.slug,
+            isActive: user.isActive,
           });
 
+          // Verify tenantId matches (if provided)
+          if (tenantId && tenantId !== user.tenantId) {
+            console.log('❌ [Auth] Tenant ID mismatch:', {
+              provided: tenantId,
+              user: user.tenantId,
+            });
+            return null;
+          }
+
+          // Verify clientId is in user's clientAccess (if provided)
+          if (clientId) {
+            console.log('🔍 [Auth] Checking client access for:', clientId);
+            console.log('   User has access to clients:', user.clientAccess.map(uc => uc.clientId));
+            const hasAccess = user.clientAccess.some(
+              (uc) => uc.clientId === clientId
+            );
+            if (!hasAccess) {
+              console.log('❌ [Auth] User does not have access to client:', clientId);
+              console.log('   Available clients:', user.clientAccess.map(uc => ({ id: uc.clientId, name: uc.client.name })));
+              return null;
+            }
+            console.log('✅ [Auth] Client access verified:', clientId);
+          } else {
+            console.log('ℹ️  [Auth] No client ID provided, skipping client access check');
+          }
+
           console.log('🔍 [Auth] Testing password...');
-          
+
           // Check if passwordHash exists (required for production schema compatibility)
           if (!user.passwordHash) {
-            console.log('❌ [Auth] No password hash found for user:', credentials.email);
+            console.log('❌ [Auth] No password hash found for user:', normalizedEmail);
             return null;
           }
 
-          const isPasswordValid = await bcrypt.compare(
-            credentials.password,
-            user.passwordHash
-          );
+          const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
 
           console.log('🔍 [Auth] Password validation result:', isPasswordValid);
-          console.log('🔍 [Auth] Stored hash:', user.passwordHash);
-          console.log('🔍 [Auth] Provided password:', credentials.password);
 
           if (!isPasswordValid) {
-            console.log('❌ [Auth] Invalid password for:', credentials.email);
+            console.log('❌ [Auth] Invalid password for:', normalizedEmail);
+            console.log('   Password provided:', password ? '***' : 'empty');
             return null;
           }
 
-          console.log('🎉 [Auth] Authentication successful for:', credentials.email);
+          console.log('🎉 [Auth] Authentication successful for:', normalizedEmail);
 
           // If user is a DRIVER, look up their driverId
           let driverId: string | null = null;
@@ -150,6 +191,7 @@ export const authOptions: NextAuthOptions = {
             role: user.role as "ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER",
             tenantId: user.tenantId,
             tenantSlug: user.tenant.slug,
+            clientId: clientId || null,
             driverId,
           };
         } catch (error) {
@@ -164,17 +206,15 @@ export const authOptions: NextAuthOptions = {
           });
 
           // Fallback to hardcoded credentials if database fails
-          if (
-            credentials.email === 'admin@digiwize.com' &&
-            credentials.password === 'admin123'
-          ) {
+          if (email === 'admin@digiwize.com' && password === 'admin123') {
             console.log('🎉 Fallback authentication successful after DB error');
             return {
               id: 'fallback-admin-id',
               email: 'admin@digiwize.com',
               role: 'ADMIN' as const,
-              tenantId: 'fallback-tenant-id',
-              tenantSlug: 'digiwize',
+              tenantId: tenantId || 'fallback-tenant-id',
+              tenantSlug: tenantSlug || 'digiwize',
+              clientId: clientId || null,
               driverId: null,
             };
           }
@@ -185,13 +225,14 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      // First login: copy role/tenant/driverId from your user model
+    async jwt({ token, user, trigger }) {
+      // First login: copy role/tenant/clientId/driverId from your user model
       if (user) {
         const userWithExtras = user as {
           role?: "ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER";
           tenantId?: string;
           tenantSlug?: string;
+          clientId?: string | null;
           driverId?: string | null;
         };
         const validRoles: Array<"ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER"> = [
@@ -207,7 +248,35 @@ export const authOptions: NextAuthOptions = {
           : "VIEWER";
         token.tenantId = userWithExtras.tenantId ?? (token.tenantId as string | undefined) ?? undefined;
         token.tenantSlug = userWithExtras.tenantSlug ?? (token.tenantSlug as string | undefined) ?? undefined;
+        token.clientId = userWithExtras.clientId ?? (token.clientId as string | null) ?? null;
         token.driverId = userWithExtras.driverId ?? (token.driverId as string | null) ?? null;
+      } else if (token.sub && trigger !== 'signOut') {
+        // On subsequent requests, refresh role from database to ensure it's up-to-date
+        // This is important after tenant updates or role changes
+        try {
+          const dbUser = await db.user.findUnique({
+            where: { id: token.sub },
+            include: { tenant: true },
+          });
+          if (dbUser) {
+            const validRoles: Array<"ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER"> = [
+              "ADMIN",
+              "MANAGER",
+              "DISPATCH",
+              "DRIVER",
+              "VIEWER",
+            ];
+            if (validRoles.includes(dbUser.role as typeof validRoles[number])) {
+              token.role = dbUser.role as typeof validRoles[number];
+            }
+            token.tenantId = dbUser.tenantId;
+            token.tenantSlug = dbUser.tenant?.slug;
+            // Note: clientId is not refreshed from DB as it's session-specific
+          }
+        } catch (error) {
+          console.warn('⚠️ [Auth] Could not refresh user role from database:', error);
+          // Continue with existing token values if DB lookup fails
+        }
       }
       return token;
     },
@@ -217,6 +286,7 @@ export const authOptions: NextAuthOptions = {
           role?: "ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER";
           tenantId?: string;
           tenantSlug?: string;
+          clientId?: string | null;
           driverId?: string | null;
         };
         const user = session.user as {
@@ -224,12 +294,14 @@ export const authOptions: NextAuthOptions = {
           role?: "ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER";
           tenantId?: string;
           tenantSlug?: string;
+          clientId?: string | null;
           driverId?: string | null;
         };
         user.id = token.sub!;
         user.role = tokenWithExtras.role;
         user.tenantId = tokenWithExtras.tenantId;
         user.tenantSlug = tokenWithExtras.tenantSlug;
+        user.clientId = tokenWithExtras.clientId ?? null;
         user.driverId = tokenWithExtras.driverId ?? null;
       }
       return session;

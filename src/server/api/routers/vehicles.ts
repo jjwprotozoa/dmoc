@@ -1,22 +1,10 @@
 // src/server/api/routers/vehicles.ts
+// NOTE: tenant filtering standardized via buildTenantWhere(...).
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { db } from '../../../lib/db';
+import { buildTenantWhere } from '../utils/tenant';
 import { protectedProcedure, router } from '../trpc';
-
-// Helper – ensure tenant isolation, but allow admin to see everything
-function whereTenant(tenantId: string | undefined, userRole?: string) {
-  // If user is ADMIN, don't filter by tenant (can see everything)
-  if (userRole === 'ADMIN') {
-    console.log('🔓 [Admin] Bypassing tenant isolation - can see all vehicles');
-    return {};
-  }
-  // For non-admin users, tenantId must be provided
-  if (!tenantId) {
-    throw new Error("Tenant ID is required");
-  }
-  return { tenantId };
-}
 
 export const vehiclesRouter = router({
   // Get all vehicles for a tenant
@@ -41,16 +29,8 @@ export const vehiclesRouter = router({
         role: ctx.session.user.role
       });
 
-      const tenantId = ctx.session.user.tenantId;
-      console.log('🏢 Using tenantId:', tenantId);
-
-      if (!tenantId) {
-        console.error('❌ [Vehicles Router] No tenantId in session');
-        throw new Error('User tenant not found');
-      }
-
       const where: Prisma.VehicleWhereInput = {
-        ...whereTenant(tenantId, ctx.session.user.role),
+        ...buildTenantWhere(ctx),
       };
 
       // Default to active vehicles only, unless:
@@ -102,14 +82,8 @@ export const vehiclesRouter = router({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      // CRITICAL: Ensure tenantId exists (required for non-ADMIN users)
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId && ctx.session.user.role !== 'ADMIN') {
-        throw new Error("Tenant ID is required");
-      }
       const where: Prisma.VehicleWhereInput = {
-        id: input.id,
-        ...whereTenant(tenantId, ctx.session.user.role),
+        ...buildTenantWhere(ctx, { id: input.id }),
       };
       
       const vehicle = await db.vehicle.findFirst({
@@ -139,24 +113,18 @@ export const vehiclesRouter = router({
       }),
     )
     .query(async ({ ctx, input }) => {
-      const tenantId = ctx.session.user.tenantId;
-
-      if (!tenantId) {
-        throw new Error('User tenant not found');
-      }
-
       console.log('🔍 [Vehicles Router] list called with input:', JSON.stringify(input, null, 2));
       console.log('👤 [Vehicles Router] User session:', {
-        tenantId,
+        tenantId: ctx.session.user.tenantId,
         role: ctx.session.user.role,
       });
       
       // Build base where clause with tenant isolation (admin bypass)
-      const baseWhere = whereTenant(tenantId, ctx.session.user.role);
+      const baseWhere = buildTenantWhere(ctx);
       
       // First check: count all vehicles for this tenant/admin (no filters)
       const totalForTenant = await db.vehicle.count({ where: baseWhere });
-      console.log(`🔍 [Vehicles Router] Total vehicles accessible: ${totalForTenant} (${ctx.session.user.role === 'ADMIN' ? 'all tenants' : `tenant ${tenantId}`})`);
+      console.log(`🔍 [Vehicles Router] Total vehicles accessible: ${totalForTenant} (${ctx.session.user.role === 'ADMIN' ? 'all tenants' : `tenant ${ctx.session.user.tenantId}`})`);
 
       const where: Prisma.VehicleWhereInput = {
         ...baseWhere,
@@ -244,7 +212,10 @@ export const vehiclesRouter = router({
         const allVehiclesCount = await db.vehicle.count({ where: baseWhere });
         console.log(`🔍 [Vehicles Router] Debug: Total accessible vehicles: ${allVehiclesCount}`);
         
-        if (allVehiclesCount === 0 && ctx.session.user.role !== 'ADMIN') {
+        // Normalize role to uppercase to match buildTenantWhere behavior
+        const userRole = ctx.session.user.role;
+        const normalizedRole = typeof userRole === 'string' ? userRole.toUpperCase() : userRole;
+        if (allVehiclesCount === 0 && normalizedRole !== 'ADMIN') {
           // Check all tenants to see which one has vehicles
           const allTenants = await db.tenant.findMany({
             select: {
@@ -278,14 +249,8 @@ export const vehiclesRouter = router({
 
   // Get filter counts for the filter component
   getFilterCounts: protectedProcedure.query(async ({ ctx }) => {
-    const tenantId = ctx.session.user.tenantId;
-
-    if (!tenantId) {
-      throw new Error('User tenant not found');
-    }
-
     const baseWhere: Prisma.VehicleWhereInput = {
-      ...whereTenant(tenantId, ctx.session.user.role),
+      ...buildTenantWhere(ctx),
     };
 
     const [
@@ -332,9 +297,8 @@ export const vehiclesRouter = router({
 
   // Get vehicle statistics
   getStats: protectedProcedure.query(async ({ ctx }) => {
-    const tenantId = ctx.session.user.tenantId;
     const baseWhere: Prisma.VehicleWhereInput = {
-      ...whereTenant(tenantId, ctx.session.user.role),
+      ...buildTenantWhere(ctx),
     };
     
     const [

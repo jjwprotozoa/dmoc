@@ -109,3 +109,19 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* Enhanced scrollbar styles for manifest table */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 8px;
+}
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #e5e7eb;
+  border-radius: 4px;
+}
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 4px;
+}
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}

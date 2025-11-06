@@ -1,7 +1,9 @@
 // src/server/api/routers/drivers.ts
+// NOTE: tenant filtering standardized via buildTenantWhere(...).
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { db } from '../../../lib/db';
+import { buildTenantWhere, getTenantId } from '../utils/tenant';
 import { protectedProcedure, router } from '../trpc';
 
 export const driversRouter = router({
@@ -18,7 +20,7 @@ export const driversRouter = router({
       const { search, country, active } = input;
 
       const where: Prisma.DriverWhereInput = {
-        tenantId: ctx.session.user.tenantId,
+        ...buildTenantWhere(ctx),
       };
 
       if (search) {
@@ -51,10 +53,7 @@ export const driversRouter = router({
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const driver = await db.driver.findFirst({
-        where: {
-          id: input.id,
-          tenantId: ctx.session.user.tenantId,
-        },
+        where: buildTenantWhere(ctx, { id: input.id }),
         include: {
           offenses: {
             orderBy: { createdAt: 'desc' },
@@ -86,10 +85,7 @@ export const driversRouter = router({
       const { id, ...updateData } = input;
 
       const driver = await db.driver.updateMany({
-        where: {
-          id,
-          tenantId: ctx.session.user.tenantId,
-        },
+        where: buildTenantWhere(ctx, { id }),
         data: updateData,
       });
 
@@ -115,11 +111,11 @@ export const driversRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // enforce tenant on write
+      const tenantId = getTenantId(ctx);
+
       const driver = await db.driver.findFirst({
-        where: {
-          id: input.driverId,
-          tenantId: ctx.session.user.tenantId,
-        },
+        where: buildTenantWhere(ctx, { id: input.driverId }),
       });
 
       if (!driver) {
@@ -128,6 +124,7 @@ export const driversRouter = router({
 
       const offense = await db.offense.create({
         data: {
+          tenantId,
           driverId: input.driverId,
           kind: input.kind,
           severity: input.severity,
@@ -143,25 +140,23 @@ export const driversRouter = router({
     const [totalDrivers, activeDrivers, driversWithOffenses, countries] =
       await Promise.all([
         db.driver.count({
-          where: { tenantId: ctx.session.user.tenantId },
+          where: buildTenantWhere(ctx),
         }),
         db.driver.count({
-          where: {
-            tenantId: ctx.session.user.tenantId,
+          where: buildTenantWhere(ctx, {
             active: true,
-          },
+          }),
         }),
         db.driver.count({
-          where: {
-            tenantId: ctx.session.user.tenantId,
+          where: buildTenantWhere(ctx, {
             offenses: {
               some: {},
             },
-          },
+          }),
         }),
         db.driver.groupBy({
           by: ['countryOfOrigin'],
-          where: { tenantId: ctx.session.user.tenantId },
+          where: buildTenantWhere(ctx),
           _count: true,
         }),
       ]);
@@ -182,10 +177,9 @@ export const driversRouter = router({
     .input(z.object({ country: z.string() }))
     .query(async ({ ctx, input }) => {
       const drivers = await db.driver.findMany({
-        where: {
-          tenantId: ctx.session.user.tenantId,
+        where: buildTenantWhere(ctx, {
           countryOfOrigin: input.country,
-        },
+        }),
         orderBy: { name: 'asc' },
       });
 

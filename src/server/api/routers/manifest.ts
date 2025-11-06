@@ -1,109 +1,119 @@
 // FILE: src/server/api/routers/manifest.ts
 // Manifest router with getAll and list procedures - Updated with new fields
-import { db } from "@/lib/db";
-import { protectedProcedure, router } from "@/server/api/trpc";
-import { getSignedPutUrl, objectUri } from "@/server/lib/storage";
-import { z } from "zod";
-
-// Helper – ensure tenant isolation, but allow admin to see everything
-function whereTenant(tenantId: string | undefined, userRole?: string) {
-  // If user is ADMIN, don't filter by tenant (can see everything)
-  if (userRole === 'ADMIN') {
-    console.log('🔓 [Admin] Bypassing tenant isolation - can see all manifests');
-    return {};
-  }
-  // For non-admin users, tenantId must be provided
-  if (!tenantId) {
-    throw new Error("Tenant ID is required");
-  }
-  return { tenantId };
-}
+// NOTE: tenant filtering standardized via buildTenantWhere(...).
+import { db } from '@/lib/db';
+import { protectedProcedure, router } from '@/server/api/trpc';
+import { buildTenantWhere, getTenantId } from '@/server/api/utils/tenant';
+import { getSignedPutUrl, objectUri } from '@/server/lib/storage';
+import { z } from 'zod';
 
 export const manifestRouter = router({
-  getAll: protectedProcedure
-    .query(async ({ ctx }) => {
-      console.log('🔍 [Manifest Router] getAll called');
-      console.log('👤 User session:', {
-        userId: ctx.session.user.id,
-        email: ctx.session.user.email,
-        tenantId: ctx.session.user.tenantId,
-        tenantSlug: ctx.session.user.tenantSlug,
-        role: ctx.session.user.role
-      });
-      
-      // CRITICAL: Ensure tenantId exists (required for non-ADMIN users)
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId && ctx.session.user.role !== 'ADMIN') {
-        throw new Error("Tenant ID is required");
-      }
-      console.log('🏢 Using tenantId:', tenantId);
-      console.log('👑 User role:', ctx.session.user.role);
-      
-      try {
-        console.log('🗄️ [Database] Testing connection...');
-        await db.$connect();
-        console.log('✅ [Database] Connection successful');
-        
-        console.log('🔍 [Database] Querying manifests...');
-        const manifests = await db.manifest.findMany({
-          where: whereTenant(tenantId, ctx.session.user.role),
-          orderBy: { dateTimeAdded: "desc" },
-          select: {
-            id: true,
-            title: true,
-            status: true,
-            trackingId: true,
-            tripStateId: true,
-            routeId: true,
-            clientId: true,
-            transporterId: true,
-            companyId: true,
-            horseId: true,
-            trailerId1: true,
-            trailerId2: true,
-            locationId: true,
-            parkLocationId: true,
-            countryId: true,
-            invoiceStateId: true,
-            invoiceNumber: true,
-            rmn: true,
-            jobNumber: true,
-            scheduledAt: true,
-            dateTimeAdded: true,
-            dateTimeUpdated: true,
-            dateTimeEnded: true,
-            // Relations
-            invoiceState: { select: { name: true, code: true } },
-            company: { select: { id: true, name: true } },
-            route: { select: { id: true, name: true } },
-            location: { select: { id: true, description: true, latitude: true, longitude: true } },
-            parkLocation: { select: { id: true, description: true, latitude: true, longitude: true } },
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    console.log('🔍 [Manifest Router] getAll called');
+    console.log('👤 User session:', {
+      userId: ctx.session.user.id,
+      email: ctx.session.user.email,
+      tenantId: ctx.session.user.tenantId,
+      tenantSlug: ctx.session.user.tenantSlug,
+      role: ctx.session.user.role,
+    });
+
+    console.log('👑 User role:', ctx.session.user.role);
+
+    try {
+      console.log('🗄️ [Database] Testing connection...');
+      await db.$connect();
+      console.log('✅ [Database] Connection successful');
+
+      console.log('🔍 [Database] Querying manifests...');
+
+      // Build where clause exactly like drivers and vehicles routers do
+      const where = {
+        ...buildTenantWhere(ctx),
+      };
+
+      console.log(
+        '🔍 [Database] Where clause:',
+        JSON.stringify(where, null, 2)
+      );
+
+      const manifests = await db.manifest.findMany({
+        where,
+        orderBy: { dateTimeAdded: 'desc' },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          trackingId: true,
+          tripStateId: true,
+          routeId: true,
+          clientId: true,
+          transporterId: true,
+          companyId: true,
+          horseId: true,
+          trailerId1: true,
+          trailerId2: true,
+          locationId: true,
+          parkLocationId: true,
+          countryId: true,
+          invoiceStateId: true,
+          invoiceNumber: true,
+          rmn: true,
+          jobNumber: true,
+          scheduledAt: true,
+          dateTimeAdded: true,
+          dateTimeUpdated: true,
+          dateTimeEnded: true,
+          // Relations
+          invoiceState: { select: { name: true, code: true } },
+          company: { select: { id: true, name: true } },
+          route: { select: { id: true, name: true } },
+          location: {
+            select: {
+              id: true,
+              description: true,
+              latitude: true,
+              longitude: true,
+            },
           },
-        });
+          parkLocation: {
+            select: {
+              id: true,
+              description: true,
+              latitude: true,
+              longitude: true,
+            },
+          },
+        },
+      });
 
-        console.log('📊 [Database] Query result:', {
-          count: manifests.length,
-          manifests: manifests.map(m => ({
-            id: m.id.slice(-8),
-            title: m.title,
-            status: m.status,
-            trackingId: m.trackingId,
-            company: m.company?.name
-          }))
-        });
+      console.log('📊 [Database] Query result:', {
+        count: manifests.length,
+        manifests: manifests.map((m) => ({
+          id: m.id.slice(-8),
+          title: m.title,
+          status: m.status,
+          trackingId: m.trackingId,
+          company: m.company?.name,
+        })),
+      });
 
-        const result = manifests.map(manifest => ({
-          ...manifest,
-          createdAt: manifest.dateTimeAdded, // Map for UI compatibility
-        }));
-        
-        console.log('✅ [Manifest Router] getAll returning', result.length, 'manifests');
-        return result;
-      } catch (error) {
-        console.error('❌ [Manifest Router] getAll error:', error);
-        throw error;
-      }
-    }),
+      const result = manifests.map((manifest) => ({
+        ...manifest,
+        createdAt: manifest.dateTimeAdded, // Map for UI compatibility
+      }));
+
+      console.log(
+        '✅ [Manifest Router] getAll returning',
+        result.length,
+        'manifests'
+      );
+      return result;
+    } catch (error) {
+      console.error('❌ [Manifest Router] getAll error:', error);
+      throw error;
+    }
+  }),
 
   list: protectedProcedure
     .input(
@@ -111,15 +121,29 @@ export const manifestRouter = router({
         q: z.string().optional(),
         status: z.array(z.string()).optional(),
         activeOnly: z.boolean().optional(),
-        dateRange: z.enum(['today', 'yesterday', 'week', 'month', 'custom', 'all']).optional(),
+        dateRange: z
+          .enum(['today', 'yesterday', 'week', 'month', 'custom', 'all'])
+          .optional(),
         customDateFrom: z.string().optional(),
         customDateTo: z.string().optional(),
         staleness: z.enum(['fresh', 'stale', 'old', 'all']).optional(),
-        quickFilter: z.enum(['all', 'active', 'waiting', 'breakdown', 'accident', 'logistical', 'closed', 'handed_over', 'foreign']).optional(),
+        quickFilter: z
+          .enum([
+            'all',
+            'active',
+            'waiting',
+            'breakdown',
+            'accident',
+            'logistical',
+            'closed',
+            'handed_over',
+            'foreign',
+          ])
+          .optional(),
         take: z.number().min(1).max(100).default(20),
         skip: z.number().min(0).default(0),
         cursor: z.string().optional(), // string cursor for cuid
-      }),
+      })
     )
     .query(async ({ ctx, input }) => {
       console.log('🔍 [Manifest Router] list called with input:', input);
@@ -128,29 +152,26 @@ export const manifestRouter = router({
         email: ctx.session.user.email,
         tenantId: ctx.session.user.tenantId,
         tenantSlug: ctx.session.user.tenantSlug,
-        role: ctx.session.user.role
+        role: ctx.session.user.role,
       });
-      
-      // CRITICAL: Ensure tenantId exists (required for non-ADMIN users)
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId && ctx.session.user.role !== 'ADMIN') {
-        throw new Error("Tenant ID is required");
-      }
-      console.log('🏢 Using tenantId:', tenantId);
+
       console.log('👑 User role:', ctx.session.user.role);
-      
+
       try {
         console.log('🗄️ [Database] Testing connection...');
         await db.$connect();
         console.log('✅ [Database] Connection successful');
-        
-        // Build where clause with proper typing
+
+        // Build where clause exactly like drivers and vehicles routers do
         const where: Record<string, unknown> = {
-          ...whereTenant(tenantId, ctx.session.user.role),
+          ...buildTenantWhere(ctx),
         };
-        
-        console.log('🔍 [Database] Base where clause:', where);
-        
+
+        console.log(
+          '🔍 [Database] Base where clause:',
+          JSON.stringify(where, null, 2)
+        );
+
         // Text search across multiple fields
         if (input.q) {
           where.OR = [
@@ -161,18 +182,20 @@ export const manifestRouter = router({
           ].filter(Boolean);
           console.log('🔍 [Database] Added search filter:', where.OR);
         }
-        
+
         // Status filtering
         if (input.status && input.status.length > 0) {
           where.status = { in: input.status };
           console.log('🔍 [Database] Added status filter:', where.status);
         }
-        
+
         // Active-only filtering (not ended and updated recently)
         if (input.activeOnly) {
           const activeHours = parseInt(process.env.ACTIVE_HOURS || '48', 10);
-          const cutoffTime = new Date(Date.now() - activeHours * 60 * 60 * 1000);
-          
+          const cutoffTime = new Date(
+            Date.now() - activeHours * 60 * 60 * 1000
+          );
+
           where.AND = [
             { dateTimeEnded: null }, // Not ended
             { dateTimeUpdated: { gte: cutoffTime } }, // Updated recently
@@ -188,11 +211,23 @@ export const manifestRouter = router({
 
           switch (input.dateRange) {
             case 'today':
-              dateFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+              dateFrom = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate()
+              );
               break;
             case 'yesterday':
-              dateFrom = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-              dateTo = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+              dateFrom = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate() - 1
+              );
+              dateTo = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate()
+              );
               break;
             case 'week':
               dateFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -216,9 +251,12 @@ export const manifestRouter = router({
           if (dateFrom) {
             where.dateTimeAdded = {
               gte: dateFrom,
-              ...(dateTo && { lte: dateTo })
+              ...(dateTo && { lte: dateTo }),
             };
-            console.log('🔍 [Database] Added date range filter:', { dateFrom, dateTo });
+            console.log('🔍 [Database] Added date range filter:', {
+              dateFrom,
+              dateTo,
+            });
           }
         }
 
@@ -235,7 +273,7 @@ export const manifestRouter = router({
               cutoffTime = new Date(now.getTime() - 2 * 60 * 60 * 1000); // 2 hours
               where.dateTimeUpdated = {
                 gte: new Date(now.getTime() - 2 * 60 * 60 * 1000),
-                lt: new Date(now.getTime() - 30 * 60 * 1000)
+                lt: new Date(now.getTime() - 30 * 60 * 1000),
               };
               break;
             case 'old':
@@ -288,9 +326,12 @@ export const manifestRouter = router({
           }
           console.log('🔍 [Database] Added quick filter:', input.quickFilter);
         }
-        
-        console.log('🔍 [Database] Final where clause:', JSON.stringify(where, null, 2));
-        
+
+        console.log(
+          '🔍 [Database] Final where clause:',
+          JSON.stringify(where, null, 2)
+        );
+
         console.log('🔍 [Database] Querying manifests with pagination...');
         const [rows, total] = await Promise.all([
           db.manifest.findMany({
@@ -326,8 +367,22 @@ export const manifestRouter = router({
               invoiceState: { select: { name: true, code: true } },
               company: { select: { id: true, name: true } },
               route: { select: { id: true, name: true } },
-              location: { select: { id: true, description: true, latitude: true, longitude: true } },
-              parkLocation: { select: { id: true, description: true, latitude: true, longitude: true } },
+              location: {
+                select: {
+                  id: true,
+                  description: true,
+                  latitude: true,
+                  longitude: true,
+                },
+              },
+              parkLocation: {
+                select: {
+                  id: true,
+                  description: true,
+                  latitude: true,
+                  longitude: true,
+                },
+              },
             },
           }),
           db.manifest.count({ where }),
@@ -337,31 +392,31 @@ export const manifestRouter = router({
           rowsCount: rows.length,
           totalCount: total,
           pagination: { take: input.take, skip: input.skip },
-          rows: rows.map(r => ({
+          rows: rows.map((r) => ({
             id: r.id.slice(-8),
             title: r.title,
             status: r.status,
             trackingId: r.trackingId,
             company: r.company?.name,
-            dateTimeUpdated: r.dateTimeUpdated
-          }))
+            dateTimeUpdated: r.dateTimeUpdated,
+          })),
         });
 
-        const result = { 
-          items: rows.map(row => ({
+        const result = {
+          items: rows.map((row) => ({
             ...row,
             createdAt: row.dateTimeAdded, // Map for UI compatibility
-          })), 
+          })),
           total,
           hasMore: input.skip + input.take < total,
         };
-        
+
         console.log('✅ [Manifest Router] list returning:', {
           itemsCount: result.items.length,
           total: result.total,
-          hasMore: result.hasMore
+          hasMore: result.hasMore,
         });
-        
+
         return result;
       } catch (error) {
         console.error('❌ [Manifest Router] list error:', error);
@@ -372,21 +427,15 @@ export const manifestRouter = router({
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      // CRITICAL: Ensure tenantId exists (required for non-ADMIN users)
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId && ctx.session.user.role !== 'ADMIN') {
-        throw new Error("Tenant ID is required");
-      }
-
       const row = await db.manifest.findFirst({
-        where: tenantId ? { id: input.id, tenantId } : { id: input.id },
+        where: buildTenantWhere(ctx, { id: input.id }),
         include: {
           route: true,
           invoiceState: true,
           location: true,
           parkLocation: true,
           locations: {
-            orderBy: { recordedAt: "asc" },
+            orderBy: { recordedAt: 'asc' },
           },
           whatsapp: {
             include: {
@@ -396,14 +445,14 @@ export const manifestRouter = router({
             },
           },
           audits: {
-            orderBy: { createdAt: "desc" },
+            orderBy: { createdAt: 'desc' },
             take: 50,
           },
         },
       });
 
       if (!row) {
-        throw new Error("Manifest not found or not in tenant.");
+        throw new Error('Manifest not found or not in tenant.');
       }
       return row;
     }),
@@ -413,7 +462,9 @@ export const manifestRouter = router({
       z.object({
         title: z.string().optional(),
         trackingId: z.string().min(1),
-        status: z.enum(["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"]).optional(),
+        status: z
+          .enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
+          .optional(),
         scheduledAt: z.date().optional(),
         routeId: z.string().optional(),
         locationId: z.string().optional(),
@@ -421,21 +472,17 @@ export const manifestRouter = router({
         companyId: z.string().optional(),
         rmn: z.string().optional(),
         jobNumber: z.string().optional(),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
-      // CRITICAL: Ensure tenantId exists (required for all mutations)
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new Error("Tenant ID is required");
-      }
+      const tenantId = getTenantId(ctx);
 
       const created = await db.manifest.create({
         data: {
           tenantId,
           title: input.title || input.trackingId,
           trackingId: input.trackingId,
-          status: input.status || "SCHEDULED",
+          status: input.status || 'SCHEDULED',
           scheduledAt: input.scheduledAt || new Date(),
           routeId: input.routeId,
           locationId: input.locationId,
@@ -446,8 +493,8 @@ export const manifestRouter = router({
           audits: {
             create: {
               tenantId,
-              action: "create",
-              oldValues: "{}",
+              action: 'create',
+              oldValues: '{}',
               newValues: JSON.stringify(input),
             },
           },
@@ -464,7 +511,9 @@ export const manifestRouter = router({
         id: z.string(),
         patch: z.object({
           title: z.string().optional(),
-          status: z.enum(["SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"]).optional(),
+          status: z
+            .enum(['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'])
+            .optional(),
           scheduledAt: z.date().optional(),
           routeId: z.string().optional(),
           locationId: z.string().optional(),
@@ -473,18 +522,16 @@ export const manifestRouter = router({
           rmn: z.string().optional(),
           jobNumber: z.string().optional(),
         }),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
-      // CRITICAL: Ensure tenantId exists (required for all mutations)
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new Error("Tenant ID is required");
-      }
+      // enforce tenant on write
+      const tenantId = getTenantId(ctx);
+
       const existing = await db.manifest.findFirst({
-        where: { id: input.id, tenantId },
+        where: buildTenantWhere(ctx, { id: input.id }),
       });
-      if (!existing) throw new Error("Manifest not found.");
+      if (!existing) throw new Error('Manifest not found.');
 
       const updated = await db.manifest.update({
         where: { id: existing.id },
@@ -499,7 +546,7 @@ export const manifestRouter = router({
         data: {
           tenantId,
           manifestId: existing.id,
-          action: "update",
+          action: 'update',
           oldValues: JSON.stringify(existing),
           newValues: JSON.stringify(input.patch),
         },
@@ -515,21 +562,17 @@ export const manifestRouter = router({
         latitude: z.number().min(-90).max(90),
         longitude: z.number().min(-180).max(180),
         recordedAt: z.date().optional(),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
-      // CRITICAL: Ensure tenantId exists (required for all mutations)
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new Error("Tenant ID is required");
-      }
+      const tenantId = getTenantId(ctx);
 
       // assert ownership
       const exists = await db.manifest.findFirst({
-        where: { id: input.manifestId, tenantId },
+        where: buildTenantWhere(ctx, { id: input.manifestId }),
         select: { id: true },
       });
-      if (!exists) throw new Error("Manifest not found.");
+      if (!exists) throw new Error('Manifest not found.');
 
       await db.manifestLocation.create({
         data: {
@@ -549,24 +592,20 @@ export const manifestRouter = router({
     .input(
       z.object({
         manifestId: z.string(),
-        kind: z.enum(["file", "media", "thumbnail"]),
+        kind: z.enum(['file', 'media', 'thumbnail']),
         filename: z.string(),
         contentType: z.string().optional(),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
-      // CRITICAL: Ensure tenantId exists (required for all mutations)
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new Error("Tenant ID is required");
-      }
+      const tenantId = getTenantId(ctx);
       const { manifestId, filename, contentType, kind } = input;
 
       const manifest = await db.manifest.findFirst({
-        where: { id: manifestId, tenantId },
+        where: buildTenantWhere(ctx, { id: manifestId }),
         select: { id: true },
       });
-      if (!manifest) throw new Error("Manifest not found.");
+      if (!manifest) throw new Error('Manifest not found.');
 
       const key = `${tenantId}/manifests/${manifestId}/${Date.now()}_${filename}`;
       const url = await getSignedPutUrl(key, contentType);
@@ -580,40 +619,35 @@ export const manifestRouter = router({
       z.object({
         manifestId: z.string(),
         parentId: z.string().optional(), // optional: existing WhatsappData
-        type: z.enum(["file", "media"]),
+        type: z.enum(['file', 'media']),
         fileName: z.string(),
         uri: z.string().url(),
         mimeType: z.string().optional(),
         sizeBytes: z.number().optional(),
         checksum: z.string().optional(),
-      }),
+      })
     )
     .mutation(async ({ ctx, input }) => {
-      // CRITICAL: Ensure tenantId exists (required for all mutations)
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new Error("Tenant ID is required");
-      }
+      const tenantId = getTenantId(ctx);
       const { manifestId } = input;
 
       const manifest = await db.manifest.findFirst({
-        where: { id: manifestId, tenantId },
+        where: buildTenantWhere(ctx, { id: manifestId }),
         select: { id: true },
       });
-      if (!manifest) throw new Error("Manifest not found.");
+      if (!manifest) throw new Error('Manifest not found.');
 
-      const parent =
-        input.parentId
-          ? await db.whatsappData.findFirst({
-              where: { id: input.parentId, tenantId, manifestId },
-            })
-          : await db.whatsappData.create({
-              data: { tenantId, manifestId },
-            });
+      const parent = input.parentId
+        ? await db.whatsappData.findFirst({
+            where: buildTenantWhere(ctx, { id: input.parentId, manifestId }),
+          })
+        : await db.whatsappData.create({
+            data: { tenantId, manifestId },
+          });
 
-      if (!parent) throw new Error("WhatsappData not found/created.");
+      if (!parent) throw new Error('WhatsappData not found/created.');
 
-      if (input.type === "file") {
+      if (input.type === 'file') {
         await db.whatsappFile.create({
           data: {
             tenantId,
@@ -630,7 +664,7 @@ export const manifestRouter = router({
           data: {
             tenantId,
             whatsappDataId: parent.id,
-            extension: input.fileName.split(".").pop() || undefined,
+            extension: input.fileName.split('.').pop() || undefined,
             link: null,
             uri: input.uri,
             mimeType: input.mimeType,
@@ -645,8 +679,8 @@ export const manifestRouter = router({
         data: {
           tenantId,
           manifestId,
-          action: "attachMedia",
-          oldValues: "{}",
+          action: 'attachMedia',
+          oldValues: '{}',
           newValues: JSON.stringify(input),
         },
       });
@@ -658,26 +692,21 @@ export const manifestRouter = router({
   timeline: protectedProcedure
     .input(z.object({ manifestId: z.string() }))
     .query(async ({ ctx, input }) => {
-      // CRITICAL: Ensure tenantId exists (required for non-ADMIN users)
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId && ctx.session.user.role !== 'ADMIN') {
-        throw new Error("Tenant ID is required");
-      }
       const [m, locs, media] = await Promise.all([
         db.manifest.findFirst({
-          where: tenantId ? { id: input.manifestId, tenantId } : { id: input.manifestId },
+          where: buildTenantWhere(ctx, { id: input.manifestId }),
           select: { id: true },
         }),
         db.manifestLocation.findMany({
-          where: tenantId ? { tenantId, manifestId: input.manifestId } : { manifestId: input.manifestId },
-          orderBy: { recordedAt: "asc" },
+          where: buildTenantWhere(ctx, { manifestId: input.manifestId }),
+          orderBy: { recordedAt: 'asc' },
         }),
         db.whatsappData.findMany({
-          where: tenantId ? { tenantId, manifestId: input.manifestId } : { manifestId: input.manifestId },
+          where: buildTenantWhere(ctx, { manifestId: input.manifestId }),
           include: { files: true, media: true, locations: true },
         }),
       ]);
-      if (!m) throw new Error("Manifest not found.");
+      if (!m) throw new Error('Manifest not found.');
       return { locations: locs, whatsapp: media };
     }),
 
@@ -686,151 +715,151 @@ export const manifestRouter = router({
       z.object({
         manifestId: z.string(),
         limit: z.number().min(1).max(200).default(50),
-      }),
+      })
     )
     .query(async ({ ctx, input }) => {
-      // CRITICAL: Ensure tenantId exists (required for non-ADMIN users)
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId && ctx.session.user.role !== 'ADMIN') {
-        throw new Error("Tenant ID is required");
-      }
       return db.manifestAudit.findMany({
-        where: tenantId ? { tenantId, manifestId: input.manifestId } : { manifestId: input.manifestId },
+        where: buildTenantWhere(ctx, { manifestId: input.manifestId }),
         take: input.limit,
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
       });
     }),
 
   // Get filter counts for the filter component
-  getFilterCounts: protectedProcedure
-    .query(async ({ ctx }) => {
-      // CRITICAL: Ensure tenantId exists (whereTenant will validate for non-ADMIN users)
-      const tenantId = ctx.session.user.tenantId;
-      const baseWhere = whereTenant(tenantId, ctx.session.user.role);
-      
-      try {
-        const [
-          total,
-          active,
-          waiting,
-          breakdown,
-          accident,
-          logistical,
-          closed,
-          handedOver,
-          foreign
-        ] = await Promise.all([
-          // Total count
-          db.manifest.count({ where: baseWhere }),
-          
-          // Active (IN_PROGRESS + SCHEDULED, not ended)
-          db.manifest.count({
-            where: {
-              ...baseWhere,
-              status: { in: ['IN_PROGRESS', 'SCHEDULED'] },
-              dateTimeEnded: null,
-            }
-          }),
-          
-          // Waiting for docs (SCHEDULED)
-          db.manifest.count({
-            where: {
-              ...baseWhere,
-              status: 'SCHEDULED',
-            }
-          }),
-          
-          // Breakdown (IN_PROGRESS - would need additional business logic)
-          db.manifest.count({
-            where: {
-              ...baseWhere,
-              status: 'IN_PROGRESS',
-            }
-          }),
-          
-          // Accident (IN_PROGRESS - would need additional business logic)
-          db.manifest.count({
-            where: {
-              ...baseWhere,
-              status: 'IN_PROGRESS',
-            }
-          }),
-          
-          // Logistical issues (IN_PROGRESS - would need additional business logic)
-          db.manifest.count({
-            where: {
-              ...baseWhere,
-              status: 'IN_PROGRESS',
-            }
-          }),
-          
-          // Closed (COMPLETED)
-          db.manifest.count({
-            where: {
-              ...baseWhere,
-              status: 'COMPLETED',
-            }
-          }),
-          
-          // Handed over (COMPLETED - would need additional business logic)
-          db.manifest.count({
-            where: {
-              ...baseWhere,
-              status: 'COMPLETED',
-            }
-          }),
-          
-          // Foreign horse and driver (IN_PROGRESS + SCHEDULED - would need additional business logic)
-          db.manifest.count({
-            where: {
-              ...baseWhere,
-              status: { in: ['IN_PROGRESS', 'SCHEDULED'] },
-            }
-          }),
-        ]);
+  getFilterCounts: protectedProcedure.query(async ({ ctx }) => {
+    const baseWhere = buildTenantWhere(ctx);
 
-        return {
-          all: total,
-          active,
-          waiting,
-          breakdown,
-          accident,
-          logistical,
-          closed,
-          handed_over: handedOver,
-          foreign,
-          total,
-        };
-      } catch (error) {
-        console.error('❌ [Manifest Router] getFilterCounts error:', error);
-        throw error;
-      }
-    }),
+    try {
+      const [
+        total,
+        active,
+        waiting,
+        breakdown,
+        accident,
+        logistical,
+        closed,
+        handedOver,
+        foreign,
+      ] = await Promise.all([
+        // Total count
+        db.manifest.count({ where: baseWhere }),
+
+        // Active (IN_PROGRESS + SCHEDULED, not ended)
+        db.manifest.count({
+          where: {
+            ...baseWhere,
+            status: { in: ['IN_PROGRESS', 'SCHEDULED'] },
+            dateTimeEnded: null,
+          },
+        }),
+
+        // Waiting for docs (SCHEDULED)
+        db.manifest.count({
+          where: {
+            ...baseWhere,
+            status: 'SCHEDULED',
+          },
+        }),
+
+        // Breakdown (IN_PROGRESS - would need additional business logic)
+        db.manifest.count({
+          where: {
+            ...baseWhere,
+            status: 'IN_PROGRESS',
+          },
+        }),
+
+        // Accident (IN_PROGRESS - would need additional business logic)
+        db.manifest.count({
+          where: {
+            ...baseWhere,
+            status: 'IN_PROGRESS',
+          },
+        }),
+
+        // Logistical issues (IN_PROGRESS - would need additional business logic)
+        db.manifest.count({
+          where: {
+            ...baseWhere,
+            status: 'IN_PROGRESS',
+          },
+        }),
+
+        // Closed (COMPLETED)
+        db.manifest.count({
+          where: {
+            ...baseWhere,
+            status: 'COMPLETED',
+          },
+        }),
+
+        // Handed over (COMPLETED - would need additional business logic)
+        db.manifest.count({
+          where: {
+            ...baseWhere,
+            status: 'COMPLETED',
+          },
+        }),
+
+        // Foreign horse and driver (IN_PROGRESS + SCHEDULED - would need additional business logic)
+        db.manifest.count({
+          where: {
+            ...baseWhere,
+            status: { in: ['IN_PROGRESS', 'SCHEDULED'] },
+          },
+        }),
+      ]);
+
+      return {
+        all: total,
+        active,
+        waiting,
+        breakdown,
+        accident,
+        logistical,
+        closed,
+        handed_over: handedOver,
+        foreign,
+        total,
+      };
+    } catch (error) {
+      console.error('❌ [Manifest Router] getFilterCounts error:', error);
+      throw error;
+    }
+  }),
 
   // Display dashboard - optimized for display screens with configurable filters
   getDisplayDashboard: protectedProcedure
     .input(
-      z.object({
-        statusFilters: z.array(z.string()).optional(),
-        highPriorityOnly: z.boolean().optional(),
-        maxResults: z.number().optional(),
-      }).optional()
+      z
+        .object({
+          statusFilters: z.array(z.string()).optional(),
+          highPriorityOnly: z.boolean().optional(),
+          maxResults: z.number().optional(),
+        })
+        .optional()
     )
     .query(async ({ ctx, input }) => {
-      // CRITICAL: Ensure tenantId exists (whereTenant will validate for non-ADMIN users)
-      const tenantId = ctx.session.user.tenantId;
-      const baseWhere = whereTenant(tenantId, ctx.session.user.role);
-      
+      const baseWhere = buildTenantWhere(ctx);
+      const tenantId = ctx.session.user.tenantId; // For logging only
+
       const {
         statusFilters = ['IN_PROGRESS', 'SCHEDULED'], // Default to active manifests
         highPriorityOnly = false,
         maxResults = 1000, // Default limit
       } = input || {};
-      
+
       try {
-        console.log('📺 [Display Dashboard] Getting dashboard data for tenant:', tenantId);
-        console.log('🔍 [Display Dashboard] Filters:', { statusFilters, highPriorityOnly, maxResults });
-        
+        console.log(
+          '📺 [Display Dashboard] Getting dashboard data for tenant:',
+          tenantId
+        );
+        console.log('🔍 [Display Dashboard] Filters:', {
+          statusFilters,
+          highPriorityOnly,
+          maxResults,
+        });
+
         // Build where clause for manifests
         const manifestWhere = {
           ...baseWhere,
@@ -838,13 +867,17 @@ export const manifestRouter = router({
           ...(highPriorityOnly && {
             OR: [
               // High priority: recently updated (< 2 hours)
-              { dateTimeUpdated: { gte: new Date(Date.now() - 2 * 60 * 60 * 1000) } },
+              {
+                dateTimeUpdated: {
+                  gte: new Date(Date.now() - 2 * 60 * 60 * 1000),
+                },
+              },
               // High priority: critical statuses
               { status: { in: ['IN_PROGRESS'] } },
-            ]
-          })
+            ],
+          }),
         };
-        
+
         // Get critical manifests (stale > 2 hours or specific statuses)
         const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
         const criticalManifests = await db.manifest.findMany({
@@ -862,10 +895,12 @@ export const manifestRouter = router({
               // Long-running manifests (>4 hours in progress)
               {
                 status: 'IN_PROGRESS',
-                dateTimeUpdated: { lt: new Date(Date.now() - 4 * 60 * 60 * 1000) },
+                dateTimeUpdated: {
+                  lt: new Date(Date.now() - 4 * 60 * 60 * 1000),
+                },
                 dateTimeEnded: null,
-              }
-            ]
+              },
+            ],
           },
           orderBy: { dateTimeUpdated: 'asc' }, // Oldest first for critical alerts
           take: 10,
@@ -884,7 +919,14 @@ export const manifestRouter = router({
             dateTimeEnded: true,
             company: { select: { id: true, name: true } },
             route: { select: { id: true, name: true } },
-            location: { select: { id: true, description: true, latitude: true, longitude: true } },
+            location: {
+              select: {
+                id: true,
+                description: true,
+                latitude: true,
+                longitude: true,
+              },
+            },
           },
         });
 
@@ -908,7 +950,14 @@ export const manifestRouter = router({
             dateTimeEnded: true,
             company: { select: { id: true, name: true } },
             route: { select: { id: true, name: true } },
-            location: { select: { id: true, description: true, latitude: true, longitude: true } },
+            location: {
+              select: {
+                id: true,
+                description: true,
+                latitude: true,
+                longitude: true,
+              },
+            },
           },
         });
 
@@ -922,7 +971,7 @@ export const manifestRouter = router({
           logistical,
           closed,
           handedOver,
-          foreign
+          foreign,
         ] = await Promise.all([
           db.manifest.count({ where: baseWhere }),
           db.manifest.count({
@@ -930,22 +979,24 @@ export const manifestRouter = router({
               ...baseWhere,
               status: 'IN_PROGRESS',
               dateTimeEnded: null,
-            }
+            },
           }),
           db.manifest.count({
             where: {
               ...baseWhere,
               status: 'SCHEDULED',
-            }
+            },
           }),
           // Breakdown: long-running IN_PROGRESS manifests (>4 hours)
           db.manifest.count({
             where: {
               ...baseWhere,
               status: 'IN_PROGRESS',
-              dateTimeUpdated: { lt: new Date(Date.now() - 4 * 60 * 60 * 1000) }, // >4 hours
+              dateTimeUpdated: {
+                lt: new Date(Date.now() - 4 * 60 * 60 * 1000),
+              }, // >4 hours
               dateTimeEnded: null,
-            }
+            },
           }),
           // Accident: manifests with accident-related tracking IDs or job numbers
           db.manifest.count({
@@ -954,24 +1005,26 @@ export const manifestRouter = router({
               OR: [
                 { trackingId: { contains: 'ACCIDENT' } },
                 { jobNumber: { contains: 'ACCIDENT' } },
-                { title: { contains: 'ACCIDENT' } }
-              ]
-            }
+                { title: { contains: 'ACCIDENT' } },
+              ],
+            },
           }),
           // Logistical: manifests with logistical issues (stale >2 hours)
           db.manifest.count({
             where: {
               ...baseWhere,
               status: 'IN_PROGRESS',
-              dateTimeUpdated: { lt: new Date(Date.now() - 2 * 60 * 60 * 1000) }, // >2 hours
+              dateTimeUpdated: {
+                lt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+              }, // >2 hours
               dateTimeEnded: null,
-            }
+            },
           }),
           db.manifest.count({
             where: {
               ...baseWhere,
               status: 'COMPLETED',
-            }
+            },
           }),
           // Handed Over: manifests with HANDED_OVER in tracking or job number
           db.manifest.count({
@@ -980,9 +1033,9 @@ export const manifestRouter = router({
               OR: [
                 { trackingId: { contains: 'HANDED_OVER' } },
                 { jobNumber: { contains: 'HANDED_OVER' } },
-                { title: { contains: 'HANDED_OVER' } }
-              ]
-            }
+                { title: { contains: 'HANDED_OVER' } },
+              ],
+            },
           }),
           // Foreign: manifests with foreign country IDs or tracking IDs
           db.manifest.count({
@@ -991,18 +1044,18 @@ export const manifestRouter = router({
               OR: [
                 { countryId: { not: null } }, // Has country ID
                 { trackingId: { contains: 'FOREIGN' } },
-                { trackingId: { contains: 'INTL' } }
-              ]
-            }
+                { trackingId: { contains: 'INTL' } },
+              ],
+            },
           }),
         ]);
 
         const result = {
-          criticalManifests: criticalManifests.map(m => ({
+          criticalManifests: criticalManifests.map((m) => ({
             ...m,
             createdAt: m.dateTimeAdded,
           })),
-          highPriorityManifests: filteredManifests.map(m => ({
+          highPriorityManifests: filteredManifests.map((m) => ({
             ...m,
             createdAt: m.dateTimeAdded,
           })),

@@ -1,7 +1,10 @@
 // src/server/api/root.ts
+import { adminUsersRouter } from './routers/adminUsers';
+import { authRouter } from './routers/auth';
 import { clientsRouter } from './routers/clients';
 import { contactsRouter } from './routers/contacts';
 import { countriesRouter } from './routers/countries';
+import { debugRouter } from './routers/debug';
 import { driverRouter } from './routers/driver';
 import { driversRouter } from './routers/drivers';
 import { locationsRouter } from './routers/locations';
@@ -16,6 +19,7 @@ import { vehiclesRouter } from './routers/vehicles';
 import { router } from './trpc';
 
 export const appRouter = router({
+  auth: authRouter,
   manifest: manifestRouter,
   tracking: trackingRouter,
   offenses: offensesRouter,
@@ -30,6 +34,8 @@ export const appRouter = router({
   locations: locationsRouter,
   logisticsOfficers: logisticsOfficersRouter,
   vehicleCombinations: vehicleCombinationsRouter,
+  adminUsers: adminUsersRouter,
+  debug: debugRouter,
 });
 
 export type AppRouter = typeof appRouter;

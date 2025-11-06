@@ -1,6 +1,11 @@
 // src/server/api/routers/offenses.ts
+// NOTE: Offenses are filtered by driver/vehicle's current tenant, not offense.tenantId.
+// This allows tenants to see offense history when drivers/vehicles move between tenants.
+// Admin can see all offenses across all tenants.
+import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { db } from '@/lib/db';
+import { buildTenantWhere, getTenantId } from '../utils/tenant';
 import { protectedProcedure, router } from '../trpc';
 
 export const offensesRouter = router({
@@ -13,49 +18,60 @@ export const offensesRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      // Note: Offense model doesn't have tenantId, so we filter through driver/vehicle relations
-      // If driverId is provided, ensure driver belongs to tenant
-      // If vehicleId is provided, ensure vehicle belongs to tenant
-      const whereClause: {
-        driverId?: string;
-        vehicleId?: string;
-        severity?: string;
-      } = {};
+      // Build where clause for offenses
+      // IMPORTANT: Offenses are visible based on driver/vehicle's current tenant,
+      // not the offense's tenantId. This allows cross-tenant visibility when
+      // drivers/vehicles move between tenants.
+      const userRole = ctx.session.user.role;
+      const tenantId = ctx.session.user.tenantId;
 
+      // Build base where clause
+      const where: Prisma.OffenseWhereInput = {
+        ...(input.driverId && { driverId: input.driverId }),
+        ...(input.vehicleId && { vehicleId: input.vehicleId }),
+        ...(input.severity && { severity: input.severity }),
+      };
+
+      // For non-admin users: filter by driver/vehicle's current tenant
+      // This ensures offenses follow the driver/vehicle, not where they were created.
+      // Example: If Driver X had offenses in Tenant A, then moved to Tenant B,
+      // Tenant B will see those offenses because the driver's current tenantId is B.
+      // Normalize role to uppercase to match buildTenantWhere behavior
+      const normalizedRole = typeof userRole === 'string' ? userRole.toUpperCase() : userRole;
+      if (normalizedRole !== 'ADMIN' && tenantId) {
+        // Show offenses where the driver OR vehicle currently belongs to this tenant
+        // This handles all cases:
+        // - Offense with driver only: show if driver.tenantId matches
+        // - Offense with vehicle only: show if vehicle.tenantId matches
+        // - Offense with both: show if either matches
+        where.OR = [
+          { driver: { tenantId } },
+          { vehicle: { tenantId } },
+        ];
+      }
+      // For ADMIN: no tenant filter (can see all offenses across all tenants)
+
+      // If driverId or vehicleId is provided, verify it belongs to the tenant
       if (input.driverId) {
-        // Verify driver belongs to tenant
         const driver = await db.driver.findFirst({
-          where: {
-            id: input.driverId,
-            tenantId: ctx.session.user.tenantId,
-          },
+          where: buildTenantWhere(ctx, { id: input.driverId }),
         });
         if (!driver) {
           throw new Error('Driver not found or access denied');
         }
-        whereClause.driverId = input.driverId;
       }
 
       if (input.vehicleId) {
-        // Verify vehicle belongs to tenant
         const vehicle = await db.vehicle.findFirst({
-          where: {
-            id: input.vehicleId,
-            tenantId: ctx.session.user.tenantId,
-          },
+          where: buildTenantWhere(ctx, { id: input.vehicleId }),
         });
         if (!vehicle) {
           throw new Error('Vehicle not found or access denied');
         }
-        whereClause.vehicleId = input.vehicleId;
-      }
-
-      if (input.severity) {
-        whereClause.severity = input.severity;
       }
 
       const offenses = await db.offense.findMany({
-        where: whereClause,
+        where,
         include: {
           driver: true,
           vehicle: true,
@@ -63,20 +79,7 @@ export const offensesRouter = router({
         orderBy: { createdAt: 'desc' },
       });
 
-      // Filter results to only show offenses for drivers/vehicles in this tenant
-      // (additional security layer in case of data inconsistency)
-      const tenantId = ctx.session.user.tenantId;
-      const filteredOffenses = offenses.filter((offense) => {
-        if (offense.driver && offense.driver.tenantId !== tenantId) {
-          return false;
-        }
-        if (offense.vehicle && offense.vehicle.tenantId !== tenantId) {
-          return false;
-        }
-        return true;
-      });
-
-      return filteredOffenses;
+      return offenses;
     }),
 
   create: protectedProcedure
@@ -96,15 +99,12 @@ export const offensesRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const tenantId = ctx.session.user.tenantId;
+      const tenantId = getTenantId(ctx);
 
       // Verify driver belongs to tenant if provided
       if (input.driverId) {
         const driver = await db.driver.findFirst({
-          where: {
-            id: input.driverId,
-            tenantId,
-          },
+          where: buildTenantWhere(ctx, { id: input.driverId }),
         });
         if (!driver) {
           throw new Error('Driver not found or access denied');
@@ -114,10 +114,7 @@ export const offensesRouter = router({
       // Verify vehicle belongs to tenant if provided
       if (input.vehicleId) {
         const vehicle = await db.vehicle.findFirst({
-          where: {
-            id: input.vehicleId,
-            tenantId,
-          },
+          where: buildTenantWhere(ctx, { id: input.vehicleId }),
         });
         if (!vehicle) {
           throw new Error('Vehicle not found or access denied');
@@ -126,6 +123,7 @@ export const offensesRouter = router({
 
       const offense = await db.offense.create({
         data: {
+          tenantId,
           driverId: input.driverId,
           vehicleId: input.vehicleId,
           kind: input.kind,

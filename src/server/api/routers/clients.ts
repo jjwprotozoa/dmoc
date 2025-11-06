@@ -1,7 +1,9 @@
 // src/server/api/routers/clients.ts
+// NOTE: tenant filtering standardized via buildTenantWhere(...).
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { db } from '../../../lib/db';
+import { buildTenantWhere, getTenantId } from '../utils/tenant';
 import { protectedProcedure, router } from '../trpc';
 
 export const clientsRouter = router({
@@ -17,7 +19,7 @@ export const clientsRouter = router({
       const { search, type } = input;
 
       const where: Prisma.ClientWhereInput = {
-        tenantId: ctx.session.user.tenantId,
+        ...buildTenantWhere(ctx),
       };
 
       if (search) {
@@ -45,10 +47,7 @@ export const clientsRouter = router({
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const client = await db.client.findFirst({
-        where: {
-          id: input.id,
-          tenantId: ctx.session.user.tenantId,
-        },
+        where: buildTenantWhere(ctx, { id: input.id }),
       });
 
       if (!client) {
@@ -71,14 +70,11 @@ export const clientsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const tenantId = ctx.session.user.tenantId;
-      if (!tenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const tenantId = getTenantId(ctx);
       
       const client = await db.client.create({
         data: {
-          tenantId: tenantId as string,
+          tenantId,
           companyId: input.companyId,
           companyTypeId: input.companyTypeId,
           entityTypeDescription: input.entityTypeDescription,
@@ -105,10 +101,7 @@ export const clientsRouter = router({
       const { id, ...updateData } = input;
 
       const client = await db.client.updateMany({
-        where: {
-          id,
-          tenantId: ctx.session.user.tenantId,
-        },
+        where: buildTenantWhere(ctx, { id }),
         data: updateData,
       });
 
@@ -120,10 +113,7 @@ export const clientsRouter = router({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const client = await db.client.deleteMany({
-        where: {
-          id: input.id,
-          tenantId: ctx.session.user.tenantId,
-        },
+        where: buildTenantWhere(ctx, { id: input.id }),
       });
 
       return client;
@@ -134,31 +124,28 @@ export const clientsRouter = router({
     const [totalClients, clientsWithAddress, thisMonthClients] =
       await Promise.all([
         db.client.count({
-          where: { tenantId: ctx.session.user.tenantId },
+          where: buildTenantWhere(ctx),
         }),
         db.client.count({
-          where: {
-            tenantId: ctx.session.user.tenantId,
+          where: buildTenantWhere(ctx, {
             address: { not: '' },
-          },
+          }),
         }),
         db.client.count({
-          where: {
-            tenantId: ctx.session.user.tenantId,
+          where: buildTenantWhere(ctx, {
             createdAt: {
               gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
             },
-          },
+          }),
         }),
       ]);
 
     // Get unique locations
     const locations = await db.client.groupBy({
       by: ['address'],
-      where: {
-        tenantId: ctx.session.user.tenantId,
+      where: buildTenantWhere(ctx, {
         address: { not: '' },
-      },
+      }),
       _count: true,
     });
 
@@ -175,10 +162,9 @@ export const clientsRouter = router({
     .input(z.object({ location: z.string() }))
     .query(async ({ ctx, input }) => {
       const clients = await db.client.findMany({
-        where: {
-          tenantId: ctx.session.user.tenantId,
+        where: buildTenantWhere(ctx, {
           address: { contains: input.location },
-        },
+        }),
         orderBy: { name: 'asc' },
       });
 
@@ -195,14 +181,13 @@ export const clientsRouter = router({
     )
     .query(async ({ ctx, input }) => {
       const clients = await db.client.findMany({
-        where: {
-          tenantId: ctx.session.user.tenantId,
+        where: buildTenantWhere(ctx, {
           OR: [
             { name: { contains: input.query } },
             { address: { contains: input.query } },
             { displayValue: { contains: input.query } },
           ],
-        },
+        }),
         take: input.limit,
         orderBy: { name: 'asc' },
       });

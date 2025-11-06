@@ -29,9 +29,41 @@ export const createTRPCContext = async () => {
     }
   }
 
+  /**
+   * Helper function to require tenant ID for tenant-scoped routes.
+   * Throws TRPCError if session, user, or tenantId is missing.
+   * 
+   * @returns The tenantId (guaranteed to be a string, never undefined)
+   * @throws TRPCError with code UNAUTHORIZED if tenantId is missing
+   * 
+   * @example
+   * // In a router that must be tenant-scoped
+   * const tenantId = ctx.requireTenant();
+   * await db.model.findMany({ where: { tenantId } });
+   */
+  const requireTenant = (): string => {
+    if (!session || !session.user) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'Session required',
+      });
+    }
+
+    const tenantId = session.user.tenantId;
+    if (!tenantId) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'Tenant ID is required for this operation',
+      });
+    }
+
+    return tenantId;
+  };
+
   return {
     session,
     db: dbConnection,
+    requireTenant,
   };
 };
 
@@ -75,3 +107,37 @@ const enforceUserIsAdmin = t.middleware(({ ctx, next }) => {
 });
 
 export const adminProcedure = t.procedure.use(enforceUserIsAdmin);
+
+/**
+ * Middleware to enforce Digiwize admin access.
+ * Allows access if:
+ * - tenantSlug === "digiwize" OR
+ * - role is in ["ADMIN", "SUPER_ADMIN", "DIGIWIZE_ADMIN"]
+ */
+const enforceDigiwizeAdmin = t.middleware(({ ctx, next }) => {
+  if (!ctx.session || !ctx.session.user) {
+    throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Session required' });
+  }
+
+  const user = ctx.session.user;
+  const tenantSlug = user.tenantSlug?.toLowerCase();
+  const role = user.role?.toUpperCase();
+
+  const isDigiwizeTenant = tenantSlug === 'digiwize';
+  const isAdminRole = ['ADMIN', 'SUPER_ADMIN', 'DIGIWIZE_ADMIN'].includes(role || '');
+
+  if (!isDigiwizeTenant && !isAdminRole) {
+    throw new TRPCError({
+      code: 'FORBIDDEN',
+      message: 'Access restricted to Digiwize administrators',
+    });
+  }
+
+  return next({
+    ctx: {
+      session: { ...ctx.session, user: ctx.session.user },
+    },
+  });
+});
+
+export const digiwizeAdminProcedure = t.procedure.use(enforceDigiwizeAdmin);

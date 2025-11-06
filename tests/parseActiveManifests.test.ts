@@ -17,12 +17,12 @@ describe('parseActiveManifests', () => {
 
     try {
       const result = parseActiveManifests(testFile);
-      
+
       expect(result.summary.totalRows).toBe(1);
       expect(result.summary.parsedRows).toBe(1);
       expect(result.summary.errorRows).toBe(0);
       expect(result.errors).toHaveLength(0);
-      
+
       const manifest = result.manifests[0];
       expect(manifest.manifestId).toBe(54125);
       expect(manifest.clientName).toBe('RELOAD CNMC/IXMTRACKING');
@@ -36,16 +36,16 @@ describe('parseActiveManifests', () => {
       expect(manifest.route).toBe('KASUMBALESA TO DAR ES SALAAM');
       expect(manifest.convoy).toBe('UNALLOCATED');
       expect(manifest.controller).toBe('MUSA NJERENJE');
-      
+
       // Check date parsing
       expect(manifest.startedAt).toBeInstanceOf(Date);
       expect(manifest.updatedAt).toBeInstanceOf(Date);
       expect(manifest.endedAt).toBeNull();
-      
+
       // Check duration parsing
       expect(manifest.sinceLastUpdateMs).toBe(264000); // 4:24 in milliseconds
-      expect(manifest.tripDurationMs).toBe(6651600000); // 77.05:21:00 in milliseconds
-      
+      // 77.05:21:00 = 77 days + 5 hours + 21 minutes = 6,672,060,000 ms
+      expect(manifest.tripDurationMs).toBe(6672060000); // 77.05:21:00 in milliseconds
     } finally {
       // Clean up test file
       fs.unlinkSync(testFile);
@@ -80,19 +80,20 @@ Situation: Normal`;
 
     try {
       const result = parseActiveManifests(testFile);
-      
+
       expect(result.summary.totalRows).toBe(1);
       expect(result.summary.parsedRows).toBe(1);
       expect(result.summary.errorRows).toBe(0);
-      
+
       const manifest = result.manifests[0];
-      expect(manifest.statusNote).toContain('The following trucks below are in.');
+      expect(manifest.statusNote).toContain(
+        'The following trucks below are in.'
+      );
       expect(manifest.statusNote).toContain('Location: Tunduma (TZ)');
       expect(manifest.statusNote).toContain('Status: Waiting for Docs');
       expect(manifest.statusNote).toContain('SWIFT TRUCKS');
       expect(manifest.statusNote).toContain('T 944 DLJ - Old horse');
       expect(manifest.statusNote).toContain('Situation: Normal');
-      
     } finally {
       fs.unlinkSync(testFile);
     }
@@ -110,15 +111,14 @@ Situation: Normal`;
 
     try {
       const result = parseActiveManifests(testFile);
-      
+
       expect(result.summary.totalRows).toBe(2);
       expect(result.summary.parsedRows).toBe(2);
       expect(result.summary.errorRows).toBe(0);
-      
+
       expect(result.manifests).toHaveLength(2);
       expect(result.manifests[0].manifestId).toBe(54125);
       expect(result.manifests[1].manifestId).toBe(54474);
-      
     } finally {
       fs.unlinkSync(testFile);
     }
@@ -135,13 +135,12 @@ Situation: Normal`;
 
     try {
       const result = parseActiveManifests(testFile);
-      
+
       expect(result.summary.totalRows).toBe(1);
       expect(result.summary.parsedRows).toBe(1);
-      
+
       const manifest = result.manifests[0];
       expect(manifest.waConnected).toBe(true);
-      
     } finally {
       fs.unlinkSync(testFile);
     }
@@ -158,16 +157,14 @@ Situation: Normal`;
 
     try {
       const result = parseActiveManifests(testFile);
-      
+
       expect(result.summary.totalRows).toBe(1);
       expect(result.summary.parsedRows).toBe(0);
       expect(result.summary.errorRows).toBe(1);
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0]).toContain('Invalid manifest ID');
-      
     } finally {
       fs.unlinkSync(testFile);
     }
   });
 });
-

@@ -1,9 +1,21 @@
 # Production Deployment Steps
 
-## Current Status
-✅ Code pushed to git (commits: bb42cc5, 30ab38e, etc.)
-❌ Production database schema may not be in sync
-❌ Production database may not have latest data
+> **⚠️ Updated**: Use the automated deployment script for easier deployment:
+> ```bash
+> npm run deploy:production:auto
+> ```
+> See [PRODUCTION_DEPLOYMENT_GUIDE.md](./PRODUCTION_DEPLOYMENT_GUIDE.md) for complete documentation.
+
+## Quick Start
+
+```bash
+# Automated deployment (recommended)
+npm run deploy:production:auto
+
+# Or compare schemas first
+npm run schema:compare
+npm run deploy:production
+```
 
 ## Required Steps for Full Production Deployment
 

@@ -1,14 +1,16 @@
 // src/server/api/routers/tracking.ts
+// NOTE: tenant filtering standardized via buildTenantWhere(...).
 import { z } from 'zod';
 import { db } from '@/lib/db';
+import { buildTenantWhere } from '../utils/tenant';
 import { protectedProcedure, router } from '../trpc';
 
 export const trackingRouter = router({
   getDevices: protectedProcedure.query(async ({ ctx }) => {
+    const where = buildTenantWhere(ctx);
+
     const devices = await db.device.findMany({
-      where: {
-        tenantId: ctx.session.user.tenantId,
-      },
+      where,
       include: {
         locationPings: {
           orderBy: { timestamp: 'desc' },
@@ -29,7 +31,17 @@ export const trackingRouter = router({
         limit: z.number().default(100),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
+      // Verify device belongs to tenant before querying location pings
+      const device = await db.device.findFirst({
+        where: buildTenantWhere(ctx, { id: input.deviceId }),
+      });
+
+      if (!device) {
+        throw new Error('Device not found or access denied');
+      }
+
+      // LocationPing is scoped through Device relation
       const pings = await db.locationPing.findMany({
         where: {
           deviceId: input.deviceId,
@@ -52,12 +64,14 @@ export const trackingRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
+      // LocationPing is scoped through Device relation
+      const deviceWhere = buildTenantWhere(ctx, {
+        ...(input.deviceIds && { id: { in: input.deviceIds } }),
+      });
+
       const pings = await db.locationPing.findMany({
         where: {
-          device: {
-            tenantId: ctx.session.user.tenantId,
-            ...(input.deviceIds && { id: { in: input.deviceIds } }),
-          },
+          device: deviceWhere,
         },
         include: {
           device: true,
