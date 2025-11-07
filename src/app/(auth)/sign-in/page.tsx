@@ -138,7 +138,16 @@ export default function SignInPage() {
             : 'Authentication failed. Please try again.'
         );
       } else if (result?.ok) {
-        router.push('/post-login');
+        // For drivers, redirect directly to /driver; others go to /post-login
+        // We need to check the role from the lookup data
+        const lookupData = await utils.auth.lookupByEmailOrUsername.fetch({
+          identifier,
+        });
+        if (lookupData.role === 'DRIVER') {
+          router.push('/driver');
+        } else {
+          router.push('/post-login');
+        }
         router.refresh();
       } else {
         setError('Authentication failed. Please try again.');
@@ -231,7 +240,13 @@ export default function SignInPage() {
         setError('Authentication failed. Please check your credentials.');
         setCredentialsFilled(false);
       } else if (result?.ok) {
-        router.push('/post-login');
+        // For drivers, redirect directly to /driver; others go to /post-login
+        // Check if this is a driver by looking at the lookup data
+        if (lookupData.role === 'DRIVER') {
+          router.push('/driver');
+        } else {
+          router.push('/post-login');
+        }
         router.refresh();
         return; // Don't reset credentialsFilled on success
       } else {

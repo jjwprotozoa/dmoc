@@ -93,6 +93,24 @@ async function main() {
 
   console.log('✅ Created admin user:', adminUser.email);
 
+  // Create a test driver user for quick sign-in
+  const driverPassword = await bcrypt.hash('driver123', 10);
+  const driverUser = await prisma.user.upsert({
+    where: { email: 'driver@test.com' },
+    update: {},
+    create: {
+      tenantId: tenant.id,
+      email: 'driver@test.com',
+      name: 'Test Driver',
+      passwordHash: driverPassword,
+      role: 'DRIVER',
+      tenantSlug: 'digiwize',
+      isActive: true,
+    },
+  });
+
+  console.log('✅ Created driver user:', driverUser.email);
+
   // Create an organization for the tenant
   const organization = await prisma.organization.upsert({
     where: { id: tenant.id },
