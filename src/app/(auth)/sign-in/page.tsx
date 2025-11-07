@@ -78,7 +78,9 @@ export default function SignInPage() {
       setStep('password');
     } catch (e) {
       const error = e instanceof Error ? e : new Error('Unknown error');
-      setError(error.message ?? 'Could not find user with that email or username');
+      setError(
+        error.message ?? 'Could not find user with that email or username'
+      );
     }
   };
 
