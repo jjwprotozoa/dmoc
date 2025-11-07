@@ -18,7 +18,6 @@ import {
   RefreshCw,
   Eye,
   Upload,
-  Image as ImageIcon,
   ArrowUpDown,
   Filter,
 } from 'lucide-react';
@@ -65,13 +64,6 @@ interface UserFormData {
   profileId: string;
   clientIds: string[];
   isActive: boolean;
-}
-
-interface Client {
-  id: string;
-  companyId: number;
-  name: string;
-  displayValue: string;
 }
 
 export default function AdminUsersPage() {

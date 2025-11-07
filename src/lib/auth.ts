@@ -225,8 +225,10 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async jwt({ token, user, trigger }) {
       // First login: copy role/tenant/clientId/driverId from your user model
+      // Note: trigger is part of NextAuth callback signature but not used in this implementation
       if (user) {
         const userWithExtras = user as {
           role?: "ADMIN" | "MANAGER" | "DISPATCH" | "DRIVER" | "VIEWER";
