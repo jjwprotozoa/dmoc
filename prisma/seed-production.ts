@@ -386,47 +386,74 @@ async function main() {
   // ========== Import Logistics Officers from data file ==========
   console.log('\n📊 Importing Logistics Officers from data file...');
   try {
-    const officersContent = fs.readFileSync(
-      path.join(process.cwd(), 'data', 'Logistics_Officers.txt'),
-      'utf-8'
-    );
-    const officersData = parseTSV(officersContent);
-    let officerCount = 0;
+    const officersFilePath = path.join(process.cwd(), 'data', 'Logistics_Officers.txt');
+    
+    // Check if file exists
+    if (!fs.existsSync(officersFilePath)) {
+      console.warn('⚠️  Logistics_Officers.txt not found, skipping import');
+    } else {
+      const officersContent = fs.readFileSync(officersFilePath, 'utf-8');
+      const officersData = parseTSV(officersContent);
+      const totalOfficers = officersData.rows.length;
+      let officerCount = 0;
+      let errorCount = 0;
+      let skippedCount = 0;
 
-    for (const row of officersData.rows) {
-      const officerId = parseIntSafe(row[6]); // ID column
-      if (!officerId) continue;
+      console.log(`   Processing ${totalOfficers} logistics officers...`);
 
-      const officer = {
-        tenantId,
-        logisticsOfficerId: officerId,
-        name: row[0] || '',
-        contactNr: row[1] || undefined,
-        idNumber: row[2] || undefined,
-        pictureLoaded: parseBoolean(row[3]),
-        countryOfOrigin: row[4] || undefined,
-        displayValue: row[7] || row[0] || undefined,
-        isActive: true,
-        createdAt: parseDate(row[5]) || undefined,
-        updatedAt: parseDate(row[5]) || undefined,
-      };
+      for (let i = 0; i < officersData.rows.length; i++) {
+        const row = officersData.rows[i];
+        const officerId = parseIntSafe(row[6]); // ID column
+        
+        if (!officerId) {
+          skippedCount++;
+          continue;
+        }
 
-      if (!officer.name) continue;
+        const officer = {
+          tenantId,
+          logisticsOfficerId: officerId,
+          name: row[0] || '',
+          contactNr: row[1] || undefined,
+          idNumber: row[2] || undefined,
+          pictureLoaded: parseBoolean(row[3]),
+          countryOfOrigin: row[4] || undefined,
+          displayValue: row[7] || row[0] || undefined,
+          isActive: true,
+          createdAt: parseDate(row[5]) || undefined,
+          updatedAt: parseDate(row[5]) || undefined,
+        };
 
-      try {
-        await prisma.logisticsOfficer.upsert({
-          where: { logisticsOfficerId: officerId },
-          update: officer,
-          create: officer,
-        });
-        officerCount++;
-      } catch (error) {
-        console.warn(`⚠️  Failed to import logistics officer ${officerId}:`, error);
+        if (!officer.name) {
+          skippedCount++;
+          continue;
+        }
+
+        try {
+          await prisma.logisticsOfficer.upsert({
+            where: { logisticsOfficerId: officerId },
+            update: officer,
+            create: officer,
+          });
+          officerCount++;
+        } catch (error: any) {
+          errorCount++;
+          if (errorCount % 10 === 0) {
+            console.warn(`⚠️  Failed to import logistics officer ${officerId} (${errorCount} total errors):`, error?.message || error);
+          }
+        }
+
+        // Show progress every 50 records or at the end
+        if ((i + 1) % 50 === 0 || i === officersData.rows.length - 1) {
+          const progress = ((i + 1) / totalOfficers) * 100;
+          console.log(`   Progress: ${i + 1}/${totalOfficers} officers (${progress.toFixed(1)}%) - ${officerCount} imported, ${errorCount} errors, ${skippedCount} skipped`);
+        }
       }
+      console.log(`✅ Imported ${officerCount} logistics officers (${errorCount} errors, ${skippedCount} skipped)`);
     }
-    console.log(`✅ Imported ${officerCount} logistics officers`);
   } catch (error) {
     console.warn('⚠️  Could not import logistics officers:', error);
+    console.warn('   Continuing with rest of seed...');
   }
 
   // ========== Import Vehicles from data file ==========
