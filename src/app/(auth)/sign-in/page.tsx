@@ -76,8 +76,9 @@ export default function SignInPage() {
       }
 
       setStep('password');
-    } catch (e: any) {
-      setError(e.message ?? 'Could not find user with that email or username');
+    } catch (e) {
+      const error = e instanceof Error ? e : new Error('Unknown error');
+      setError(error.message ?? 'Could not find user with that email or username');
     }
   };
 
@@ -103,7 +104,14 @@ export default function SignInPage() {
       });
 
       // Build credentials object - only include clientId if a specific client is selected
-      const credentials: any = {
+      const credentials: {
+        email: string;
+        password: string;
+        tenantId: string;
+        tenantSlug: string;
+        redirect: boolean;
+        clientId?: string;
+      } = {
         email: lookupData.email, // Always use email for NextAuth
         password,
         tenantId: tenant.id,
@@ -133,9 +141,10 @@ export default function SignInPage() {
       } else {
         setError('Authentication failed. Please try again.');
       }
-    } catch (e: any) {
-      console.error('Sign-in exception:', e);
-      setError(e.message ?? 'An error occurred. Please try again.');
+    } catch (e) {
+      const error = e instanceof Error ? e : new Error('Unknown error');
+      console.error('Sign-in exception:', error);
+      setError(error.message ?? 'An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -186,7 +195,14 @@ export default function SignInPage() {
       }
 
       // Build credentials object - only include clientId if it exists
-      const credentials: any = {
+      const credentials: {
+        email: string;
+        password: string;
+        tenantId: string;
+        tenantSlug: string;
+        redirect: boolean;
+        clientId?: string;
+      } = {
         email: lookupData.email,
         password: demoPassword,
         tenantId: lookupData.tenantId,
@@ -220,9 +236,10 @@ export default function SignInPage() {
         setError('Authentication failed. Please try again.');
         setCredentialsFilled(false);
       }
-    } catch (e: any) {
-      console.error('Sign-in exception:', e);
-      setError(e.message ?? 'An error occurred. Please try again.');
+    } catch (e) {
+      const error = e instanceof Error ? e : new Error('Unknown error');
+      console.error('Sign-in exception:', error);
+      setError(error.message ?? 'An error occurred. Please try again.');
       setCredentialsFilled(false);
     } finally {
       setIsLoading(false);

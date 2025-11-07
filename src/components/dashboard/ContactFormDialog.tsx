@@ -26,6 +26,23 @@ type ContactFormState = {
   countryOfOrigin: string;
 };
 
+type CountryData = {
+  name?: { common?: string; official?: string } | string;
+  cca2?: string;
+  code?: string;
+  flag?: string;
+  idd?: { root?: string; suffixes?: string[] };
+};
+
+type CountryOption = {
+  name: string;
+  abbreviation: string;
+  flag: string;
+  displayValue: string;
+  dialCode: string;
+  iso2: string;
+};
+
 const initialState: ContactFormState = {
   name: '',
   contactNr: '',
@@ -40,27 +57,31 @@ export default function ContactFormDialog({ open, onOpenChange, initial, onSave 
   const [countrySearch, setCountrySearch] = useState('');
   const [phoneLocal, setPhoneLocal] = useState(''); // national digits without country code
 
-  const countryOptions = useMemo(() => {
-    const arr = Array.isArray(countriesData) ? countriesData : Object.values(countriesData as any);
+  const countryOptions = useMemo((): CountryOption[] => {
+    const arr = Array.isArray(countriesData) 
+      ? (countriesData as CountryData[]) 
+      : Object.values(countriesData as Record<string, CountryData>);
     return arr
-      .map((c: any) => ({
-        name: c.name?.common || c.name,
-        abbreviation: c.cca2 || c.code,
+      .map((c: CountryData): CountryOption => ({
+        name: typeof c.name === 'object' ? (c.name?.common || '') : (c.name || ''),
+        abbreviation: c.cca2 || c.code || '',
         flag: c.flag || '',
-        displayValue: c.name?.official || c.name?.common || c.name,
+        displayValue: typeof c.name === 'object' 
+          ? (c.name?.official || c.name?.common || '') 
+          : (c.name || ''),
         dialCode:
           (c.idd?.root || '') && Array.isArray(c.idd?.suffixes) && c.idd.suffixes.length > 0
             ? `${c.idd.root}${c.idd.suffixes[0]}`
             : (c.idd?.root || '') || '',
         iso2: (c.cca2 || '').toUpperCase(),
       }))
-      .sort((a: any, b: any) => (a.name || '').localeCompare(b.name || ''));
+      .sort((a: CountryOption, b: CountryOption) => (a.name || '').localeCompare(b.name || ''));
   }, []);
 
   const filteredCountryOptions = useMemo(() => {
     const q = countrySearch.trim().toLowerCase();
     if (!q) return countryOptions;
-    return countryOptions.filter((opt: any) =>
+    return countryOptions.filter((opt: CountryOption) =>
       (opt.name || '').toLowerCase().includes(q) ||
       (opt.displayValue || '').toLowerCase().includes(q) ||
       (opt.abbreviation || '').toLowerCase().includes(q) ||
@@ -69,7 +90,7 @@ export default function ContactFormDialog({ open, onOpenChange, initial, onSave 
   }, [countryOptions, countrySearch]);
 
   const selectedCountry = useMemo(
-    () => countryOptions.find((c: any) => c.name === form.countryOfOrigin),
+    () => countryOptions.find((c: CountryOption) => c.name === form.countryOfOrigin),
     [countryOptions, form.countryOfOrigin]
   );
 
@@ -96,7 +117,7 @@ export default function ContactFormDialog({ open, onOpenChange, initial, onSave 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initial, open]);
 
-  const handleChange = (key: keyof typeof form, value: any) => {
+  const handleChange = (key: keyof typeof form, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -162,7 +183,7 @@ export default function ContactFormDialog({ open, onOpenChange, initial, onSave 
                     className="h-8"
                   />
                 </div>
-                {filteredCountryOptions.map((opt: any) => (
+                {filteredCountryOptions.map((opt: CountryOption) => (
                   <SelectItem key={opt.name} value={opt.name}>
                     <span className="flex items-center gap-2">
                       <span>{opt.flag}</span>

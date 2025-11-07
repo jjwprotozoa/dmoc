@@ -8,24 +8,6 @@ import { db } from '@/lib/db';
 import { digiwizeAdminProcedure, router } from '../trpc';
 import { TRPCError } from '@trpc/server';
 
-/**
- * Helper to parse CSV company list to array of IDs
- */
-function parseCompanyList(companyList: string | null | undefined): string[] {
-  if (!companyList) return [];
-  return companyList
-    .split(',')
-    .map((id) => id.trim())
-    .filter((id) => id.length > 0);
-}
-
-/**
- * Helper to format array of company IDs to CSV string
- */
-function formatCompanyList(companyIds: string[]): string {
-  return companyIds.filter((id) => id.length > 0).join(',');
-}
-
 export const adminUsersRouter = router({
   /**
    * List all users across all tenants with tenant and company information
@@ -606,7 +588,7 @@ export const adminUsersRouter = router({
    */
   getClients: digiwizeAdminProcedure
     .input(z.object({ tenantId: z.string().optional() }))
-    .query(async ({ input }) => {
+    .query(async () => {
       // For Digiwize admins, return all clients (companies are shared across tenants)
       // If tenantId is provided, we can still filter, but typically we want all clients
       const clients = await db.client.findMany({
