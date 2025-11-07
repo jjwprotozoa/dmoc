@@ -250,9 +250,10 @@ export const authOptions: NextAuthOptions = {
         token.tenantSlug = userWithExtras.tenantSlug ?? (token.tenantSlug as string | undefined) ?? undefined;
         token.clientId = userWithExtras.clientId ?? (token.clientId as string | null) ?? null;
         token.driverId = userWithExtras.driverId ?? (token.driverId as string | null) ?? null;
-      } else if (token.sub && trigger !== 'signOut') {
+      } else if (token.sub) {
         // On subsequent requests, refresh role from database to ensure it's up-to-date
         // This is important after tenant updates or role changes
+        // Note: JWT callback is not called during signOut, so no need to check for it
         try {
           const dbUser = await db.user.findUnique({
             where: { id: token.sub },
